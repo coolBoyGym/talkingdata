@@ -349,3 +349,4 @@ TSWLatexianTemp*
 *.app
 
 data/
+.idea/
