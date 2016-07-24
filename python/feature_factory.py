@@ -54,7 +54,7 @@ feature_active_app = multi_feature('installed_app', np.int64, active_app(), spac
 # print feature_installed_app
 # print feature_active_app
 
-with open('../data/test_installed_active.csv', 'w') as fout:
+with open('../data/test_brand_model_installed_active.csv', 'w') as fout:
     off1 = len(dict_brand)
     off2 = off1 + len(dict_model)
     off3 = off2 + len(dict_app)
