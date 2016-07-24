@@ -1,21 +1,16 @@
-class B:
-    def apply(self, **argv2):
-        pass
+from random import random
+from sklearn.cross_validation import train_test_split
+import xgboost as xgb
+
+# def split_file():
+#     with open('../data/train_brand_model_installed_active.csv') as fin:
+#         with open('../data/train.csv', 'w') as fout_train:
+#             with open('../data/valid.csv', 'w') as fout_valid:
+#                 for line in fin:
+#                     if random() < 0.7:
+#                         fout_train.write(line)
+#                     else:
+#                         fout_valid.write(line)
 
 
-class A:
-    def __init__(self, B):
-        self.B = B
-
-    def get_b(self, **argv2):
-        return self.B.apply(**argv2)
-
-
-class C(B):
-    def apply(self, i, j, k):
-        print i
-        print j
-        print k
-
-a = A(C())
-a.get_b(i=1, j=2, k=3)
+X_train, X_valid = train_test_split()
