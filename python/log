@@ -1,0 +1,62 @@
+gbtree:
+cv rate 0.75
+Stopping. Best iteration:
+[814]	train-mlogloss:2.074024	eval-mlogloss:2.281378
+
+gblinear:
+cv rate 0.75
+lambda 40, alpha 0
+Stopping. Best iteration:
+[81]	train-mlogloss:2.157845	eval-mlogloss:2.275807
+
+#################################################################
+
+99 	new
+xepa
+
+2.27845
+	3 	Mon, 25 Jul 2016 02:33:14
+Your Best Entry ↑
+You improved on your best score by 0.00595.
+You just moved up 39 positions on the leaderboard. Tweet this!
+
+lambda 40, alpha 0.1
+[131]	train-mlogloss:2.162140	eval-mlogloss:2.275910
+Stopping. Best iteration:
+[81]	train-mlogloss:2.162170	eval-mlogloss:2.275790
+
+../model/xgb.model.0.75.2.gblinear.40.0.10 ../model/dunp.raw.txt.0.75.2.gblinear.40.0.10
+112071x40270 matrix with 2133249 entries is loaded from ../input/test.csv
+../output/submission.csv.0.75.2.gblinear.40.0.10
+
+#################################################################
+
+
+lambda 40, alpha 0.2
+[128]	train-mlogloss:2.166329	eval-mlogloss:2.275923
+Stopping. Best iteration:
+[78]	train-mlogloss:2.166365	eval-mlogloss:2.275775
+
+../model/xgb.model.0.75.2.gblinear.40.0.20 ../model/dunp.raw.txt.0.75.2.gblinear.40.0.20
+112071x40270 matrix with 2133249 entries is loaded from ../input/test.csv
+../output/submission.csv.0.75.2.gblinear.40.0.20
+
+
+
+lambda 40, alpha 0.05
+[132]	train-mlogloss:2.159988	eval-mlogloss:2.275931
+Stopping. Best iteration:
+[82]	train-mlogloss:2.160016	eval-mlogloss:2.275782
+
+../model/xgb.model.0.75.1.gblinear.40.0.05 ../model/dunp.raw.txt.0.75.1.gblinear.40.0.05
+112071x40270 matrix with 2133249 entries is loaded from ../input/test.csv
+../output/submission.csv.0.75.1.gblinear.40.0.05
+
+
+lambda 40, alpha 0.01
+Stopping. Best iteration:
+[86]	train-mlogloss:2.158261	eval-mlogloss:2.275812
+
+../model/xgb.model.0.75.1.gblinear.40.0.01 ../model/dunp.raw.txt.0.75.1.gblinear.40.0.01
+112071x40270 matrix with 2133249 entries is loaded from ../input/test.csv
+../output/submission.csv.0.75.1.gblinear.40.0.01
