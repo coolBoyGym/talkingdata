@@ -4,7 +4,7 @@ import xgboost as xgb
 from sklearn.metrics import log_loss
 
 cv_rate = 0.75
-version = 3
+version = 4
 booster = 'gblinear'
 
 path_train = '../input/train.csv.%.2f' % (cv_rate)
@@ -23,11 +23,15 @@ def split_file():
     with open('../data/train_brand_model_installed_active.csv') as fin:
         with open(path_train, 'w') as fout_train:
             with open(path_valid, 'w') as fout_valid:
+                i = 0
                 for line in fin:
-                    if random() < cv_rate:
-                        fout_train.write(line)
-                    else:
+                    i += 1
+                    fout_train.write(line)
+                    if i == 1:
                         fout_valid.write(line)
+                    else:
+                        if random() > cv_rate:
+                            fout_valid.write(line)
 
 
 def wrap_test():
@@ -131,6 +135,6 @@ def xgb_test():
     print path_submission
 
 
-# split_file()
+split_file()
 xgb_train()
 # xgb_test()
