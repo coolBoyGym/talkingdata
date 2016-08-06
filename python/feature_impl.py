@@ -18,16 +18,16 @@ import numpy as np
 
 
 def phone_brand_proc(device_id, dict_device_brand_model):
-    values = map(lambda d: dict_device_brand_model[d][0], device_id)
-    values = np.array(values)
-    indices = np.zeros_like(values, dtype=np.int64)
+    indices = map(lambda d: dict_device_brand_model[d][0], device_id)
+    indices = np.array(indices)
+    values = np.ones_like(indices, dtype=np.int64)
     return indices, values
 
 
 def device_model_proc(device_id, dict_device_brand_model):
-    values = map(lambda d: dict_device_brand_model[d][1], device_id)
-    values = np.array(values)
-    indices = np.zeros_like(values, dtype=np.int64)
+    indices = map(lambda d: dict_device_brand_model[d][1], device_id)
+    indices = np.array(indices)
+    values = np.ones_like(indices, dtype=np.int64)
     return indices, values
 
 
