@@ -1,47 +1,87 @@
 import numpy as np
 
-from feature import *
+
+# def num_proc():
+#     return [0] * 10, range(10)
+#
+#
+# def one_hot_proc():
+#     return range(10), [1] * 10
+#
+#
+# def multi_proc():
+#     return [range(x) for x in range(1, 11)], [[1] * x for x in range(1, 11)]
+#
+#
+# def seq_proc():
+#     return None, None
 
 
-class installed_app(value_function):
-    def __init__(self):
-        value_function.__init__(self, 'num', 'list')
-
-    def apply(self, dict_device_event, dict_app_event, device_id):
-        res = []
-        for did in device_id:
-            if did not in dict_device_event:
-                res.append([])
-                continue
-
-            events = dict_device_event[did]
-            tmp = set()
-            for e in events:
-                eid = e[0]
-                if eid in dict_app_event:
-                    tmp = tmp | dict_app_event[eid][0]
-            res.append(np.array([[x, 1] for x in list(tmp)]))
-
-        return np.array(res)
+def phone_brand_proc(device_id, dict_device_brand_model):
+    values = map(lambda d: dict_device_brand_model[d][0], device_id)
+    values = np.array(values)
+    indices = np.zeros_like(values, dtype=np.int64)
+    return indices, values
 
 
-class active_app(value_function):
-    def __init__(self):
-        value_function.__init__(self, 'num', 'list')
+def device_model_proc(device_id, dict_device_brand_model):
+    values = map(lambda d: dict_device_brand_model[d][1], device_id)
+    values = np.array(values)
+    indices = np.zeros_like(values, dtype=np.int64)
+    return indices, values
 
-    def apply(self, dict_device_event, dict_app_event, device_id):
-        res = []
-        for did in device_id:
-            if did not in dict_device_event:
-                res.append([])
-                continue
 
-            events = dict_device_event[did]
-            tmp = set()
-            for e in events:
-                eid = e[0]
-                if eid in dict_app_event:
-                    tmp = tmp | dict_app_event[eid][1]
-            res.append(np.array([[x, 1] for x in list(tmp)]))
+def installed_app_proc(device_id, dict_device_event, dict_app_event):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
 
-        return np.array(res)
+        events = dict_device_event[did]
+        tmp = set()
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                tmp = tmp | dict_app_event[eid][0]
+        indices.append(sorted(tmp))
+        values.append([1] * len(tmp))
+
+    return np.array(indices), np.array(values)
+
+
+def active_app_proc(device_id, dict_device_event, dict_app_event):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+
+        events = dict_device_event[did]
+        tmp = set()
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                tmp = tmp | dict_app_event[eid][1]
+        indices.append(sorted(tmp))
+        values.append([1] * len(tmp))
+
+    return np.array(indices), np.array(values)
+
+
+def installed_app_norm_proc(indices, values):
+    norm_values = []
+    for v in values:
+        norm_values.append(np.float64(v) / len(v))
+    return indices, np.array(norm_values)
+
+
+def active_app_norm_proc(indices, values):
+    norm_values = []
+    for v in values:
+        norm_values.append(np.float64(v) / len(v))
+    return indices, np.array(norm_values)
