@@ -1,4 +1,5 @@
 import cPickle as pkl
+import random
 import time
 
 import numpy as np
@@ -159,20 +160,46 @@ def concat_feature(name, fea_list):
 
 # concat_feature('concat_3', [fea_phone_brand, fea_device_model, fea_installed_app_norm, fea_active_app_norm])
 
-fea_concat_1 = feature.multi_feature(name='concat_1')
-fea_concat_1.load()
-print fea_concat_1.get_value()
-print fea_concat_1.get_name()
-print fea_concat_1.get_feature_type()
-print fea_concat_1.get_data_type()
-print fea_concat_1.get_space()
-print fea_concat_1.get_rank()
-print fea_concat_1.get_size()
+# fea_concat_1 = feature.multi_feature(name='concat_1')
+# fea_concat_1.load()
+# print fea_concat_1.get_value()
+# print fea_concat_1.get_name()
+# print fea_concat_1.get_feature_type()
+# print fea_concat_1.get_data_type()
+# print fea_concat_1.get_space()
+# print fea_concat_1.get_rank()
+# print fea_concat_1.get_size()
+#
+# fea_concat_2 = feature.multi_feature(name='concat_2')
+# fea_concat_2.load()
+# print fea_concat_2.get_value()
+#
+# fea_concat_3 = feature.multi_feature(name='concat_3')
+# fea_concat_3.load()
+# print fea_concat_3.get_value()
 
-fea_concat_2 = feature.multi_feature(name='concat_2')
-fea_concat_2.load()
-print fea_concat_2.get_value()
 
-fea_concat_3 = feature.multi_feature(name='concat_3')
-fea_concat_3.load()
-print fea_concat_3.get_value()
+def split_dataset(name, valid_rate=0.25):
+    with open('../feature/' + name, 'r') as data_in:
+        with open('../feature/device_id', 'r') as device_id_in:
+            train_size = int(device_id_in.readline().strip().split()[1])
+
+        with open('../input/' + name + '.train', 'w') as train_out:
+            for i in range(train_size):
+                train_out.write(next(data_in))
+
+        with open('../input/' + name + '.test', 'w') as test_out:
+            for line in data_in:
+                test_out.write(line)
+
+    with open('../input/' + name + '.train', 'r') as train_in:
+        with open('../input/' + name + '.train.train', 'w') as train_out:
+            with open('../input/' + name + '.train.valid', 'w') as valid_out:
+                for line in train_in:
+                    if random.random() > valid_rate:
+                        train_out.write(line)
+                    else:
+                        valid_out.write(line)
+
+
+split_dataset('concat_3')
