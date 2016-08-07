@@ -4,9 +4,10 @@ import random
 from sklearn.metrics import log_loss
 
 train_type = 'libsvm'
-version = 2
+version = 3
+featureUsed = 'concat_2'
 
-path_submission = '../output/submission.csv.%s.%d' % (train_type, version)
+path_submission = '../output/submission.csv.%s.%d.%s' % (train_type, version, featureUsed)
 
 path_train = '../data/train_with_label_for_svm.csv'
 path_test = '../input/test_with_label_for_svm.csv'
@@ -105,8 +106,8 @@ def deletezerofeatureintest(name):
                     i += 1
 
 
-def getsubmission():
-    with open('../output/result2') as fin:
+def getsubmissionfromlibsvmresult():
+    with open('../output/result3') as fin:
         res = []
         next(fin)
         for line in fin:
@@ -142,8 +143,8 @@ def getsubmission():
                 cnt += 1
 
 
-# getsubmission()
+getsubmissionfromlibsvmresult()
 # test()
 # sampletest()
-deletezerofeatureintrain('concat_2')
-deletezerofeatureintest('concat_2')
+# deletezerofeatureintrain('concat_2')
+# deletezerofeatureintest('concat_2')
