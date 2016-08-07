@@ -60,3 +60,48 @@ Stopping. Best iteration:
 ../model/xgb.model.0.75.1.gblinear.40.0.01 ../model/dunp.raw.txt.0.75.1.gblinear.40.0.01
 112071x40270 matrix with 2133249 entries is loaded from ../input/test.csv
 ../output/submission.csv.0.75.1.gblinear.40.0.01
+
+
+###########################################################################################
+
+2016.8.7
+
+gblinear
+
+alpha:0 lambda:0
+[0]	train-mlogloss:1.834446	eval-mlogloss:2.568943
+
+alpha:0 lambda:10
+[58]	train-mlogloss:2.030013	eval-mlogloss:2.302813
+
+alpha:0 lambda:25
+[52]	train-mlogloss:2.117742	eval-mlogloss:2.284111
+
+alpha:0 lambda:30
+[65]	train-mlogloss:2.133154	eval-mlogloss:2.282907
+
+alpha:0 lambda:35
+[54]	train-mlogloss:2.145712	eval-mlogloss:2.282403
+
+alpha:0 lambda:40
+[46]	train-mlogloss:2.156202	eval-mlogloss:2.282362
+
+alpha:0 lambda:45
+[53]	train-mlogloss:2.165180	eval-mlogloss:2.282633
+
+alpha:0 lambda:50
+[47]	train-mlogloss:2.173005	eval-mlogloss:2.283091
+
+alpha:0 lambda:75
+[36]	train-mlogloss:2.201352	eval-mlogloss:2.286622
+
+alpha:0 lambda:100
+[38]	train-mlogloss:2.219946	eval-mlogloss:2.290718
+
+alpha:0 lambda:1000
+[7]	train-mlogloss:2.340345	eval-mlogloss:2.355150
+
+
+h:lambda v:alpha
+    0           10          25          30          35          40          45          50          75          100         1000
+0   2.568943    2.302813    2.284111    2.282907    2.282362    2.282362    2.282633    2.283091    2.286622    2.290718    2.355150

@@ -15,12 +15,6 @@ data_label_categories = '../data/raw/label_categories.csv'
 data_phone_brand_device_model = '../data/raw/phone_brand_device_model.csv'
 data_sample_submission = '../data/raw/sample_submission.csv'
 
-print 'loading data...'
-
-start_time = time.time()
-
-print 'finish in %d sec' % (time.time() - start_time)
-
 
 def read_data():
     dict_device = pkl.load(open('../data/dict_id_device.pkl', 'rb'))
@@ -71,12 +65,17 @@ fea_active_app_norm = feature.multi_feature(name='active_app_norm')
 
 
 def make_feature():
+    print 'loading data...'
+    start_time = time.time()
+
     dict_device_brand_model = pkl.load(open('../data/dict_device_brand_model.pkl', 'rb'))
     dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
     dict_app_event = pkl.load(open('../data/dict_app_event.pkl', 'rb'))
     # dict_brand = pkl.load(open('../data/dict_id_brand.pkl', 'rb'))
     # dict_model = pkl.load(open('../data/dict_id_model.pkl', 'rb'))
     # dict_app = pkl.load(open('../data/dict_id_app.pkl', 'rb'))
+
+    print 'finish in %d sec' % (time.time() - start_time)
 
     device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1)
 
@@ -179,18 +178,21 @@ def concat_feature(name, fea_list):
 # print fea_concat_3.get_value()
 
 
-def split_dataset(name, valid_rate=0.25):
+def split_dataset(name, valid_rate=0.2):
+    _, train_label, _ = read_data()
+
     with open('../feature/' + name, 'r') as data_in:
+        next(data_in)
         with open('../feature/device_id', 'r') as device_id_in:
             train_size = int(device_id_in.readline().strip().split()[1])
 
         with open('../input/' + name + '.train', 'w') as train_out:
             for i in range(train_size):
-                train_out.write(next(data_in))
+                train_out.write('%d %s' % (train_label[i], next(data_in)))
 
         with open('../input/' + name + '.test', 'w') as test_out:
             for line in data_in:
-                test_out.write(line)
+                test_out.write('0 %s' % line)
 
     with open('../input/' + name + '.train', 'r') as train_in:
         with open('../input/' + name + '.train.train', 'w') as train_out:
@@ -202,4 +204,6 @@ def split_dataset(name, valid_rate=0.25):
                         valid_out.write(line)
 
 
+split_dataset('concat_1')
+split_dataset('concat_2')
 split_dataset('concat_3')
