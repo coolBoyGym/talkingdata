@@ -57,7 +57,7 @@ def sample2():
 
 
 # feature's index used in libsvm should start with 1, not 0
-def deletezerofeatureintrain(name, valid_rate=0.2):
+def deletezerofeatureintrain(name):
     path_before = '../input/' + name + '.train'
     path_after = '../input/' + name + '.nozerofeature.train'
     with open(path_before) as fin:
@@ -76,6 +76,9 @@ def deletezerofeatureintrain(name, valid_rate=0.2):
                         fout.write(str(int(key) + 1) + ":" + value + ' ')
                     i += 1
 
+
+def splittrainingfile(name, valid_rate=0.2):
+    path_after = '../input/' + name + '.nozerofeature.train'
     with open(path_after) as train_in:
         with open('../input/' + name + '.nozerofeature.train.train', 'w') as train_out:
             with open('../input/' + name + '.nozerofeature.train.valid', 'w') as valid_out:
@@ -143,8 +146,8 @@ def getsubmissionfromlibsvmresult():
                 cnt += 1
 
 
-getsubmissionfromlibsvmresult()
+# getsubmissionfromlibsvmresult()
 # test()
 # sampletest()
-# deletezerofeatureintrain('concat_2')
-# deletezerofeatureintest('concat_2')
+deletezerofeatureintrain('concat_3')
+deletezerofeatureintest('concat_3')
