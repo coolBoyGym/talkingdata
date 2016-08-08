@@ -126,7 +126,7 @@ def concat_feature(name, fea_list):
     for i in range(len(fea_list)):
         fea = fea_list[i]
         concat_indices, concat_values = fea.get_value()
-        concat_indices += sum(spaces[:i + 1])
+        concat_indices += sum(spaces[:i])
         collect_indices.append(concat_indices)
         collect_values.append(concat_values)
 
@@ -157,7 +157,7 @@ def concat_feature(name, fea_list):
     fea_concat.dump(extra=extra)
 
 
-# concat_feature('concat_3', [fea_phone_brand, fea_device_model, fea_installed_app_norm, fea_active_app_norm])
+# concat_feature('concat_5', [fea_device_model, fea_active_app_norm])
 
 # fea_concat_1 = feature.multi_feature(name='concat_1')
 # fea_concat_1.load()
@@ -178,7 +178,7 @@ def concat_feature(name, fea_list):
 # print fea_concat_3.get_value()
 
 
-def split_dataset(name, valid_rate=0.2):
+def split_dataset(name, nfold):
     _, train_label, _ = read_data()
 
     with open('../feature/' + name, 'r') as data_in:
@@ -194,16 +194,22 @@ def split_dataset(name, valid_rate=0.2):
             for line in data_in:
                 test_out.write('0 %s' % line)
 
+    folds = [[] for i in range(nfold)]
+    cv_rate = 1.0 / nfold
     with open('../input/' + name + '.train', 'r') as train_in:
-        with open('../input/' + name + '.train.train', 'w') as train_out:
-            with open('../input/' + name + '.train.valid', 'w') as valid_out:
-                for line in train_in:
-                    if random.random() > valid_rate:
-                        train_out.write(line)
-                    else:
-                        valid_out.write(line)
+        for line in train_in:
+            folds[int(random.random() / cv_rate)].append(line)
+
+    for i in range(nfold):
+        with open('../input/' + name + '.train.%d.valid' % i, 'w') as fout:
+            for line in folds[i]:
+                fout.write(line)
+
+        with open('../input/' + name + '.train.%d.train' % i, 'w') as fout:
+            for j in range(nfold):
+                if j != i:
+                    for line in folds[j]:
+                        fout.write(line)
 
 
-split_dataset('concat_1')
-split_dataset('concat_2')
-split_dataset('concat_3')
+split_dataset('concat_1', 5)
