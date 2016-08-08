@@ -1,7 +1,6 @@
 # training the whole data set using libsvm tools.
 from svmutil import *
 import random
-from sklearn.metrics import log_loss
 
 train_type = 'libsvm'
 version = 4
@@ -12,6 +11,7 @@ path_submission = '../output/submission.csv.%s.%d.%s' % (train_type, version, fe
 path_train = '../data/train_with_label_for_svm.csv'
 path_test = '../input/test_with_label_for_svm.csv'
 path_prediction = '../output/result.csv'
+
 
 def test():
     labels, datas = sample1()
@@ -27,11 +27,12 @@ def test():
             fout.write(str(p_label[i]) + '\n')
 
 
-def sampletest():
+def sample_test():
     labels, datas = svm_read_problem(path_train)
     with open(path_prediction, 'w') as fout:
         for i in range(len(labels)):
             fout.write(str(datas[i]) + '\n')
+
 
 def sample1():
     labels, datas = svm_read_problem(path_train)
@@ -55,7 +56,7 @@ def sample2():
     print 'd = ', d
     return l, d
 
-def samplefromtrain(name, rate=0.25):
+def sample_from_train(name, rate=0.25):
     path_input = '../input/' + name + '.nozerofeature.train'
     path_output = '../input/' + name + '.0.25.sample.train'
     with open(path_input) as fin:
@@ -66,7 +67,7 @@ def samplefromtrain(name, rate=0.25):
 
 
 # feature's index used in libsvm should start with 1, not 0
-def deletezerofeatureintrain(name):
+def delete_zero_feature_in_train(name):
     path_before = '../input/' + name + '.train'
     path_after = '../input/' + name + '.nozerofeature.train'
     with open(path_before) as fin:
@@ -86,7 +87,7 @@ def deletezerofeatureintrain(name):
                     i += 1
 
 
-def splittrainingfile(name, valid_rate=0.2):
+def split_training_file(name, valid_rate=0.2):
     path_after = '../input/' + name + '.nozerofeature.train'
     with open(path_after) as train_in:
         with open('../input/' + name + '.nozerofeature.train.train', 'w') as train_out:
@@ -98,7 +99,7 @@ def splittrainingfile(name, valid_rate=0.2):
                         valid_out.write(line)
 
 
-def deletezerofeatureintest(name):
+def delete_zero_feature_in_test(name):
     path_before = '../input/' + name + '.test'
     path_after = '../input/' + name + '.nozerofeature.test'
     with open(path_before) as fin:
@@ -118,7 +119,7 @@ def deletezerofeatureintest(name):
                     i += 1
 
 
-def getsubmissionfromlibsvmresult(name):
+def get_submission_from_libsvm_result(name):
     with open('../output/' + name) as fin:
         res = []
         next(fin)
@@ -154,10 +155,3 @@ def getsubmissionfromlibsvmresult(name):
                 fout.write('\n')
                 cnt += 1
 
-
-getsubmissionfromlibsvmresult('concat_3.libsvm.result')
-# test()
-# sampletest()
-# deletezerofeatureintrain('concat_3')
-# deletezerofeatureintest('concat_3')
-# samplefromtrain('concat_3')
