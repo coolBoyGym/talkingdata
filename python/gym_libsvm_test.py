@@ -4,8 +4,8 @@ import random
 from sklearn.metrics import log_loss
 
 train_type = 'libsvm'
-version = 3
-featureUsed = 'concat_2'
+version = 4
+featureUsed = 'concat_3'
 
 path_submission = '../output/submission.csv.%s.%d.%s' % (train_type, version, featureUsed)
 
@@ -54,6 +54,15 @@ def sample2():
     print 'l = ', l
     print 'd = ', d
     return l, d
+
+def samplefromtrain(name, rate=0.25):
+    path_input = '../input/' + name + '.nozerofeature.train'
+    path_output = '../input/' + name + '.0.25.sample.train'
+    with open(path_input) as fin:
+        with open(path_output, 'w') as fout:
+            for line in fin:
+                if random.random() < rate:
+                    fout.write(line)
 
 
 # feature's index used in libsvm should start with 1, not 0
@@ -109,8 +118,8 @@ def deletezerofeatureintest(name):
                     i += 1
 
 
-def getsubmissionfromlibsvmresult():
-    with open('../output/result3') as fin:
+def getsubmissionfromlibsvmresult(name):
+    with open('../output/' + name) as fin:
         res = []
         next(fin)
         for line in fin:
@@ -146,8 +155,9 @@ def getsubmissionfromlibsvmresult():
                 cnt += 1
 
 
-# getsubmissionfromlibsvmresult()
+getsubmissionfromlibsvmresult('concat_3.libsvm.result')
 # test()
 # sampletest()
-deletezerofeatureintrain('concat_3')
-deletezerofeatureintest('concat_3')
+# deletezerofeatureintrain('concat_3')
+# deletezerofeatureintest('concat_3')
+# samplefromtrain('concat_3')
