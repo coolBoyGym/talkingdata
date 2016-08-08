@@ -48,20 +48,44 @@ def gather_device_id():
     np.savetxt('../feature/device_id', device_id, header='%d' % train_size, fmt='%d')
 
 
-# fea_phone_brand = feature.one_hot_feature(name='phone_brand', dtype='d', space=len(dict_brand))
-# fea_device_model = feature.one_hot_feature(name='device_model', dtype='d', space=len(dict_model))
-# fea_installed_app = feature.multi_feature(name='installed_app', dtype='d', space=len(dict_app))
-# fea_active_app = feature.multi_feature(name='active_app', dtype='d', space=len(dict_app))
-# fea_installed_app_norm = feature.multi_feature(name='installed_app_norm', dtype='f', space=len(dict_app))
-# fea_active_app_norm = feature.multi_feature(name='active_app_norm', dtype='f', space=len(dict_app))
+def gather_event_id():
+    train_device_id, _, test_device_id = read_data()
+
+    dict_device_event = pkl.load(open('../data/dict_device_event.pkl'))
+    device_event_id = []
+    for did in train_device_id:
+        if did in dict_device_event:
+            eids = map(lambda x: x[0], dict_device_event[did])
+            device_event_id.extend(map(lambda x: [did, x], eids))
+    train_size = len(device_event_id)
+    for did in test_device_id:
+        if did in dict_device_event:
+            eids = map(lambda x: x[0], dict_device_event[did])
+            device_event_id.extend(map(lambda x: [did, x], eids))
+
+    device_event_id = np.array(device_event_id)
+    print device_event_id, device_event_id.shape
+
+    np.savetxt('../feature/device_event_id', device_event_id, header='%d ' % train_size, fmt='%d')
 
 
-fea_phone_brand = feature.one_hot_feature(name='phone_brand')
-fea_device_model = feature.one_hot_feature(name='device_model')
-fea_installed_app = feature.multi_feature(name='installed_app')
-fea_active_app = feature.multi_feature(name='active_app')
-fea_installed_app_norm = feature.multi_feature(name='installed_app_norm')
-fea_active_app_norm = feature.multi_feature(name='active_app_norm')
+# gather_event_id()
+
+
+fea_phone_brand = feature.one_hot_feature(name='phone_brand', dtype='d')
+fea_device_model = feature.one_hot_feature(name='device_model', dtype='d')
+fea_installed_app = feature.multi_feature(name='installed_app', dtype='d')
+fea_active_app = feature.multi_feature(name='active_app', dtype='d')
+fea_installed_app_norm = feature.multi_feature(name='installed_app_norm', dtype='f')
+fea_active_app_norm = feature.multi_feature(name='active_app_norm', dtype='f')
+fea_event_time = feature.multi_feature(name='event_time', dtype='d')
+fea_event_longitude = feature.num_feature(name='event_longitude', dtype='f')
+fea_event_longitude_norm = feature.num_feature(name='event_longitude_norm', dtype='f')
+fea_event_latitude = feature.num_feature(name='event_latitude', dtype='f')
+fea_event_latitude_norm = feature.num_feature(name='event_latitude_norm', dtype='f')
+fea_event_phone_brand = feature.one_hot_feature(name='event_phone_brand', dtype='d')
+fea_event_installed_app = feature.multi_feature(name='event_installed_app', dtype='d')
+fea_event_installed_app_norm = feature.multi_feature(name='event_installed_app_norm', dtype='f')
 
 
 def make_feature():
@@ -69,38 +93,72 @@ def make_feature():
     start_time = time.time()
 
     dict_device_brand_model = pkl.load(open('../data/dict_device_brand_model.pkl', 'rb'))
-    dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
+    # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
     dict_app_event = pkl.load(open('../data/dict_app_event.pkl', 'rb'))
     # dict_brand = pkl.load(open('../data/dict_id_brand.pkl', 'rb'))
     # dict_model = pkl.load(open('../data/dict_id_model.pkl', 'rb'))
     # dict_app = pkl.load(open('../data/dict_id_app.pkl', 'rb'))
+    dict_event = pkl.load(open('../data/dict_event.pkl', 'rb'))
 
     print 'finish in %d sec' % (time.time() - start_time)
 
-    device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1)
+    # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1)
+    #
+    # fea_phone_brand.process(device_id=device_id, dict_device_brand_model=dict_device_brand_model)
+    # fea_phone_brand.dump()
+    #
+    # fea_device_model.process(device_id=device_id, dict_device_brand_model=dict_device_brand_model)
+    # fea_device_model.dump()
+    #
+    # fea_installed_app.process(device_id=device_id, dict_device_event=dict_device_event, dict_app_event=dict_app_event)
+    # fea_installed_app.dump()
+    #
+    # indices, values = fea_installed_app.get_value()
+    # fea_installed_app_norm.process(indices=indices, values=values)
+    # fea_installed_app_norm.dump()
+    #
+    # fea_active_app.process(device_id=device_id, dict_device_event=dict_device_event, dict_app_event=dict_app_event)
+    # fea_active_app.dump()
+    #
+    # indices, values = fea_active_app.get_value()
+    # fea_active_app_norm.process(indices=indices, values=values)
+    # fea_active_app_norm.dump()
 
-    fea_phone_brand.process(device_id=device_id, dict_device_brand_model=dict_device_brand_model)
-    fea_phone_brand.dump()
+    event_id = np.loadtxt('../feature/device_event_id', dtype=np.int64, skiprows=1, usecols=[1])
 
-    fea_device_model.process(device_id=device_id, dict_device_brand_model=dict_device_brand_model)
-    fea_device_model.dump()
+    # fea_event_time.process(event_id=event_id, dict_event=dict_event)
+    # fea_event_time.dump()
 
-    fea_installed_app.process(device_id=device_id, dict_device_event=dict_device_event, dict_app_event=dict_app_event)
-    fea_installed_app.dump()
+    # fea_event_longitude.process(event_id=event_id, dict_event=dict_event)
+    # fea_event_longitude.dump()
+    #
+    # indices, values = fea_event_longitude.get_value()
+    # print np.max(values), np.min(values)
+    #
+    # fea_event_longitude_norm.process(indices=indices, values=values)
+    # fea_event_longitude_norm.dump()
+    #
+    # fea_event_latitude.process(event_id=event_id, dict_event=dict_event)
+    # fea_event_latitude.dump()
+    #
+    # indices, values = fea_event_latitude.get_value()
+    # print np.max(values), np.min(values)
+    #
+    # fea_event_latitude_norm.process(indices=indices, values=values)
+    # fea_event_latitude_norm.dump()
+    fea_event_phone_brand.process(event_id=event_id, dict_event=dict_event,
+                                  dict_device_brand_model=dict_device_brand_model)
+    fea_event_phone_brand.dump()
 
-    indices, values = fea_installed_app.get_value()
-    fea_installed_app_norm.process(indices=indices, values=values)
-    fea_installed_app_norm.dump()
+    fea_event_installed_app.process(event_id=event_id, dict_app_event=dict_app_event)
+    fea_event_installed_app.dump()
 
-    fea_active_app.process(device_id=device_id, dict_device_event=dict_device_event, dict_app_event=dict_app_event)
-    fea_active_app.dump()
-
-    indices, values = fea_active_app.get_value()
-    fea_active_app_norm.process(indices=indices, values=values)
-    fea_active_app_norm.dump()
+    indices, values = fea_event_installed_app.get_value()
+    fea_event_installed_app_norm.process(indices=indices, values=values)
+    fea_event_installed_app_norm.dump()
 
 
-# make_feature()
+make_feature()
 
 
 def concat_feature(name, fea_list):
