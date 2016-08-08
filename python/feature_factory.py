@@ -212,4 +212,20 @@ def split_dataset(name, nfold):
                         fout.write(line)
 
 
-split_dataset('concat_1', 5)
+# unify feature numbers in the ../feature/concat for gym's xgb use
+def unify_feature_numbers(name):
+    path_input = '../feature/' + name
+    path_output = '../feature/' + name + '_unify'
+    with open(path_input) as fin:
+        with open(path_output, 'w') as fout:
+            i = 0
+            for line in fin:
+                if i == 0:
+                    fout.write(line)
+                else:
+                    fout.write('40270:0.0 ' + line)
+                i += 1
+
+
+split_dataset('concat_3_unify', 5)
+# unify_feature_numbers('concat_3')

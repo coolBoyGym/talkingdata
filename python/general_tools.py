@@ -117,6 +117,6 @@ def wire3d_demo():
 
 # scatter3d_use_file()
 # wire3d_demo()
-norm_argument_file_get_result('concat_3')
+norm_argument_file_get_result('concat_5')
 # find_best_argument('concat_4')
 

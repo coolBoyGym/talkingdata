@@ -2,9 +2,9 @@
 from svmutil import *
 import random
 
-train_type = 'libsvm'
-version = 4
-featureUsed = 'concat_3'
+train_type = 'liblinear'
+version = 1
+featureUsed = 'concat_1'
 
 path_submission = '../output/submission.csv.%s.%d.%s' % (train_type, version, featureUsed)
 
@@ -155,3 +155,7 @@ def get_submission_from_libsvm_result(name):
                 fout.write('\n')
                 cnt += 1
 
+
+# delete_zero_feature_in_train('concat_1')
+# delete_zero_feature_in_test('concat_1')
+get_submission_from_libsvm_result('concat_1.liblinear.3.result')

@@ -1,0 +1,24 @@
+2016.8.8 gaoyimei
+
+feature:concat_5  device_model,active_app_norm
+model:gblinear
+arguments:
+    gblinear_alpha: l1 norm
+    gblinear_lambda:l2 norm
+best argument:
+    l1 = 0.2
+    l2 = 0.86
+
+
+feature:concat_4  device_model,installed_app_norm
+model:gblinear
+best argument:
+    alpha = 0.6
+    lambda = 0.0001
+
+
+feature:concat_3  phone_brand,device_model,installed_app_norm,active_app_norm
+model:gblinear
+best argument:
+    alpha = 0.65
+    lambda = 0.0001
