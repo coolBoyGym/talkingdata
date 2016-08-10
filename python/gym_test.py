@@ -127,35 +127,34 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, ver
     return train_score, valid_score
 
 
-# gblinear_alpha = 0.5
-# gblinear_lambda = 35
+def train_gblinear_use_nfold(xgb_alpha=0.1, xgb_lambda=0.1, verbose_eval=False):
+    dtrain = [xgb.DMatrix(path_train + '.%d.train' % i) for i in range(nfold)]
+    dvalid = [xgb.DMatrix(path_train + '.%d.valid' % i) for i in range(nfold)]
 
-dtrain = [xgb.DMatrix(path_train + '.%d.train' % i) for i in range(nfold)]
-dvalid = [xgb.DMatrix(path_train + '.%d.valid' % i) for i in range(nfold)]
-
-# train_score, valid_score = tune_gblinear(dtrain, dvalid, 0.65, 0.0001, True)
-# print np.mean(train_score), np.mean(valid_score)
-# exit(0)
+    train_score, valid_score = tune_gblinear(dtrain, dvalid, xgb_alpha, xgb_lambda, verbose_eval)
+    print np.mean(train_score), np.mean(valid_score)
+    exit(0)
 
 
-# fout = open('../output/argument.concat_3.gblinear', 'a')
-# for gblinear_alpha in [0.64, 0.68, 0.8, 0.4]:
-#     print 'alpha', gblinear_alpha
-#     fout.write('alpha ' + str(gblinear_alpha) + '\n')
-#     for gblinear_lambda in [0]:
-#         train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, False)
-#         print 'lambda', gblinear_lambda, np.mean(train_score), np.mean(valid_score)
-#         fout.write('lambda ' + str(gblinear_lambda) + ' ' + str(np.mean(train_score)) + ' '
-#                    + str(np.mean(valid_score)) + '\n')
+def train_gblinear_find_argument(argument_file_name):
+    dtrain = [xgb.DMatrix(path_train + '.%d.train' % i) for i in range(nfold)]
+    dvalid = [xgb.DMatrix(path_train + '.%d.valid' % i) for i in range(nfold)]
+
+    fout = open(argument_file_name, 'a')
+    for gblinear_alpha in [0.64, 0.68, 0.8, 0.4]:
+        print 'alpha', gblinear_alpha
+        fout.write('alpha ' + str(gblinear_alpha) + '\n')
+        for gblinear_lambda in [0, 0.1, 0.2]:
+            train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, False)
+            print 'lambda', gblinear_lambda, np.mean(train_score), np.mean(valid_score)
+            fout.write('lambda ' + str(gblinear_lambda) + ' ' + str(np.mean(train_score)) + ' ' +
+                       str(np.mean(valid_score)) + '\n')
 
 
-gblinear_alpha = 0.21
-gblinear_lambda = 0.8
-# tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, True)
-
-dtrain = xgb.DMatrix(path_train)
-dtest = xgb.DMatrix(path_test)
-train_gblinear(dtrain, dtest, 5, 0.21, 0.8)
+def train_gblinear_get_result():
+    dtrain = xgb.DMatrix(path_train)
+    dtest = xgb.DMatrix(path_test)
+    train_gblinear(dtrain, dtest, 5, 0.21, 0.8)
 
 
 # max_depth = 3
