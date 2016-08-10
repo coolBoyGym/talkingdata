@@ -3,26 +3,29 @@ import xgboost as xgb
 from sklearn.metrics import log_loss
 
 import feature
+from model_impl import logistic_regression
 
 version = 1
-booster = 'gblinear'
-
-dataset = 'concat_3'
+booster = 'logistic_regression'
+dataset = 'concat_1'
 nfold = 5
-
 path_train = '../input/' + dataset + '.train'
 path_test = '../input/' + dataset + '.test'
-
 tag = '%s_%s_%d' % (dataset, booster, version)
 path_model_log = '../model/' + tag + '.log'
 path_model_bin = '../model/' + tag + '.model'
 path_model_dump = '../model/' + tag + '.dump'
-
 path_submission = '../output/' + tag + '.submission'
-
-# fea_model = feature.multi_feature(name=tag, dtype='f', space=12, rank=12)
-
 random_state = 0
+
+print tag
+fea_tmp = feature.multi_feature(name=dataset)
+fea_tmp.load_meta()
+space = fea_tmp.get_space()
+rank = fea_tmp.get_rank()
+size = fea_tmp.get_size()
+num_class = 12
+print 'feature space: %d, rank: %d, size: %d, num class: %d' % (space, rank, size, num_class)
 
 
 def tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, verbose_eval):
@@ -127,35 +130,80 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, ver
     return train_score, valid_score
 
 
-print tag
+def read_feature(file_path, zero_pad):
+    indices = []
+    values = []
+    labels = []
+    with open(file_path, 'r') as fin:
+        for line in fin:
+            fields = line.strip().split()
+            tmp_y = [0] * num_class
+            tmp_y[int(fields[0])] = 1
+            labels.append(tmp_y)
+            tmp_i = map(lambda x: int(x.split(':')[0]), fields[1:])
+            tmp_v = map(lambda x: float(x.split(':')[1]), fields[1:])
+            if zero_pad and len(tmp_i) < space:
+                tmp_i.extend([space] * (space - len(tmp_i)))
+                tmp_v.extend([0] * (space - len(tmp_v)))
+            indices.append(tmp_i)
+            values.append(tmp_v)
+    indices = np.array(indices)
+    values = np.array(values)
+    labels = np.array(labels)
+    return indices, values, labels
 
-dtrain = [xgb.DMatrix(path_train + '.%d.train' % i) for i in range(nfold)]
-dvalid = [xgb.DMatrix(path_train + '.%d.valid' % i) for i in range(nfold)]
-#
-# dtrain = xgb.DMatrix(path_train)
-# dtest = xgb.DMatrix(path_test)
 
-if booster == 'gblinear':
-    # train_score, valid_score = tune_gblinear(dtrain, dvalid, 0, 9, True)
-    # print np.mean(train_score), np.mean(valid_score)
-    #
-    # train_gblinear(dtrain, dtest, 100, 0, 9)
+if __name__ == '__main__':
 
-    for gblinear_alpha in [0, 0.001, 0.01, 0.1]:
-        print 'alpha', gblinear_alpha
-        for gblinear_lambda in [0, 0.01, 0.1, 1]:
-            train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, False)
-            print 'lambda', gblinear_lambda, np.mean(train_score), np.mean(valid_score)
+    # dtrain = [xgb.DMatrix(path_train + '.%d.train' % i) for i in range(nfold)]
+    # dvalid = [xgb.DMatrix(path_train + '.%d.valid' % i) for i in range(nfold)]
 
+    # dtrain = xgb.DMatrix(path_train)
+    # dtest = xgb.DMatrix(path_test)
 
-elif booster == 'gbtree':
-    max_depth = 3
-    eta = 0.1
-    subsample = 0.7
-    colsample_bytree = 0.7
+    if booster == 'gblinear':
+        # train_score, valid_score = tune_gblinear(dtrain, dvalid, 0.009, 14, True)
+        # print np.mean(train_score), np.mean(valid_score)
 
-    for max_depth in [2, 3]:
-        print 'max_depth', max_depth
-        for subsample in [0.6, 0.7, 0.8, 0.9, 1]:
-            train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree)
-            print 'subsample', subsample, train_score, valid_score
+        train_gblinear(dtrain, dtest, 100, 0.009, 14)
+
+        # for gblinear_alpha in [0.007, 0.008, 0.009, 0.01, 0.02]:
+        #     print 'alpha', gblinear_alpha
+        #     for gblinear_lambda in [13, 14, 15]:
+        #         train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, False)
+        #         print 'lambda', gblinear_lambda, np.mean(train_score), np.mean(valid_score)
+    elif booster == 'gbtree':
+        max_depth = 3
+        eta = 0.1
+        subsample = 0.7
+        colsample_bytree = 0.7
+
+        for max_depth in [2, 3]:
+            print 'max_depth', max_depth
+            for subsample in [0.6, 0.7, 0.8, 0.9, 1]:
+                train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
+                                                       False)
+                print 'subsample', subsample, train_score, valid_score
+    elif booster == 'logistic_regression':
+        lr_model = logistic_regression(tag, 'log_loss', 12)
+        lr_model.init(space + 1, rank, 0, 'adam', 0.01)
+        # lr_model.write_log_header()
+        # lr_model.write_log('loss\ttrain-score\tvalid_score')
+
+        num_round = 100
+        for i in range(nfold):
+            train_indices, train_values, train_labels = read_feature(path_train + '.%d.train' % i, True)
+            print 'read finish'
+            # valid_indices, valid_values, valid_labels = read_feature(path_train + '.%d.valid' % i, True)
+            for j in range(num_round):
+                y = lr_model.y.eval()
+                print y
+                print y.shape
+                exit(0)
+                # train_loss = lr_model.train(train_indices, train_values, train_labels)
+                # train_pred = lr_model.predict(train_indices, train_values)
+                # valid_pred = lr_model.predict(valid_indices, valid_values)
+                # train_score = log_loss(train_labels, train_pred)
+                # valid_score = log_loss(valid_labels, valid_pred)
+                # print 'loss: %f \ttrain_score: %f\tvalid_score: %f' % (train_loss, train_score, valid_score)
+                # lr_model.write_log('%f\t%f\t%f\n' % (train_loss, train_score, valid_score))

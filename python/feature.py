@@ -100,7 +100,7 @@ class feature:
             print 'header: %s' % header
             fout.write(header + '\n')
 
-    def load(self):
+    def load_meta(self):
         with open('../feature/' + self.__name, 'r') as fin:
             ftype, dtype, space, rank, size = fin.readline().strip().split()[:5]
             if space == 'None':
@@ -124,7 +124,7 @@ class num_feature(feature):
         feature.__init__(self, name, ftype, dtype, space, rank, size)
 
     def load(self):
-        feature.load(self)
+        feature.load_meta(self)
         with open('../feature/' + self.get_name(), 'r') as fin:
             next(fin)
             data = [line.strip() for line in fin]
@@ -155,7 +155,7 @@ class one_hot_feature(feature):
         feature.__init__(self, name, ftype, dtype, space, rank, size)
 
     def load(self):
-        feature.load(self)
+        feature.load_meta(self)
         with open('../feature/' + self.get_name(), 'r') as fin:
             next(fin)
             data = [line.strip().split(':') for line in fin]
@@ -187,7 +187,7 @@ class multi_feature(feature):
         feature.__init__(self, name, ftype, dtype, space, rank, size)
 
     def load(self):
-        feature.load(self)
+        feature.load_meta(self)
         with open('../feature/' + self.get_name(), 'r') as fin:
             next(fin)
             indices = []
@@ -227,7 +227,7 @@ class seq_feature(feature):
         feature.__init__(self, name, ftype, dtype, space, rank, size)
 
     def load(self):
-        feature.load(self)
+        feature.load_meta(self)
 
     def dump(self, extra=None):
         feature.dump(self, extra)
