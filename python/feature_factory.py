@@ -69,15 +69,14 @@ def gather_event_id():
     np.savetxt('../feature/device_event_id', device_event_id, header='%d ' % train_size, fmt='%d')
 
 
-# gather_event_id()
-
-
 fea_phone_brand = feature.one_hot_feature(name='phone_brand', dtype='d')
 fea_device_model = feature.one_hot_feature(name='device_model', dtype='d')
 fea_installed_app = feature.multi_feature(name='installed_app', dtype='d')
 fea_active_app = feature.multi_feature(name='active_app', dtype='d')
 fea_installed_app_norm = feature.multi_feature(name='installed_app_norm', dtype='f')
 fea_active_app_norm = feature.multi_feature(name='active_app_norm', dtype='f')
+fea_installed_app_freq = feature.multi_feature(name='installed_app_freq', dtype='f')
+fea_active_app_freq = feature.multi_feature(name='active_app_freq', dtype='f')
 fea_event_time = feature.multi_feature(name='event_time', dtype='d')
 fea_event_longitude = feature.num_feature(name='event_longitude', dtype='f')
 fea_event_longitude_norm = feature.num_feature(name='event_longitude_norm', dtype='f')
@@ -86,23 +85,29 @@ fea_event_latitude_norm = feature.num_feature(name='event_latitude_norm', dtype=
 fea_event_phone_brand = feature.one_hot_feature(name='event_phone_brand', dtype='d')
 fea_event_installed_app = feature.multi_feature(name='event_installed_app', dtype='d')
 fea_event_installed_app_norm = feature.multi_feature(name='event_installed_app_norm', dtype='f')
+fea_device_long_lat = feature.multi_feature(name='device_long_lat', dtype='f')
+fea_device_long_lat_norm = feature.multi_feature(name='device_long_lat_norm', dtype='f')
+fea_device_event_num = feature.num_feature(name='device_event_num', dtype='d')
+fea_device_event_num_norm = feature.num_feature(name='device_event_num_norm', dtype='f')
+fea_device_day_event_num = feature.multi_feature(name='device_day_event_num', dtype='d')
+fea_device_day_event_num_norm = feature.multi_feature(name='device_day_event_num_norm', dtype='f')
 
 
 def make_feature():
     print 'loading data...'
     start_time = time.time()
 
-    dict_device_brand_model = pkl.load(open('../data/dict_device_brand_model.pkl', 'rb'))
-    # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
-    dict_app_event = pkl.load(open('../data/dict_app_event.pkl', 'rb'))
+    # dict_device_brand_model = pkl.load(open('../data/dict_device_brand_model.pkl', 'rb'))
+    dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
+    # dict_app_event = pkl.load(open('../data/dict_app_event.pkl', 'rb'))
     # dict_brand = pkl.load(open('../data/dict_id_brand.pkl', 'rb'))
     # dict_model = pkl.load(open('../data/dict_id_model.pkl', 'rb'))
     # dict_app = pkl.load(open('../data/dict_id_app.pkl', 'rb'))
-    dict_event = pkl.load(open('../data/dict_event.pkl', 'rb'))
+    # dict_event = pkl.load(open('../data/dict_event.pkl', 'rb'))
 
     print 'finish in %d sec' % (time.time() - start_time)
 
-    # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1)
+    device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1)
     #
     # fea_phone_brand.process(device_id=device_id, dict_device_brand_model=dict_device_brand_model)
     # fea_phone_brand.dump()
@@ -124,7 +129,7 @@ def make_feature():
     # fea_active_app_norm.process(indices=indices, values=values)
     # fea_active_app_norm.dump()
 
-    event_id = np.loadtxt('../feature/device_event_id', dtype=np.int64, skiprows=1, usecols=[1])
+    # event_id = np.loadtxt('../feature/device_event_id', dtype=np.int64, skiprows=1, usecols=[1])
 
     # fea_event_time.process(event_id=event_id, dict_event=dict_event)
     # fea_event_time.dump()
@@ -146,19 +151,44 @@ def make_feature():
     #
     # fea_event_latitude_norm.process(indices=indices, values=values)
     # fea_event_latitude_norm.dump()
-    fea_event_phone_brand.process(event_id=event_id, dict_event=dict_event,
-                                  dict_device_brand_model=dict_device_brand_model)
-    fea_event_phone_brand.dump()
+    # fea_event_phone_brand.process(event_id=event_id, dict_event=dict_event,
+    #                               dict_device_brand_model=dict_device_brand_model)
+    # fea_event_phone_brand.dump()
+    #
+    # fea_event_installed_app.process(event_id=event_id, dict_app_event=dict_app_event)
+    # fea_event_installed_app.dump()
+    #
+    # indices, values = fea_event_installed_app.get_value()
+    # fea_event_installed_app_norm.process(indices=indices, values=values)
+    # fea_event_installed_app_norm.dump()
 
-    fea_event_installed_app.process(event_id=event_id, dict_app_event=dict_app_event)
-    fea_event_installed_app.dump()
+    # fea_device_long_lat.process(device_id=device_id, dict_device_event=dict_device_event)
+    # fea_device_long_lat.dump()
+    #
+    # fea_device_long_lat_norm.process(device_id=device_id, dict_device_event=dict_device_event)
+    # fea_device_long_lat_norm.dump()
 
-    indices, values = fea_event_installed_app.get_value()
-    fea_event_installed_app_norm.process(indices=indices, values=values)
-    fea_event_installed_app_norm.dump()
+    # fea_installed_app_freq.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                dict_app_event=dict_app_event)
+    # fea_installed_app_freq.dump()
+    #
+    # fea_active_app_freq.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                             dict_app_event=dict_app_event)
+    # fea_active_app_freq.dump()
 
+    fea_device_event_num.process(device_id=device_id, dict_device_event=dict_device_event)
+    fea_device_event_num.dump()
 
-make_feature()
+    indices, values = fea_device_event_num.get_value()
+    fea_device_event_num_norm.process(indices=indices, values=values)
+    fea_device_event_num_norm.dump()
+
+    fea_device_day_event_num.process(device_id=device_id, dict_device_event=dict_device_event)
+    fea_device_day_event_num.dump()
+
+    indices, values = fea_device_day_event_num.get_value()
+    fea_device_day_event_num_norm.process(indices=indices, values=values)
+    fea_device_day_event_num_norm.dump()
 
 
 def concat_feature(name, fea_list):
@@ -215,40 +245,36 @@ def concat_feature(name, fea_list):
     fea_concat.dump(extra=extra)
 
 
-# concat_feature('concat_5', [fea_device_model, fea_active_app_norm])
-
-# fea_concat_1 = feature.multi_feature(name='concat_1')
-# fea_concat_1.load()
-# print fea_concat_1.get_value()
-# print fea_concat_1.get_name()
-# print fea_concat_1.get_feature_type()
-# print fea_concat_1.get_data_type()
-# print fea_concat_1.get_space()
-# print fea_concat_1.get_rank()
-# print fea_concat_1.get_size()
-#
-# fea_concat_2 = feature.multi_feature(name='concat_2')
-# fea_concat_2.load()
-# print fea_concat_2.get_value()
-#
-# fea_concat_3 = feature.multi_feature(name='concat_3')
-# fea_concat_3.load()
-# print fea_concat_3.get_value()
+def padding_zero(line, space):
+    line_space = int(line.strip().split()[-1].split(':')[0]) + 1
+    if line_space < space:
+        return line.strip() + ' %d:0\n' % (space - 1)
+    else:
+        return line.strip() + '\n'
 
 
-def split_dataset(name, nfold):
+def split_dataset(name, nfold, zero_pad=False):
     _, train_label, _ = read_data()
 
     with open('../feature/' + name, 'r') as data_in:
-        next(data_in)
+        header = next(data_in)
+        space = int(header.strip().split()[2])
         with open('../feature/device_id', 'r') as device_id_in:
             train_size = int(device_id_in.readline().strip().split()[1])
 
         with open('../input/' + name + '.train', 'w') as train_out:
-            for i in range(train_size):
+            first_line = next(data_in)
+            if zero_pad:
+                first_line = padding_zero(first_line, space)
+            train_out.write('%d %s' % (train_label[0], first_line))
+            for i in range(1, train_size):
                 train_out.write('%d %s' % (train_label[i], next(data_in)))
 
         with open('../input/' + name + '.test', 'w') as test_out:
+            first_line = next(data_in)
+            if zero_pad:
+                first_line = padding_zero(first_line, space)
+            test_out.write('0 %s' % first_line)
             for line in data_in:
                 test_out.write('0 %s' % line)
 
@@ -257,7 +283,11 @@ def split_dataset(name, nfold):
     with open('../input/' + name + '.train', 'r') as train_in:
         for line in train_in:
             folds[int(random.random() / cv_rate)].append(line)
-
+    for i in range(nfold):
+        first_line = folds[i][0]
+        if zero_pad:
+            first_line = padding_zero(first_line, space)
+        folds[i][0] = first_line
     for i in range(nfold):
         with open('../input/' + name + '.train.%d.valid' % i, 'w') as fout:
             for line in folds[i]:
@@ -285,5 +315,30 @@ def unify_feature_numbers(name):
                 i += 1
 
 
-split_dataset('concat_3_unify', 5)
-# unify_feature_numbers('concat_3')
+def zero_pad_feature(feature_name):
+    with open(feature_name, 'r') as fin:
+        header = next(fin)
+        space = int(header.strip().split()[2])
+        with open(feature_name + '_zero_pad', 'w') as fout:
+            fout.write(header)
+            first_line = next(fin)
+            first_line_space = int(first_line.strip().split()[-1].split(':')) + 1
+            if first_line_space < space:
+                fout.write(first_line.strip() + ' %d:0\n' % (space - 1))
+            for line in fin:
+                fout.write(line)
+
+
+if __name__ == '__main__':
+    # gather_event_id()
+
+    # make_feature()
+
+    # concat_feature('concat_6', [fea_phone_brand, fea_device_model, fea_device_long_lat_norm, fea_device_event_num_norm,
+    #                             fea_device_day_event_num_norm, fea_installed_app_freq, fea_active_app_freq])
+
+    # fea_concat_1 = feature.multi_feature(name='concat_1')
+    # fea_concat_1.load()
+
+    split_dataset('concat_6', 5, zero_pad=True)
+    # unify_feature_numbers('concat_3')
