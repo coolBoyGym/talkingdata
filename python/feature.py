@@ -32,10 +32,10 @@ class feature:
         """
         :param name: identifier, string
         :param ftype: feature type, string, could be num | one_hot | multi | seq
-        :param dtype: data type, a format string
-        :param proc: feature map, func in module feature_impl
-        :param space: dimension of feature space, int | None
-        :param rank: num of non-zero values, int | None
+        :param dtype: data type, 'f' for np.float64, 'd' for np.int64
+        :param space: dimension of feature space, int
+        :param rank: num of non-zero values, int
+        :param size: data size, int
         """
         self.__name = name
         self.__ftype = ftype

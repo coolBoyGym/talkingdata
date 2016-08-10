@@ -5,8 +5,8 @@ import seaborn as sns
 
 sns.set_style('darkgrid')
 
-data_app_events = '../data/app_events.csv'
-data_app_labels = '../data/app_labels.csv'
+data_app_events = '../data/raw/app_events.csv'
+data_app_labels = '../data/raw/app_labels.csv'
 # ['app_id', 'label_id']
 # (459943, 2)
 # field app_id unique values: 113211
@@ -14,18 +14,18 @@ data_app_labels = '../data/app_labels.csv'
 # app owning labels: max: 25	min: 1	avg: 4.058369
 # label owning apps: max: 56902	min: 1	avg: 906.216963
 
-data_events = '../data/events.csv'
-data_gender_age_test = '../data/gender_age_test.csv'
-data_gender_age_train = '../data/gender_age_train.csv'
-data_label_categories = '../data/label_categories.csv'
+data_events = '../data/raw/events.csv'
+data_gender_age_test = '../data/raw/gender_age_test.csv'
+data_gender_age_train = '../data/raw/gender_age_train.csv'
+data_label_categories = '../data/raw/label_categories.csv'
 # label_id unique, category not unique ('unknown', '', etc.)
 # (930,)
 
-data_phone_brand_device_model = '../data/phone_brand_device_model.csv'
+data_phone_brand_device_model = '../data/raw/phone_brand_device_model.csv'
 # 131 brands, 1666 models
 # brand owning models: max: 194	min: 1	avg: 12.717557
 
-data_sample_submission = '../data/sample_submission.csv'
+data_sample_submission = '../data/raw/sample_submission.csv'
 
 
 # label stat
@@ -346,6 +346,30 @@ def aggregate_device_event():
     pkl.dump(dict_device_event, open('../data/dict_device_event.pkl', 'wb'))
 
 
+def build_event_dict():
+    dict_device = pkl.load(open('../data/dict_id_device.pkl', 'rb'))
+    data_e = np.loadtxt(data_events, skiprows=1, delimiter=',',
+                        dtype=[('event_id', np.int64), ('device_id', np.int64), ('timestamp', 'S100'),
+                               ('longitude', np.float64), ('latitude', np.float64)])
+
+    print data_e
+    print data_e.shape
+
+    dict_events = {}
+    for eid, device_id, timestamp, longitude, latitude in data_e:
+        if device_id not in dict_device:
+            print 'not in'
+            continue
+
+        did = dict_device[device_id]
+        dict_events[eid] = (did, timestamp, longitude, latitude)
+
+    print dict_events.keys()[:10]
+    print dict_events.values()[:10]
+
+    pkl.dump(dict_events, open('../data/dict_event.pkl', 'wb'))
+
+
 def aggregate_app_event():
     dict_app = pkl.load(open('../data/dict_id_app.pkl', 'rb'))
     data_a = np.loadtxt(data_app_events, skiprows=1, delimiter=',', dtype=np.int64)
@@ -375,4 +399,4 @@ def aggregate_app_event():
 
 
 if __name__ == '__main__':
-    aggregate_app_event()
+    build_event_dict()
