@@ -5,9 +5,9 @@ from sklearn.metrics import log_loss
 import feature
 
 version = 1
-booster = 'gblinear'
+booster = 'gbtree'
 
-dataset = 'concat_5_unify'
+dataset = 'concat_6'
 nfold = 5
 
 path_train = '../input/' + dataset + '.train'
@@ -19,8 +19,6 @@ path_model_bin = '../model/' + tag + '.model'
 path_model_dump = '../model/' + tag + '.dump'
 
 path_submission = '../output/' + tag + '.submission'
-
-# fea_model = feature.multi_feature(name=tag, dtype='f', space=12, rank=12)
 
 random_state = 0
 
@@ -51,6 +49,42 @@ def tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, verbose_eval)
         train_score.append(log_loss(dtrain[i].get_label(), train_pred))
 
         valid_pred = bst.predict(dvalid[i])
+        valid_score.append(log_loss(dvalid[i].get_label(), valid_pred))
+
+    return train_score, valid_score
+
+
+def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, verbose_eval):
+    num_boost_round = 1000
+    early_stopping_rounds = 30
+    # print 'num_boost_round=', num_boost_round
+    # print 'early_stopping_rounds', early_stopping_rounds
+
+    params = {
+        "booster": booster,
+        "silent": 1,
+        "num_class": 12,
+        "eta": eta,
+        "max_depth": max_depth,
+        "subsample": subsample,
+        "colsample_bytree": colsample_bytree,
+        "objective": "multi:softprob",
+        "seed": random_state,
+        "eval_metric": "mlogloss",
+    }
+
+    train_score = []
+    valid_score = []
+    for i in range(nfold):
+        watchlist = [(dtrain[i], 'train'), (dvalid[i], 'eval')]
+        bst = xgb.train(params, dtrain[i], num_boost_round, evals=watchlist,
+                        early_stopping_rounds=early_stopping_rounds,
+                        verbose_eval=verbose_eval)
+
+        train_pred = bst.predict(dtrain[i], ntree_limit=bst.best_iteration)
+        train_score.append(log_loss(dtrain[i].get_label(), train_pred))
+
+        valid_pred = bst.predict(dvalid[i], ntree_limit=bst.best_iteration)
         valid_score.append(log_loss(dvalid[i].get_label(), valid_pred))
 
     return train_score, valid_score
@@ -97,36 +131,6 @@ def train_gblinear(dtrain, dtest, num_boost_round, gblinear_alpha, gblinear_lamb
     fea_pred.dump()
 
 
-def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, verbose_eval):
-    num_boost_round = 1000
-    early_stopping_rounds = 50
-
-    params = {
-        "booster": booster,
-        "silent": 1,
-        "num_class": 12,
-        "eta": eta,
-        "max_depth": max_depth,
-        "subsample": subsample,
-        "colsample_bytree": colsample_bytree,
-        "objective": "multi:softprob",
-        "seed": random_state,
-        "eval_metric": "mlogloss",
-    }
-
-    watchlist = [(dtrain, 'train'), (dvalid, 'eval')]
-    bst = xgb.train(params, dtrain, num_boost_round, evals=watchlist, early_stopping_rounds=early_stopping_rounds,
-                    verbose_eval=verbose_eval)
-
-    train_pred = bst.predict(dtrain, ntree_limit=bst.best_iteration)
-    train_score = log_loss(dtrain.get_label(), train_pred)
-
-    valid_pred = bst.predict(dvalid, ntree_limit=bst.best_iteration)
-    valid_score = log_loss(dvalid.get_label(), valid_pred)
-
-    return train_score, valid_score
-
-
 def train_gblinear_use_nfold(xgb_alpha=0.1, xgb_lambda=0.1, verbose_eval=False):
     dtrain = [xgb.DMatrix(path_train + '.%d.train' % i) for i in range(nfold)]
     dvalid = [xgb.DMatrix(path_train + '.%d.valid' % i) for i in range(nfold)]
@@ -137,17 +141,40 @@ def train_gblinear_use_nfold(xgb_alpha=0.1, xgb_lambda=0.1, verbose_eval=False):
 
 
 def train_gblinear_find_argument(argument_file_name):
+    # argument_file_name = '../output/argument.concat_3.gblinear'
     dtrain = [xgb.DMatrix(path_train + '.%d.train' % i) for i in range(nfold)]
     dvalid = [xgb.DMatrix(path_train + '.%d.valid' % i) for i in range(nfold)]
 
     fout = open(argument_file_name, 'a')
-    for gblinear_alpha in [0.64, 0.68, 0.8, 0.4]:
+    for gblinear_alpha in [0.01, 0.02]:
         print 'alpha', gblinear_alpha
         fout.write('alpha ' + str(gblinear_alpha) + '\n')
-        for gblinear_lambda in [0, 0.1, 0.2]:
+        for gblinear_lambda in [10, 20, 30, 40]:
             train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, False)
             print 'lambda', gblinear_lambda, np.mean(train_score), np.mean(valid_score)
             fout.write('lambda ' + str(gblinear_lambda) + ' ' + str(np.mean(train_score)) + ' ' +
+                       str(np.mean(valid_score)) + '\n')
+
+
+def train_gbtree_find_argument(argument_file_name):
+    # argument_file_name = '../output/argument.concat_3.gblinear'
+
+    dtrain = [xgb.DMatrix(path_train + '.%d.train' % i) for i in range(nfold)]
+    dvalid = [xgb.DMatrix(path_train + '.%d.valid' % i) for i in range(nfold)]
+
+    # max_depth = 3
+    eta = 0.1
+    # subsample = 0.7
+    colsample_bytree = 0.7
+
+    fout = open(argument_file_name, 'a')
+    for max_depth in [2, 3]:
+        print 'max_depth', max_depth
+        fout.write('max_depth ' + str(max_depth) + '\n')
+        for subsample in [0.6, 0.7, 0.8]:
+            train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, True)
+            print 'subsample', subsample, np.mean(train_score), np.mean(valid_score)
+            fout.write('subsample ' + str(subsample) + ' ' + str(np.mean(train_score)) + ' ' +
                        str(np.mean(valid_score)) + '\n')
 
 
@@ -167,3 +194,10 @@ def train_gblinear_get_result():
 #     for subsample in [0.6, 0.7, 0.8, 0.9, 1]:
 #         train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree)
 #         print 'subsample', subsample, train_score, valid_score
+
+
+# train_gblinear_find_argument('../output/argument.concat_6.gblinear')
+
+if __name__ == '__main__':
+    train_gbtree_find_argument('../output/argument.concat_6.gblinear')
+    print('main function finish!')
