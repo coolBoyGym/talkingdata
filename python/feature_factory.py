@@ -479,7 +479,8 @@ if __name__ == '__main__':
     #                                  fea_device_long_lat_norm,
     #                                  fea_device_event_num_norm,
     #                                  fea_device_day_event_num_norm,
-    #                                  fea_device_hour_event_num_norm, ])
+    #                                  fea_device_hour_event_num_norm,
+    #                                  fea_device_day_hour_event_num_norm])
     #
     # concat_feature('concat_4_norm', [fea_phone_brand,
     #                                  fea_device_model,
