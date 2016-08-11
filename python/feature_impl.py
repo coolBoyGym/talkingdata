@@ -127,18 +127,96 @@ def active_app_freq_proc(device_id, dict_device_event, dict_app_event):
     return np.array(indices), np.array(values)
 
 
-def installed_app_norm_proc(indices, values):
-    norm_values = []
-    for v in values:
-        norm_values.append(np.float64(v) / len(v))
-    return indices, np.array(norm_values)
+def installed_app_label_proc(device_id, dict_device_event, dict_app_event, dict_app_label):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = set()
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][0]:
+                    tmp = tmp | dict_app_label[aid]
+        indices.append(sorted(tmp))
+        values.append([1] * len(tmp))
+    return np.array(indices), np.array(values)
 
 
-def active_app_norm_proc(indices, values):
-    norm_values = []
-    for v in values:
-        norm_values.append(np.float64(v) / len(v))
-    return indices, np.array(norm_values)
+def active_app_label_proc(device_id, dict_device_event, dict_app_event, dict_app_label):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = set()
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][1]:
+                    tmp = tmp | dict_app_label[aid]
+        indices.append(sorted(tmp))
+        values.append([1] * len(tmp))
+    return np.array(indices), np.array(values)
+
+
+def installed_app_label_freq_proc(device_id, dict_device_event, dict_app_event, dict_app_label):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = {}
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][0]:
+                    for lid in dict_app_label[aid]:
+                        if lid in tmp:
+                            tmp[lid] += 1
+                        else:
+                            tmp[lid] = 1
+        sorted_tmp = sorted(tmp.keys())
+        total_freq = sum(tmp.values())
+        indices.append(sorted_tmp)
+        values.append(map(lambda x: tmp[x] * 1.0 / total_freq, sorted_tmp))
+    return np.array(indices), np.array(values)
+
+
+def active_app_label_freq_proc(device_id, dict_device_event, dict_app_event, dict_app_label):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = {}
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][1]:
+                    for lid in dict_app_label[aid]:
+                        if lid in tmp:
+                            tmp[lid] += 1
+                        else:
+                            tmp[lid] = 1
+        sorted_tmp = sorted(tmp.keys())
+        total_freq = sum(tmp.values())
+        indices.append(sorted_tmp)
+        values.append(map(lambda x: tmp[x] * 1.0 / total_freq, sorted_tmp))
+    return np.array(indices), np.array(values)
 
 
 def device_event_num_proc(device_id, dict_device_event):
@@ -175,6 +253,53 @@ def device_day_event_num_proc(device_id, dict_device_event):
     return indices, values
 
 
+def device_hour_event_num_proc(device_id, dict_device_event):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+        else:
+            days = map(lambda x: get_time(x[1], ['hour'])[0], dict_device_event[did])
+            tmp = {}
+            for d in days:
+                if d in tmp:
+                    tmp[d] += 1
+                else:
+                    tmp[d] = 1
+            sorted_tmp = sorted(tmp.keys())
+            indices.append(sorted_tmp)
+            values.append(map(lambda x: tmp[x], sorted_tmp))
+    indices = np.array(indices)
+    values = np.array(values)
+    return indices, values
+
+
+def device_day_hour_event_num_proc(device_id, dict_device_event):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+        else:
+            day_hours = map(lambda x: get_time(x[1], ['day', 'hour']), dict_device_event[did])
+            day_hours = map(lambda x: x[0] * 24 + x[1], day_hours)
+            tmp = {}
+            for dh in day_hours:
+                if dh in tmp:
+                    tmp[dh] += 1
+                else:
+                    tmp[dh] = 1
+            sorted_tmp = sorted(tmp.keys())
+            indices.append(sorted_tmp)
+            values.append(map(lambda x: tmp[x], sorted_tmp))
+    indices = np.array(indices)
+    values = np.array(values)
+    return indices, values
+
+
 def device_event_num_norm_proc(indices, values):
     norm_values = np.float64(values) / np.max(values)
     return indices, norm_values
@@ -189,6 +314,28 @@ def device_day_event_num_norm_proc(indices, values):
     for v in values:
         norm_values.append(np.array(v, dtype=np.float64) / max_num)
     return indices, norm_values
+
+
+def device_hour_event_num_norm_proc(indices, values):
+    norm_values = []
+    max_num = 0
+    for v in values:
+        if len(v) > 0:
+            max_num = max(max_num, max(v))
+    for v in values:
+        norm_values.append(np.array(v, dtype=np.float64) / max_num)
+    return indices, norm_values
+
+
+def device_day_hour_event_num_norm_proc(indices, values):
+    norm_values = []
+    max_num = 0
+    for v in values:
+        if len(v) > 0:
+            max_num = max(max_num, max(v))
+    for v in values:
+        norm_values.append(np.array(v, dtype=np.float64) / max_num)
+    return indices, values
 
 
 def device_long_lat_proc(device_id, dict_device_event):

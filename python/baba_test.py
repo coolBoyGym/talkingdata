@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import xgboost as xgb
 from sklearn.metrics import log_loss
@@ -130,27 +132,70 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, ver
     return train_score, valid_score
 
 
-def read_feature(file_path, zero_pad):
+def read_buffer(fin, buf_size):
+    line_buffer = []
+    while True:
+        try:
+            line_buffer.append(next(fin))
+        except StopIteration as e:
+            print e
+            break
+        if len(line_buffer) == buf_size:
+            break
+    return line_buffer
+
+
+def read_feature(fin, buf_size, zero_pad=True):
+    line_buffer = read_buffer(fin, buf_size)
     indices = []
     values = []
     labels = []
-    with open(file_path, 'r') as fin:
-        for line in fin:
-            fields = line.strip().split()
-            tmp_y = [0] * num_class
-            tmp_y[int(fields[0])] = 1
-            labels.append(tmp_y)
-            tmp_i = map(lambda x: int(x.split(':')[0]), fields[1:])
-            tmp_v = map(lambda x: float(x.split(':')[1]), fields[1:])
-            if zero_pad and len(tmp_i) < space:
-                tmp_i.extend([space] * (space - len(tmp_i)))
-                tmp_v.extend([0] * (space - len(tmp_v)))
-            indices.append(tmp_i)
-            values.append(tmp_v)
+    for line in line_buffer:
+        fields = line.strip().split()
+        tmp_y = [0] * num_class
+        tmp_y[int(fields[0])] = 1
+        labels.append(tmp_y)
+        tmp_i = map(lambda x: int(x.split(':')[0]), fields[1:])
+        tmp_v = map(lambda x: float(x.split(':')[1]), fields[1:])
+        if zero_pad and len(tmp_i) < rank:
+            tmp_i.extend([rank] * (rank - len(tmp_i)))
+            tmp_v.extend([0] * (rank - len(tmp_v)))
+        indices.append(tmp_i)
+        values.append(tmp_v)
     indices = np.array(indices)
     values = np.array(values)
     labels = np.array(labels)
     return indices, values, labels
+
+
+def train_with_batch(file_name, batch_size):
+    data = open(file_name, 'r')
+    loss = []
+    preds = []
+    labels = []
+    while True:
+        batch_indices, batch_values, batch_labels = read_feature(data, batch_size, True)
+        batch_loss, batch_preds = lr_model.train(batch_indices, batch_values, batch_labels)
+        loss.append(batch_loss)
+        preds.extend(batch_preds)
+        labels.extend(batch_labels)
+        if len(batch_indices) < batch_size:
+            break
+    return np.array(loss), np.array(preds), np.array(labels)
+
+
+def predict_with_batch(file_name, batch_size):
+    data = open(file_name, 'r')
+    preds = []
+    labels = []
+    while True:
+        batch_indices, batch_values, batch_labels = read_feature(data, batch_size, True)
+        batch_preds = lr_model.predict(batch_indices, batch_values)
+        preds.extend(batch_preds)
+        labels.extend(batch_labels)
+        if len(batch_indices) < batch_size:
+            break
+    return np.array(preds), np.array(labels)
 
 
 if __name__ == '__main__':
@@ -185,25 +230,18 @@ if __name__ == '__main__':
                                                        False)
                 print 'subsample', subsample, train_score, valid_score
     elif booster == 'logistic_regression':
-        lr_model = logistic_regression(tag, 'log_loss', 12)
-        lr_model.init(space + 1, rank, 0, 'adam', 0.01)
+        lr_model = logistic_regression(tag, 'log_loss', 12, space + 1, rank, 0.1, 'adam', 0.1, None)
         # lr_model.write_log_header()
         # lr_model.write_log('loss\ttrain-score\tvalid_score')
-
         num_round = 100
+        batch_size = 100
         for i in range(nfold):
-            train_indices, train_values, train_labels = read_feature(path_train + '.%d.train' % i, True)
-            print 'read finish'
-            # valid_indices, valid_values, valid_labels = read_feature(path_train + '.%d.valid' % i, True)
             for j in range(num_round):
-                y = lr_model.y.eval()
-                print y
-                print y.shape
-                exit(0)
-                # train_loss = lr_model.train(train_indices, train_values, train_labels)
-                # train_pred = lr_model.predict(train_indices, train_values)
-                # valid_pred = lr_model.predict(valid_indices, valid_values)
-                # train_score = log_loss(train_labels, train_pred)
-                # valid_score = log_loss(valid_labels, valid_pred)
-                # print 'loss: %f \ttrain_score: %f\tvalid_score: %f' % (train_loss, train_score, valid_score)
+                start_time = time.time()
+                train_loss, train_preds, train_labels = train_with_batch(path_train + '.%d.train' % i, batch_size)
+                valid_preds, valid_labels = predict_with_batch(path_train + '.%d.valid' % i, batch_size)
+                train_score = log_loss(train_labels, train_preds)
+                valid_score = log_loss(valid_labels, valid_preds)
+                print 'loss: %f \ttrain_score: %f\tvalid_score: %f' % (np.mean(train_loss), train_score, valid_score)
                 # lr_model.write_log('%f\t%f\t%f\n' % (train_loss, train_score, valid_score))
+                print 'one round training', time.time() - start_time
