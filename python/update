@@ -1,0 +1,11 @@
+16/8/12 Fri.
+feature
+
+
+model
+
+
+submission
+    # data, model, best_param, submission_score, dumped_file
+    gym
+        concat_5, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample_bytree=0.5}, 2.27017, concat_5_gbtree_1
