@@ -430,7 +430,7 @@ def zero_pad_feature(feature_name):
 if __name__ == '__main__':
     # gather_device_id()
     # gather_event_id()
-
+    #
     # make_feature()
 
     # concat_feature('concat_1', [fea_phone_brand,

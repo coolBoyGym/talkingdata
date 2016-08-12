@@ -36,7 +36,7 @@ model
         max_depth, eta, subsample, colsample_bytree
 
     baba
-        lr
+        lr: finish
         fm
         nn (as proposed on forum)
 
@@ -60,5 +60,6 @@ submission
         concat_2, norm_gblinear
 
     baba
-        concat_5_norm, gbtree
-        concat_5_norm, gblinear
+        concat_5_norm, gbtree, {max_depth=4, eta=0.1, subsample=0.7, colsample=0.7}, [556]   train-mlogloss:1.89167	eval-mlogloss:2.28766, concat_5_norm_gbtree_1
+        concat_5_norm, gblinear, {0.001, 10}, [2]	train-mlogloss:2.15605	eval-mlogloss:2.32268, concat_5_norm_gblinear_1
+        concat_5_norm, lr, {0, 0}

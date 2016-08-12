@@ -8,8 +8,8 @@ import feature
 from model_impl import logistic_regression
 
 version = 1
-booster = 'gbtree'
-dataset = 'concat_1'
+booster = 'logistic_regression'
+dataset = 'concat_5_norm'
 # nfold = 5
 path_train = '../input/' + dataset + '.train'
 path_test = '../input/' + dataset + '.test'
@@ -49,9 +49,13 @@ def make_feature_model_output(train_pred, valid_pred, test_pred):
     fea_pred.dump()
 
 
-def tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, verbose_eval, dtest=None):
+def write_log(log_str):
+    with open(path_model_log, 'a') as fout:
+        fout.write(log_str)
+
+
+def tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, verbose_eval, early_stopping_rounds=50, dtest=None):
     num_boost_round = 1000
-    early_stopping_rounds = 50
 
     params = {
         'booster': booster,
@@ -106,7 +110,7 @@ def train_gblinear(dtrain_complete, dtest, gblinear_alpha, gblinear_lambda, num_
 
 
 def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, verbose_eval, dtest=None):
-    num_boost_round = 1000
+    num_boost_round = 2000
     early_stopping_rounds = 50
 
     params = {
@@ -178,8 +182,8 @@ def read_buffer(fin, buf_size):
     return line_buffer
 
 
-def read_feature(fin, buf_size, zero_pad=True):
-    line_buffer = read_buffer(fin, buf_size)
+def read_feature(fin, batch_size, zero_pad=True):
+    line_buffer = read_buffer(fin, batch_size)
     indices = []
     values = []
     labels = []
@@ -201,34 +205,56 @@ def read_feature(fin, buf_size, zero_pad=True):
     return indices, values, labels
 
 
-def train_with_batch(file_name, batch_size):
-    data = open(file_name, 'r')
+def libsvm_2_csr(indices, values):
+    csr_indices = []
+    csr_values = []
+    for i in range(len(indices)):
+        csr_indices.extend(map(lambda x: [i, x], indices[i]))
+        csr_values.extend(values[i])
+    return csr_indices, csr_values, [len(indices), space]
+
+
+def read_csr_feature(fin, batch_size):
+    indices, values, labels = read_feature(fin, batch_size, False)
+    csr_indices, csr_values, csr_shape = libsvm_2_csr(indices, values)
+    return csr_indices, csr_values, csr_shape, labels
+
+
+def train_with_batch_csr(model, indices, values, labels, batch_size):
     loss = []
-    preds = []
-    labels = []
-    while True:
-        batch_indices, batch_values, batch_labels = read_feature(data, batch_size, True)
-        batch_loss, batch_preds = lr_model.train(batch_indices, batch_values, batch_labels)
-        loss.append(batch_loss)
-        preds.extend(batch_preds)
-        labels.extend(batch_labels)
-        if len(batch_indices) < batch_size:
-            break
-    return np.array(loss), np.array(preds), np.array(labels)
+    y = []
+    y_prob = []
+    if batch_size == -1:
+        indices, values, shape = libsvm_2_csr(indices, values)
+        loss, y, y_prob = model.train(indices, values, shape, labels)
+    else:
+        for i in range(len(indices) / batch_size + 1):
+            batch_indices = indices[i * batch_size: (i + 1) * batch_size]
+            batch_values = values[i * batch_size: (i + 1) * batch_size]
+            batch_labels = labels[i * batch_size: (i + 1) * batch_size]
+            batch_indices, batch_values, batch_shape = libsvm_2_csr(batch_indices, batch_values)
+            batch_loss, batch_y, batch_y_prob = model.train(batch_indices, batch_values, batch_shape, batch_labels)
+            loss.append(batch_loss)
+            y.extend(batch_y)
+            y_prob.extend(batch_y_prob)
+    return np.array(loss), np.array(y), np.array(y_prob)
 
 
-def predict_with_batch(file_name, batch_size):
-    data = open(file_name, 'r')
-    preds = []
-    labels = []
-    while True:
-        batch_indices, batch_values, batch_labels = read_feature(data, batch_size, True)
-        batch_preds = lr_model.predict(batch_indices, batch_values)
-        preds.extend(batch_preds)
-        labels.extend(batch_labels)
-        if len(batch_indices) < batch_size:
-            break
-    return np.array(preds), np.array(labels)
+def predict_with_batch_csr(model, indices, values, batch_size):
+    y = []
+    y_prob = []
+    if batch_size == -1:
+        indices, values, shape = libsvm_2_csr(indices, values)
+        y, y_prob = model.predict(indices, values, shape)
+    else:
+        for i in range(len(indices) / batch_size + 1):
+            batch_indices = indices[i * batch_size: (i + 1) * batch_size]
+            batch_values = values[i * batch_size: (i + 1) * batch_size]
+            batch_indices, batch_values, batch_shape = libsvm_2_csr(batch_indices, batch_values)
+            batch_y, batch_y_prob = model.predict(batch_indices, batch_values, batch_shape)
+            y.extend(batch_y)
+            y_prob.extend(batch_y_prob)
+    return np.array(y), np.array(y_prob)
 
 
 if __name__ == '__main__':
@@ -238,17 +264,19 @@ if __name__ == '__main__':
         dtrain_complete = xgb.DMatrix(path_train)
         dtest = xgb.DMatrix(path_test)
 
-        train_score, valid_score = tune_gblinear(dtrain, dvalid, 1, 10, True)
-        # train_score, valid_score = tune_gblinear(dtrain, dvalid, 1, 10, True, dtest)
-        print train_score, valid_score
-        # train_gblinear(dtrain_complete, dtest, 100, 1, 10)
+        early_stopping_round = 1
+        # train_score, valid_score = tune_gblinear(dtrain, dvalid, 0.1, 10, True, early_stopping_round)
+        train_score, valid_score = tune_gblinear(dtrain, dvalid, 0.001, 10, True, early_stopping_round, dtest)
+        # print train_score, valid_score
+        train_gblinear(dtrain_complete, dtest, 0.001, 10, 2)
 
         # print train_score, valid_score
-        # for gblinear_alpha in [0.007, 0.008, 0.009, 0.01, 0.02]:
-        #     print 'alpha', gblinear_alpha
-        #     for gblinear_lambda in [13, 14, 15]:
-        #         train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, False)
-        #         print 'lambda', gblinear_lambda, np.mean(train_score), np.mean(valid_score)
+        # for gblinear_alpha in [0.001]:
+        #     for gblinear_lambda in [10]:
+        #         train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, True,
+        #                                                  early_stopping_round)
+        #         print gblinear_alpha, gblinear_lambda, train_score, valid_score
+        # write_log('%f\t%f\t%f\t%f\n' % (gblinear_alpha, gblinear_lambda, train_score, valid_score))
     elif booster == 'gbtree':
         dtrain = xgb.DMatrix(path_train + '.train')
         dvalid = xgb.DMatrix(path_train + '.valid')
@@ -256,33 +284,47 @@ if __name__ == '__main__':
         dtest = xgb.DMatrix(path_test)
 
         # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.1, 3, 0.7, 0.7, True)
-        # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.1, 3, 0.7, 0.7, True, dtest)
-        # print train_score, valid_score
-        train_gbtree(dtrain_complete, dtest, 0.1, 3, 0.7, 0.7, 300)
+        train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.1, 4, 0.7, 0.7, True, dtest)
+        print train_score, valid_score
+        # train_gbtree(dtrain_complete, dtest, 0.1, 3, 0.7, 0.7, 300)
 
         # max_depth = 3
         # eta = 0.1
         # subsample = 0.7
         # colsample_bytree = 0.7
-        #
-        # for max_depth in [2, 3]:
-        #     print 'max_depth', max_depth
-        #     for subsample in [0.6, 0.7, 0.8, 0.9, 1]:
-        #         train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
-        #                                                False)
-        #         print 'subsample', subsample, train_score, valid_score
+
+        # start_time = time.time()
+        # colsample_bytree = 0.7
+        # for max_depth in [3, 4, 5, 6, 7]:
+        #     for eta in [0.1, 0.2, 0.3]:
+        #         for subsample in [0.5, 0.6, 0.7, 0.8, 0.9, 1]:
+        #             train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
+        #                                                    False)
+        #             print max_depth, eta, subsample, train_score, valid_score, time.time() - start_time
     elif booster == 'logistic_regression':
-        lr_model = logistic_regression(tag, 'log_loss', 12, space + 1, rank, 0.1, 'adam', 0.1, None)
-        # lr_model.write_log_header()
-        # lr_model.write_log('loss\ttrain-score\tvalid_score')
-        num_round = 100
-        batch_size = 100
-        for j in range(num_round):
-            start_time = time.time()
-            train_loss, train_preds, train_labels = train_with_batch(path_train + '.train', batch_size)
-            valid_preds, valid_labels = predict_with_batch(path_train + '.valid', batch_size)
-            train_score = log_loss(train_labels, train_preds)
-            valid_score = log_loss(valid_labels, valid_preds)
-            print 'loss: %f \ttrain_score: %f\tvalid_score: %f' % (np.mean(train_loss), train_score, valid_score)
-            # lr_model.write_log('%f\t%f\t%f\n' % (train_loss, train_score, valid_score))
-            print 'one round training', time.time() - start_time
+        for l1_alpha in [0]:
+            for l2_lambda in [10]:
+                print '##########################################################################'
+                print l1_alpha, l2_lambda
+                lr_model = logistic_regression(name=tag, eval_metric='softmax_log_loss', num_class=12,
+                                               input_space=space, l1_alpha=l1_alpha, l2_lambda=l2_lambda,
+                                               optimizer='adadelta', learning_rate=0.1, )
+
+                # lr_model.write_log_header()
+                # lr_model.write_log('loss\ttrain-score\tvalid_score')
+                num_round = 500
+                batch_size = -1
+                train_indices, train_values, train_labels = read_feature(open(path_train + '.train'), -1, False)
+                valid_indices, valid_values, valid_labels = read_feature(open(path_train + '.valid'), -1, False)
+                for j in range(num_round):
+                    start_time = time.time()
+                    # train_loss, train_preds, train_labels = train_with_batch(path_train + '.train', batch_size)
+                    # valid_preds, valid_labels = predict_with_batch(path_train + '.valid', batch_size)
+                    train_loss, train_y, train_y_prob = train_with_batch_csr(lr_model, train_indices, train_values,
+                                                                             train_labels, batch_size)
+                    valid_y, valid_y_prob = predict_with_batch_csr(lr_model, valid_indices, valid_values, batch_size)
+                    train_score = log_loss(train_labels, train_y_prob)
+                    valid_score = log_loss(valid_labels, valid_y_prob)
+                    print 'loss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % (
+                        train_loss.mean(), train_score, valid_score, time.time() - start_time)
+                    lr_model.write_log('%d\t%f\t%f\t%f\n' % (j, train_loss.mean(), train_score, valid_score))

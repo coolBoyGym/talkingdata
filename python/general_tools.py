@@ -1,9 +1,13 @@
 # this module file is used to store some useful tools to find best arguments
 
-import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 from mpl_toolkits.mplot3d import axes3d
+
+sns.set_style('darkgrid')
+colors = sns.color_palette()
 
 
 def lines3d_demo():
@@ -114,8 +118,22 @@ def wire3d_demo():
     plt.show()
 
 
-# scatter3d_use_file()
-# wire3d_demo()
-norm_argument_file_get_result('concat_3', 'alpha', 'lambda', 'gblinear')
-# find_best_argument('concat_4')
+def plot_train_valid_score(path_log, x_col=None, train_col=None, valid_col=None):
+    if x_col is None:
+        score = np.loadtxt(path_log, delimiter='\t', usecols=[train_col, valid_col])
+        plt.plot(range(len(score)), score[:, 0], color=colors[2])
+        plt.plot(range(len(score)), score[:, 1], color=colors[0])
+        plt.show()
+    else:
+        score = np.loadtxt(path_log, delimiter='\t', usecols=[x_col, train_col, valid_col])
+        sns.plt.plot(score[:, 0], score[:, 1], color=colors[2])
+        sns.plt.plot(score[:, 0], score[:, 2], color=colors[0])
+        sns.plt.show()
 
+
+if __name__ == '__main__':
+    # scatter3d_use_file()
+    # wire3d_demo()
+    # norm_argument_file_get_result('concat_3', 'alpha', 'lambda', 'gblinear')
+    # find_best_argument('concat_4')
+    plot_train_valid_score('../model/concat_5_norm_gblinear_1.log', x_col=0, train_col=2, valid_col=3)
