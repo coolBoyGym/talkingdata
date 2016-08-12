@@ -42,9 +42,10 @@ model
 
 
 submission
-    # data, model, best_param, submission_score, dumped_file
+    # data, model, best_param, valid_score, submission_score, dumped_file
     gym
-        concat_5, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample_bytree=0.5}, 2.27017, concat_5_gbtree_1
+        concat_5, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample=0.5, round=860, rate=0.2},
+                                2.2824732, 2.27017, concat_5_gbtree_1
         concat_5, gblinear
         concat_4, gbtree
         concat_4, gblinear
