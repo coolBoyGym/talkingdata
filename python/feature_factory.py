@@ -430,7 +430,7 @@ def zero_pad_feature(feature_name):
 if __name__ == '__main__':
     # gather_device_id()
     # gather_event_id()
-    #
+
     # make_feature()
 
     # concat_feature('concat_1', [fea_phone_brand,
@@ -504,9 +504,7 @@ if __name__ == '__main__':
     #                                  fea_installed_app_label_freq,
     #                                  fea_active_app_label_freq, ])
 
-
     # fea_concat_1 = feature.multi_feature(name='concat_1')
     # fea_concat_1.load()
 
-    split_dataset('concat_1', 0.2, zero_pad=True)
-    # unify_feature_numbers('concat_3')
+    split_dataset('concat_5', 0.2, zero_pad=True)

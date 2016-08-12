@@ -106,7 +106,7 @@ def train_gblinear(dtrain_complete, dtest, gblinear_alpha, gblinear_lambda, num_
 
 
 def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, verbose_eval, dtest=None):
-    num_boost_round = 1000
+    num_boost_round = 3000
     early_stopping_rounds = 50
 
     params = {

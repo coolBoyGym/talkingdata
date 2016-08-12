@@ -62,21 +62,20 @@ def scatter3d_use_file():
     plt.show()
 
 
-def norm_argument_file_get_result(name):
-    path_input = '../output/argument.' + name + '.gblinear'
-    path_output = '../output/argument.' + name + '.gblinear.out'
+def norm_argument_file_get_result(name, argument1, argument2, booster_type):
+    path_input = '../output/argument.' + name + '.' + booster_type
+    path_output = '../output/argument.' + name + '.' + booster_type + '.out'
     with open(path_input) as fin:
         with open(path_output, 'w') as fout:
             arr = []
-            fout.write('alpha\tlambda\tvalue\n')
+            fout.write(argument1 + '\t' + argument2 + '\tvalue\n')
             for line in fin:
                 l = line.split(' ')
-                if l[0] == "alpha":
+                if l[0] == argument1:
                     l1 = float(l[1])
-                elif l[0] == "lambda":
+                elif l[0] == argument2:
                     l2 = float(l[1])
                     res = float(l[3])
-                    # fout.write(str(l1) + '\t' + str(l2) + '\t' + str(res) + '\n')
                     arr.append((l1, l2, res))
 
             z = []
@@ -117,6 +116,6 @@ def wire3d_demo():
 
 # scatter3d_use_file()
 # wire3d_demo()
-norm_argument_file_get_result('concat_5')
+norm_argument_file_get_result('concat_3', 'alpha', 'lambda', 'gblinear')
 # find_best_argument('concat_4')
 

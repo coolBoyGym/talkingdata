@@ -22,3 +22,58 @@ model:gblinear
 best argument:
     alpha = 0.65
     lambda = 0.0001
+
+今天的训练结果中很奇怪的一点是 不论用哪一组参数来训练 最终训练的轮数都非常少 几乎只要几轮就达到了最优情况 原因有待考证
+
+
+
+2016.8.10 gaoyimei
+
+training set for libsvm and liblinear must have no zero feature, which means feature index begins with 1
+training set foe xgboost in my ubuntu must have same feature numbers
+
+目前为止经历了三个阶段的训练：
+1 直接使用xgboost模型 将数据集随机切分后进行训练。
+    过程：手动调整参数和划分的方式
+    结果：训练集采用全集 验证集采用部分集的方式效果较好
+2 使用libsvm和linear模型进行训练。
+    过程：修改了输入文件的格式以符合libsvm和liblinear的训练要求。 参数的调整没找到什么指导性原则，就是模仿网上的一些例子。
+         另外发现libsvm的速度比较慢，训练一次要十几分钟，而liblinear则快的多。
+    结果：效果并没有比直接用xgboost好
+3 使用k-fold的方式和xgb模型进行训练。
+    过程：寻找最优参数 包括大体的训练轮数 再使用这些参数在全集上进行训练
+    结果：发现不论采用什么参数值 在concat_3 4 5 三个特征集上训练总是很快停止 原因有待发现
+
+
+feature:concat_1  phone_brand,device_model,installed_app,active_app
+model:gblinear
+best argument:
+    alpha = 0.02
+    lambda = 40
+
+
+
+2016.8.11 gaoyimei
+
+feature:concat_6
+model:gbtree
+    max_depth = 3  subsample = 0.7  eta = 0.1 colsample_bytree = 0.7
+    best_rounds = 786, 594, 688, 659, 740
+    train_score = 2.02686818429 valid_score = 2.29690349938
+
+    max_depth = 4  subsample = 0.7 eta = 0.1 colsample_bytree = 0.7
+    best_rounds = 630, 472, 518, 575, 505
+    train_score = 1.99097 valid_score = 2.29429
+
+    max_depth = 4  subsample = 0.7 eta = 0.1 colsample_bytree = 0.8
+    best_rounds = 542, 594, 585, 637, 600
+    train_score = 1.95703 valid_score = 2.29412
+
+
+21:33 feature files update.
+Old feature files are in ./feature/feature_backup_20160811
+
+
+
+
+

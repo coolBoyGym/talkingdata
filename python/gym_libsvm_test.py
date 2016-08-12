@@ -4,7 +4,7 @@ import random
 
 train_type = 'liblinear'
 version = 1
-featureUsed = 'concat_1'
+featureUsed = 'concat_6'
 
 path_submission = '../output/submission.csv.%s.%d.%s' % (train_type, version, featureUsed)
 
@@ -156,6 +156,6 @@ def get_submission_from_libsvm_result(name):
                 cnt += 1
 
 
-# delete_zero_feature_in_train('concat_1')
-# delete_zero_feature_in_test('concat_1')
-get_submission_from_libsvm_result('concat_1.liblinear.3.result')
+# delete_zero_feature_in_train('concat_6')
+# delete_zero_feature_in_test('concat_6')
+get_submission_from_libsvm_result('concat_6.liblinear.result')

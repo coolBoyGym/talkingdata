@@ -1,6 +1,6 @@
 import cPickle as pkl
 
-import tensorflow as tf
+# import tensorflow as tf
 
 from model import *
 
