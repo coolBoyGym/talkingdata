@@ -1,11 +1,64 @@
 16/8/12 Fri.
 feature
+    # name, feature_type, space, rank
+    phone_brand, one_hot, 131, 1
+    device_model, one_hot, 1666, 1
+
+    device_long_lat, multi, 10, 10              # mean, max, min, std, median ...
+    _norm, multi, 10, 10         # scale long/lat to [0, 1]
+
+    device_event_num, num, 1, 1
+    _norm, ...
+    device_day_event_num, multi, 31, 8
+    _norm, ...
+    device_hour_event_num, multi, 24, 24
+    _norm, ...
+    device_day_hour_event_num, multi, 744, 169
+    _norm, ...
+
+    installed_app, multi, 19237, 3446
+    _freq, ...
+    active_app, multi, 19237, 1342
+    _freq, ...
+
+    installed_app_label, multi, 507, 411
+    _freq, ...
+    active_app_label, multi, 507, 357
+    _freq, ...
+
 
 
 model
+    gblinear
+        alpha, lambda
+
+    gbtree
+        max_depth, eta, subsample, colsample_bytree
+
+    baba
+        lr
+        fm
+        nn (as proposed on forum)
 
 
 submission
     # data, model, best_param, submission_score, dumped_file
     gym
         concat_5, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample_bytree=0.5}, 2.27017, concat_5_gbtree_1
+        concat_5, gblinear
+        concat_4, gbtree
+        concat_4, gblinear
+        concat_4_norm, gbtree
+        concat_4_norm, gblinear
+
+    rocky
+        concat_1, gbtree
+        concat_1, gblinear
+        concat_2, gbtree
+        concat_2, gblinear
+        concat_2, norm_gbtree
+        concat_2, norm_gblinear
+
+    baba
+        concat_5_norm, gbtree
+        concat_5_norm, gblinear
