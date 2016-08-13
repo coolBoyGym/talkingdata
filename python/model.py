@@ -30,7 +30,7 @@ class model:
             fout.write('%s %s\n' % (self.__mtype, self.__eval_metric))
 
     def write_log(self, log_str):
-        with open(self.__log_path, 'wa') as fout:
+        with open(self.__log_path, 'a') as fout:
             fout.write(log_str)
 
     def init(self, **argv):

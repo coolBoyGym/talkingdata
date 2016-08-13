@@ -507,4 +507,4 @@ if __name__ == '__main__':
     # fea_concat_1 = feature.multi_feature(name='concat_1')
     # fea_concat_1.load()
 
-    split_dataset('concat_3_norm', 0.2, zero_pad=True)
+    split_dataset('concat_2_norm', 0.2, zero_pad=True)

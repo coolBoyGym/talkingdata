@@ -26,7 +26,7 @@ feature
     active_app_label, multi, 507, 357
     _freq, ...
 
-
+    emsemble_1, multi, 42215, 5890
 
 model
     gblinear
@@ -36,7 +36,7 @@ model
         max_depth, eta, subsample, colsample_bytree
 
     baba
-        lr
+        lr: finish
         fm
         nn (as proposed on forum)
 
@@ -46,11 +46,16 @@ submission
     gym
         concat_5, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample=0.5, round=860, rate=0.2},
                                 2.2824732, 2.27017, concat_5_gbtree_1
-        concat_5, gblinear
-        concat_4, gbtree
-        concat_4, gblinear
-        concat_4_norm, gbtree
-        concat_4_norm, gblinear
+        concat_5, gblinear, {alpha=0.1, lambda=66, early_stop_round=1, round=3, rate=0.2},
+                                2.29340173483, not yet, concat_5_gblinear_1
+        concat_4, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample=0.9, round=950, rate=0.2},
+                                2.28721, 2.27817, concat_4_gbtree_1
+        concat_4, gblinear, {alpha=0.05, lambda=44, early_stop_round=1, round=2, rate=0.2},
+                                2.29869730537, not yet, concat_4_gblinear_1
+        concat_4_norm, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample=0.7, round=777, rate=0.2},
+                                2.29613, not yet, concat_4_norm_gbtree_1
+        concat_4_norm, gblinear, {alpha=0.1, lambda=13, early_stop_round=1, rate=0.2},
+                                2.32331138572, not yet, concat_4_norm_gblinear_1
 
     rocky
         concat_1, gbtree            max_depth 7 eta 0.07 subsample 0.8 colsample_bytree 0.5 2.35875357389 2.39043890146
@@ -61,5 +66,20 @@ submission
         concat_2_norm, gblinear     alpha 0.001 lambda 7.5 2.34475563006 2.38551132474
 
     baba
-        concat_5_norm, gbtree
-        concat_5_norm, gblinear
+        concat_5_norm, gbtree, {max_depth=4, eta=0.1, subsample=0.7, colsample=0.7}, [556]   train-mlogloss:1.89167	eval-mlogloss:2.28766, concat_5_norm_gbtree_1
+        concat_5_norm, gblinear, {0.001, 10}, [2]	train-mlogloss:2.15605	eval-mlogloss:2.32268, concat_5_norm_gblinear_1
+        concat_5_norm, lr, {0, 0}
+
+
+2016/8/13 Sat.
+
+feature:
+
+
+model:
+
+
+submission:
+    baba:
+        ensemble, average, {[ 0.01968983,  0.0391137 ,  0.01906632,  0.00886792,  0.0204471 ,
+                                0.02016268,  0.25404595,  0.2369304 ,  0.22133675,  0.16033936,]}, 2.03700311,  2.28009707, average_1.log
