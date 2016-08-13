@@ -329,7 +329,7 @@ def tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l
         train_score = log_loss(train_labels, train_y_prob)
         valid_score = log_loss(valid_labels, valid_y_prob)
         if verbose:
-            print 'round:%d\tloss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % \
+            print '[%d]\tloss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % \
                   (j, train_loss.mean(), train_score, valid_score, time.time() - start_time)
         if save_log:
             write_log('%d\t%f\t%f\t%f\n' % (j, train_loss.mean(), train_score, valid_score))
@@ -337,7 +337,8 @@ def tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l
         valid_scores.append(valid_score)
         if check_early_stop(valid_scores, early_stopping_round=early_stopping_round, mode='no_decrease'):
             if verbose:
-                print 'early stop at round', j
+                print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
+                    j, train_scores[-1 * early_stopping_round], valid_scores[-1 * early_stopping_round])
             break
     return train_scores[-1], valid_scores[-1]
 

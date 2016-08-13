@@ -100,7 +100,7 @@ if __name__ == '__main__':
         l2_v = 0
         l2_b = 0
         num_round = 200
-        batch_size = 1000
+        batch_size = 100
         early_stopping_round = 10
         ti.tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l1_w=l1_w, l1_v=l1_v,
                                       l2_w=l2_w, l2_v=l2_v, l2_b=l2_b, num_round=num_round, batch_size=batch_size,
