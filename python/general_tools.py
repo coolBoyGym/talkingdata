@@ -126,9 +126,17 @@ def plot_train_valid_score(path_log, x_col=None, train_col=None, valid_col=None)
         plt.show()
     else:
         score = np.loadtxt(path_log, delimiter='\t', usecols=[x_col, train_col, valid_col])
-        sns.plt.plot(score[:, 0], score[:, 1], color=colors[2])
-        sns.plt.plot(score[:, 0], score[:, 2], color=colors[0])
-        sns.plt.show()
+        plt.plot(score[:, 0], score[:, 1], color=colors[2])
+        plt.plot(score[:, 0], score[:, 2], color=colors[0])
+        plt.show()
+
+
+def plot_xgb_train_valid_score(path_log):
+    data = np.loadtxt(path_log, delimiter='\t', dtype=str, usecols=[1,2])
+    score = np.array(map(lambda x: [float(x[0].split(':')[1]), float(x[1].split(':')[1])], data))
+    plt.plot(range(len(score)), score[:, 0], color=colors[2])
+    plt.plot(range(len(score)), score[:, 1], color=colors[0])
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -136,4 +144,6 @@ if __name__ == '__main__':
     # wire3d_demo()
     # norm_argument_file_get_result('concat_3', 'alpha', 'lambda', 'gblinear')
     # find_best_argument('concat_4')
-    plot_train_valid_score('../model/concat_5_norm_gblinear_1.log', x_col=0, train_col=2, valid_col=3)
+    path_log = '../model/ensemble_1_gbtree_1.log'
+    # plot_train_valid_score(path_log, x_col=0, train_col=2, valid_col=3)
+    plot_xgb_train_valid_score(path_log)

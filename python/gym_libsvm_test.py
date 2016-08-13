@@ -1,12 +1,16 @@
 # training the whole data set using libsvm tools.
-from svmutil import *
 import random
 
-train_type = 'liblinear'
-version = 1
-featureUsed = 'concat_6'
+from svmutil import *
 
-path_submission = '../output/submission.csv.%s.%d.%s' % (train_type, version, featureUsed)
+from train_impl import *
+
+train_type = 'liblinear'
+VERSION = 1
+featureUsed = 'concat_6'
+init_constant(dataset=featureUsed, booster=train_type, version=1, random_state=0)
+
+path_submission = '../output/submission.csv.%s.%d.%s' % (train_type, VERSION, featureUsed)
 
 path_train = '../data/train_with_label_for_svm.csv'
 path_test = '../input/test_with_label_for_svm.csv'
@@ -55,6 +59,7 @@ def sample2():
     print 'l = ', l
     print 'd = ', d
     return l, d
+
 
 def sample_from_train(name, rate=0.25):
     path_input = '../input/' + name + '.nozerofeature.train'
@@ -132,7 +137,7 @@ def get_submission_from_libsvm_result(name):
                 i += 1
             res.append(l)
 
-    with open(path_submission, 'w') as fout:
+    with open(PATH_SUBMISSION, 'w') as fout:
         fout.write('device_id,F23-,F24-26,F27-28,F29-32,F33-42,F43+,M22-,M23-26,M27-28,M29-31,M32-38,M39+\n')
         with open('../data/gender_age_test.csv') as fin:
             next(fin)

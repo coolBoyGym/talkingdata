@@ -26,7 +26,7 @@ feature
     active_app_label, multi, 507, 357
     _freq, ...
 
-
+    emsemble_1, multi, 42215, 5890
 
 model
     gblinear
@@ -64,3 +64,17 @@ submission
         concat_5_norm, gbtree, {max_depth=4, eta=0.1, subsample=0.7, colsample=0.7}, [556]   train-mlogloss:1.89167	eval-mlogloss:2.28766, concat_5_norm_gbtree_1
         concat_5_norm, gblinear, {0.001, 10}, [2]	train-mlogloss:2.15605	eval-mlogloss:2.32268, concat_5_norm_gblinear_1
         concat_5_norm, lr, {0, 0}
+
+
+2016/8/13 Sat.
+
+feature:
+
+
+model:
+
+
+submission:
+    baba:
+        ensemble, average, {[ 0.01968983,  0.0391137 ,  0.01906632,  0.00886792,  0.0204471 ,
+                                0.02016268,  0.25404595,  0.2369304 ,  0.22133675,  0.16033936,]}, 2.03700311,  2.28009707, average_1.log
