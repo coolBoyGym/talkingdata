@@ -3,14 +3,14 @@ import random
 
 from svmutil import *
 
-from train_impl import *
+import train_impl as ti
 
 train_type = 'liblinear'
-VERSION = 1
+version = 1
 featureUsed = 'concat_6'
-init_constant(dataset=featureUsed, booster=train_type, version=1, random_state=0)
+ti.init_constant(dataset=featureUsed, booster=train_type, version=1, random_state=0)
 
-path_submission = '../output/submission.csv.%s.%d.%s' % (train_type, VERSION, featureUsed)
+path_submission = '../output/submission.csv.%s.%d.%s' % (train_type, version, featureUsed)
 
 path_train = '../data/train_with_label_for_svm.csv'
 path_test = '../input/test_with_label_for_svm.csv'
@@ -137,7 +137,7 @@ def get_submission_from_libsvm_result(name):
                 i += 1
             res.append(l)
 
-    with open(PATH_SUBMISSION, 'w') as fout:
+    with open(ti.PATH_SUBMISSION, 'w') as fout:
         fout.write('device_id,F23-,F24-26,F27-28,F29-32,F33-42,F43+,M22-,M23-26,M27-28,M29-31,M32-38,M39+\n')
         with open('../data/gender_age_test.csv') as fin:
             next(fin)

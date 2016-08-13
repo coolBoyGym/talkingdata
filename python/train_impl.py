@@ -1,6 +1,6 @@
 import numpy as np
 import xgboost as xgb
-from  sklearn.metrics import log_loss
+from sklearn.metrics import log_loss
 
 import feature
 
@@ -16,7 +16,6 @@ PATH_MODEL_DUMP = None
 PATH_SUBMISSION = None
 RANDOME_STATE = 0
 
-FEA_TMP = None
 SPACE = None
 RANK = None
 SIZE = None
@@ -24,8 +23,8 @@ NUM_CLASS = None
 
 
 def init_constant(dataset, booster, version, random_state=0):
-    global VERSION, BOOSTER, DATASET, PATH_TRAIN, PATH_TEST, TAG, PATH_MODEL_LOG, PATH_MODEL_BIN, PATH_MODEL_DUMP, \
-        PATH_SUBMISSION, RANDOME_STATE, FEA_TMP, SPACE, RANK, SIZE, NUM_CLASS
+    global DATASET, BOOSTER, VERSION, PATH_TRAIN, PATH_TEST, TAG, PATH_MODEL_LOG, PATH_MODEL_BIN, PATH_MODEL_DUMP, \
+        PATH_SUBMISSION, RANDOME_STATE, SPACE, RANK, SIZE, NUM_CLASS
     DATASET = dataset
     BOOSTER = booster
     VERSION = version
@@ -38,11 +37,11 @@ def init_constant(dataset, booster, version, random_state=0):
     PATH_SUBMISSION = '../output/' + TAG + '.submission'
     print TAG
     RANDOME_STATE = random_state
-    FEA_TMP = feature.multi_feature(name=DATASET)
-    FEA_TMP.load_meta()
-    SPACE = FEA_TMP.get_space()
-    RANK = FEA_TMP.get_rank()
-    SIZE = FEA_TMP.get_size()
+    fea_tmp = feature.multi_feature(name=DATASET)
+    fea_tmp.load_meta()
+    SPACE = fea_tmp.get_space()
+    RANK = fea_tmp.get_rank()
+    SIZE = fea_tmp.get_size()
     NUM_CLASS = 12
     print 'feature space: %d, rank: %d, size: %d, num class: %d' % (SPACE, RANK, SIZE, NUM_CLASS)
 
@@ -109,7 +108,7 @@ def tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, verbose_eval,
 
 
 def train_gblinear(dtrain_complete, dtest, gblinear_alpha, gblinear_lambda, num_boost_round):
-    global BOOSTER
+    global BOOSTER, RANDOME_STATE
     params = {
         'booster': BOOSTER,
         'silent': 1,
@@ -326,3 +325,53 @@ def average_predict(model_preds, train_size, valid_size, train_labels, valid_lab
     train_score = log_loss(train_labels, train_pred)
     valid_score = log_loss(valid_labels, valid_pred)
     return train_score, valid_score
+
+
+def train_gblinear_get_result(train_round, train_alpha, train_lambda):
+    global PATH_TRAIN, PATH_TEST
+    dtrain = xgb.DMatrix(PATH_TRAIN)
+    dtest = xgb.DMatrix(PATH_TEST)
+    train_gblinear(dtrain, dtest, train_round, train_alpha, train_lambda)
+
+
+def train_gbtree_find_argument(argument_file_name):
+    global PATH_TRAIN, PATH_TEST
+    dtrain = xgb.DMatrix(PATH_TRAIN + '.train')
+    dvalid = xgb.DMatrix(PATH_TRAIN + '.valid')
+
+    max_depth = 4
+    subsample = 0.8
+
+    fout = open(argument_file_name, 'a')
+    for eta in [0.1, 0.15, 0.2, 0.3]:
+        print 'eta', eta
+        fout.write('eta ' + str(eta) + '\n')
+        for colsample_bytree in [0.6, 0.7, 0.8, 0.9]:
+            train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, True)
+            print 'colsample_bytree', colsample_bytree, train_score, valid_score
+            fout.write('colsample_bytree ' + str(colsample_bytree) + ' ' + str(train_score) + ' ' +
+                       str(valid_score) + '\n')
+
+
+def train_gbtree_confirm_argument(max_depth=4, eta=0.3, subsample=0.7, colsample_bytree=0.7, verbose_eval=False):
+    global PATH_TRAIN, PATH_TEST
+    dtrain = xgb.DMatrix(PATH_TRAIN + '.train')
+    dvalid = xgb.DMatrix(PATH_TRAIN + '.valid')
+
+    train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample,
+                                           colsample_bytree, verbose_eval)
+    print train_score, valid_score
+
+
+def train_gbtree_get_result():
+    global PATH_TRAIN, PATH_TEST
+    dtrain = xgb.DMatrix(PATH_TRAIN)
+    dtest = xgb.DMatrix(PATH_TEST)
+
+    num_boost_round = 100
+    eta = 0.1
+    max_depth = 4
+    subsample = 0.8
+    colsample_bytree = 0.8
+
+    train_gbtree(dtrain, dtest, num_boost_round, eta, max_depth, subsample, colsample_bytree)
