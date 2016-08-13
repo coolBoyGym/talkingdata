@@ -9,8 +9,8 @@ import feature
 # from model_impl import logistic_regression
 
 version = 1
-booster = 'gblinear'
-dataset = 'concat_2_norm'
+booster = 'gbtree'
+dataset = 'concat_3_norm'
 # nfold = 5
 path_train = '../input/' + dataset + '.train'
 path_test = '../input/' + dataset + '.test'
@@ -240,14 +240,14 @@ if __name__ == '__main__':
         dtest = xgb.DMatrix(path_test)
 
         # train_score, valid_score = tune_gblinear(dtrain, dvalid, 0, 7.5, True)
-        # train_score, valid_score = tune_gblinear(dtrain, dvalid, 0.001, 8, True, dtest)
+        train_score, valid_score = tune_gblinear(dtrain, dvalid, 0.01, 10, True, dtest)
         # print train_score, valid_score
-        # train_gblinear(dtrain_complete, dtest, 0.001, 8, 140)
+        # train_gblinear(dtrain_complete, dtest, 0.001, 7.5, 50)
 
-        for gblinear_alpha in [0,0.001,0.005,0.01,0.02]:
-            for gblinear_lambda in [7,7.5,8,8.5,9,9.5,10]:
-                train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, False)
-                print 'alpha', gblinear_alpha, 'lambda', gblinear_lambda, np.mean(train_score), np.mean(valid_score)
+        # for gblinear_alpha in [0,0.001,0.005,0.01,0.02]:
+        #     for gblinear_lambda in [7,7.5,8,8.5,9,9.5,10]:
+        #         train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, False)
+        #         print 'alpha', gblinear_alpha, 'lambda', gblinear_lambda, np.mean(train_score), np.mean(valid_score)
     elif booster == 'gbtree':
         dtrain = xgb.DMatrix(path_train + '.train')
         dvalid = xgb.DMatrix(path_train + '.valid')
@@ -255,21 +255,21 @@ if __name__ == '__main__':
         dtest = xgb.DMatrix(path_test)
 
         #train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.07, 7, 0.8, 0.5, True)
-        # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.07, 3, 0.8, 0.6, True, dtest)
+        # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.05, 4, 0.7, 0.6, True, dtest)
         #print train_score, valid_score
-        train_gbtree(dtrain_complete, dtest, 0.07, 3, 0.8, 0.6, 500)
+        # train_gbtree(dtrain_complete, dtest, 0.05, 4, 0.7, 0.6, 530)
 
         # max_depth = 3
         # eta = 0.1
         # subsample = 0.7
         #colsample_bytree = 0.7
-        # for max_depth in [3,4,5,6,7]:
-        #    for eta in [0.05,0.06,0.07,0.09,0.1]:
-        #        for subsample in [0.7,0.8,0.9]:
-        #            for colsample_bytree in [0.5,0.6,0.7]:
-        #                train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
-        #                                                False)
-        #                print 'max_depth',max_depth,'eta', eta,'subsample', subsample,'colsample_bytree',colsample_bytree, train_score, valid_score
+        for max_depth in [3,4,5,6,7]:
+           for eta in [0.05,0.06,0.07,0.09,0.1]:
+               for subsample in [0.7,0.8,0.9]:
+                   for colsample_bytree in [0.5,0.6,0.7]:
+                       train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
+                                                       False)
+                       print 'max_depth',max_depth,'eta', eta,'subsample', subsample,'colsample_bytree',colsample_bytree, train_score, valid_score
     elif booster == 'logistic_regression':
         lr_model = logistic_regression(tag, 'log_loss', 12, space + 1, rank, 0.1, 'adam', 0.1, None)
         # lr_model.write_log_header()
