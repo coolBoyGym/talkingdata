@@ -53,12 +53,12 @@ submission
         concat_4_norm, gblinear
 
     rocky
-        concat_1, gbtree
-        concat_1, gblinear
-        concat_2, gbtree
-        concat_2, gblinear
-        concat_2, norm_gbtree
-        concat_2, norm_gblinear
+        concat_1, gbtree            max_depth 7 eta 0.07 subsample 0.8 colsample_bytree 0.5 2.35875357389 2.39043890146
+        concat_1, gblinear          alpha 0 lambda 7.5  2.3499658672 2.38944255486
+        concat_2, gbtree            max_depth 3 eta 0.07 subsample 0.8 colsample_bytree 0.6 2.33399659152 2.38934798614
+        concat_2, gblinear          alpha 0.001 lambda 8 2.34606485552 2.38613098915
+        concat_2_norm, gbtree       max_depth 3 eta 0.07 subsample 0.8 colsample_bytree 0.6 2.33028431943 2.38669627018
+        concat_2_norm, gblinear     alpha 0.001 lambda 7.5 2.34475563006 2.38551132474
 
     baba
         concat_5_norm, gbtree, {max_depth=4, eta=0.1, subsample=0.7, colsample=0.7}, [556]   train-mlogloss:1.89167	eval-mlogloss:2.28766, concat_5_norm_gbtree_1
