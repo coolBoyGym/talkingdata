@@ -97,7 +97,7 @@ if __name__ == '__main__':
         l1_w = 0
         l1_v = 0
         l2_w = 0
-        l2_v = 0gti gti 
+        l2_v = 0
         l2_b = 0
         num_round = 200
         batch_size = 1000
