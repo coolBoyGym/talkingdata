@@ -74,6 +74,21 @@ model:gbtree
 Old feature files are in ./feature/feature_backup_20160811
 
 
+2016.8.12 gaoyimei
+
+feature:concat_5
+model:gbtree
+    colsample_bytree 0.7 影响不大 基本可以固定
+    subsample 0.5-1.0
+    eta 0.1-0.3
+    max_depth 3-5
+
+采用matplotlib做图分析数据:采样三维的数据 固定其中的一维 观察另外两维的变化对结果的影响
+
+注意：使用linear模型时 因为训练过程很快就达到最优解 而linear模型输出的train_score 和 valid_score是训练停止时的得分 所以可以相应地减少
+    early_stop的轮数
+
+
 
 
 
