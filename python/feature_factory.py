@@ -112,39 +112,26 @@ fea_event_installed_app_norm = feature.multi_feature(name='event_installed_app_n
 """
 concat features
 """
-fea_concat_1 = feature.multi_feature(name='concat_1', dtype='f')
-fea_concat_1_norm = feature.multi_feature(name='concat_1_norm', dtype='f')
-fea_concat_2 = feature.multi_feature(name='concat_2', dtype='f')
-fea_concat_2_norm = feature.multi_feature(name='concat_2_norm', dtype='f')
-fea_concat_3 = feature.multi_feature(name='concat_3', dtype='f')
-fea_concat_3_norm = feature.multi_feature(name='concat_3_norm', dtype='f')
-fea_concat_4 = feature.multi_feature(name='concat_4', dtype='f')
-fea_concat_4_norm = feature.multi_feature(name='concat_4_norm', dtype='f')
-fea_concat_5 = feature.multi_feature(name='concat_5', dtype='f')
-fea_concat_5_norm = feature.multi_feature(name='concat_5_norm', dtype='f')
+# fea_concat_1 = feature.multi_feature(name='concat_1', dtype='f')
+# fea_concat_2 = feature.multi_feature(name='concat_2', dtype='f')
+# fea_concat_3 = feature.multi_feature(name='concat_3', dtype='f')
+# fea_concat_4 = feature.multi_feature(name='concat_4', dtype='f')
+# fea_concat_5 = feature.multi_feature(name='concat_5', dtype='f')
 # fea_concat_6 = feature.multi_feature(name='concat_6', dtype='f')
 
 """
 model outputs, for ensemble use
 """
-fea_concat_1_gblinear_1 = feature.multi_feature(name='concat_1_gblinear_1', dtype='f')
-fea_concat_1_gbtree_1 = feature.multi_feature(name='concat_1_gblinear_1', dtype='f')
-fea_concat_2_gblinear_1 = feature.multi_feature(name='concat_2_gblinear_1', dtype='f')
-fea_concat_2_gbtree_1 = feature.multi_feature(name='concat_2_gbtree_1', dtype='f')
-fea_concat_2_norm_gblinear_1 = feature.multi_feature(name='concat_2_norm_gblinear_1', dtype='f')
-fea_concat_2_norm_gbtree_1 = feature.multi_feature(name='concat_2_norm_gbtree_1', dtype='f')
-fea_concat_3_gblinear_1 = feature.multi_feature(name='concat_3_gblinear_1', dtype='f')
-fea_concat_3_gbtree_1 = feature.multi_feature(name='concat_3_gbtree_1', dtype='f')
-fea_concat_3_norm_gblinear_1 = feature.multi_feature(name='concat_3_norm_gblinear_1', dtype='f')
-fea_concat_3_norm_gbtree_1 = feature.multi_feature(name='concat_3_norm_gbtree_1', dtype='f')
-fea_concat_4_gblinear_1 = feature.multi_feature(name='concat_4_gblinear_1', dtype='f')
-fea_concat_4_gbtree_1 = feature.multi_feature(name='concat_4_gbtree_1', dtype='f')
-fea_concat_4_norm_gblinear_1 = feature.multi_feature(name='concat_4_norm_gblinear_1', dtype='f')
-fea_concat_4_norm_gbtree_1 = feature.multi_feature(name='concat_4_norm_gbtree_1', dtype='f')
-fea_concat_5_gblinear_1 = feature.multi_feature(name='concat_5_gblinear_1', dtype='f')
-fea_concat_5_gbtree_1 = feature.multi_feature(name='concat_5_gbtree_1', dtype='f')
-fea_concat_5_norm_gblinear_1 = feature.multi_feature(name='concat_5_norm_gblinear_1', dtype='f')
-fea_concat_5_norm_gbtree_1 = feature.multi_feature(name='concat_5_norm_gbtree_1', dtype='f')
+
+
+# fea_concat_1_gblinear_1 = feature.multi_feature(name='concat_1_gblinear_1', dtype='f')
+# fea_concat_1_gblinear_2 = feature.multi_feature(name='concat_1_gblinear_2', dtype='f')
+# fea_concat_2_gblinear_1 = feature.multi_feature(name='concat_2_gblinear_1', dtype='f')
+# fea_concat_3_unify_gblinear_1 = feature.multi_feature(name='concat_3_unify_gblinear_1', dtype='f')
+# fea_concat_4_unify_gblinear_1 = feature.multi_feature(name='concat_4_unify_gblinear_1', dtype='f')
+# fea_concat_5_unify_gblinear_1 = feature.multi_feature(name='concat_5_unify_gblinear_1', dtype='f')
+# fea_concat_6_gblinear_1 = feature.multi_feature(name='concat_6_gblinear_1', dtype='f')
+# fea_concat_6_gbtree_1 = feature.multi_feature(name='concat_6_gbtree_1', dtype='f')
 
 
 def make_feature():
@@ -519,44 +506,7 @@ if __name__ == '__main__':
     #                                  fea_installed_app_label_freq,
     #                                  fea_active_app_label_freq, ])
 
-    # concat_feature('ensemble_2', [fea_concat_1_gblinear_1,
-    #                               fea_concat_1_gbtree_1,
-    #                               fea_concat_2_gblinear_1,
-    #                               fea_concat_2_gbtree_1,
-    #                               fea_concat_2_norm_gblinear_1,
-    #                               fea_concat_2_norm_gbtree_1,
-    #                               # fea_concat_3_gblinear_1,
-    #                               # fea_concat_3_gbtree_1,
-    #                               # fea_concat_3_norm_gblinear_1,
-    #                               # fea_concat_3_norm_gbtree_1,
-    #                               fea_concat_4_gblinear_1,
-    #                               fea_concat_4_gbtree_1,
-    #                               fea_concat_4_norm_gblinear_1,
-    #                               fea_concat_4_norm_gbtree_1,
-    #                               fea_concat_5_gblinear_1,
-    #                               fea_concat_5_gbtree_1,
-    #                               fea_concat_5_norm_gblinear_1,
-    #                               fea_concat_5_norm_gbtree_1,
-    #                               fea_concat_5, ])
+    # fea_concat_1 = feature.multi_feature(name='concat_1')
+    # fea_concat_1.load()
 
-    concat_feature('ensemble_3', [fea_concat_1_gblinear_1,
-                                  fea_concat_1_gbtree_1,
-                                  fea_concat_2_gblinear_1,
-                                  fea_concat_2_gbtree_1,
-                                  fea_concat_2_norm_gblinear_1,
-                                  fea_concat_2_norm_gbtree_1,
-                                  # fea_concat_3_gblinear_1,
-                                  # fea_concat_3_gbtree_1,
-                                  # fea_concat_3_norm_gblinear_1,
-                                  # fea_concat_3_norm_gbtree_1,
-                                  fea_concat_4_gblinear_1,
-                                  fea_concat_4_gbtree_1,
-                                  fea_concat_4_norm_gblinear_1,
-                                  fea_concat_4_norm_gbtree_1,
-                                  fea_concat_5_gblinear_1,
-                                  fea_concat_5_gbtree_1,
-                                  fea_concat_5_norm_gblinear_1,
-                                  fea_concat_5_norm_gbtree_1,
-                                  fea_concat_5, ])
-
-    split_dataset('ensemble_1', 0.2, zero_pad=True)
+    split_dataset('ensemble_2', 0.2, zero_pad=True)
