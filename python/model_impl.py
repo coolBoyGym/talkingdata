@@ -190,19 +190,18 @@ class logistic_regression(tf_classifier):
 
 
 class factorization_machine(tf_classifier):
-    def __init__(self, name, eval_metric, num_class, input_space, factor_order, l1_w=0, l1_v=0, l2_w=0, l2_v=0, l2_b=0,
-                 opt_prop=None):
+    def __init__(self, name, eval_metric, num_class, input_space, factor_order, opt_prop, l1_w=0, l1_v=0, l2_w=0,
+                 l2_v=0, l2_b=0, ):
         tf_classifier.__init__(self, name, eval_metric, num_class,
                                init_actions=[('w', [input_space, num_class], 'normal', tf.float32),
                                              ('v', [input_space, factor_order * num_class], 'normal', tf.float32),
                                              ('b', [num_class], 'zero', tf.float32)],
-                               stddev=0.00001,
-                               factor_order=factor_order,
-                               l1_w=l1_w, l1_v=l1_v, l2_w=l2_w, l2_v=l2_v, l2_b=l2_b,
-                               opt_prop=opt_prop)
+                               stddev=0.0001,
+                               factor_order=factor_order, opt_prop=opt_prop,
+                               l1_w=l1_w, l1_v=l1_v, l2_w=l2_w, l2_v=l2_v, l2_b=l2_b)
         self.__factor_order = factor_order
 
-    def build_graph(self, factor_order, l1_w, l1_v, l2_w, l2_v, l2_b, opt_prop, ):
+    def build_graph(self, factor_order, opt_prop, l1_w, l1_v, l2_w, l2_v, l2_b):
         tf_classifier.build_graph(self, )
         x = tf.SparseTensor(self.index_holder, self.value_holder, self.shape_holder)
         x_square = tf.SparseTensor(self.index_holder, tf.square(self.value_holder), self.shape_holder)

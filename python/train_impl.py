@@ -315,14 +315,13 @@ def predict_with_batch_csr(model, indices, values, batch_size):
 
 
 def check_early_stop(valid_scores, early_stopping_round=50, early_stop_precision=0.0001, mode='no_decrease'):
-    if len(valid_scores) < early_stopping_round:
+    if np.argmin(valid_scores) + early_stopping_round > len(valid_scores):
         return False
-    if mode == 'increase':
-        if valid_scores[-1] - valid_scores[-1 * early_stopping_round] > early_stop_precision:
-            return True
-    else:
-        if valid_scores[-1 * early_stopping_round] - valid_scores[-1] < early_stop_precision:
-            return True
+    minimum = np.min(valid_scores)
+    if mode == 'increase' and valid_scores[-1] - minimum > early_stop_precision:
+        return True
+    elif mode == 'no_decrease' and minimum - valid_scores[-1] < early_stop_precision:
+        return True
     return False
 
 
@@ -331,8 +330,8 @@ def tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l
     train_indices, train_values, train_labels = train_data
     valid_indices, valid_values, valid_labels = valid_data
     fm_model = factorization_machine(name=TAG, eval_metric='softmax_log_loss', num_class=12,
-                                     input_space=SPACE, factor_order=factor_order, l1_w=l1_w, l1_v=l1_v, l2_w=l2_w,
-                                     l2_v=l2_v, l2_b=l2_b, opt_prop=opt_prop)
+                                     input_space=SPACE, factor_order=factor_order, opt_prop=opt_prop, l1_w=l1_w,
+                                     l1_v=l1_v, l2_w=l2_w, l2_v=l2_v, l2_b=l2_b)
     train_scores = []
     valid_scores = []
     for j in range(num_round):
@@ -351,8 +350,9 @@ def tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l
         valid_scores.append(valid_score)
         if check_early_stop(valid_scores, early_stopping_round=early_stopping_round, mode='no_decrease'):
             if verbose:
+                best_iteration = j + 1 - early_stopping_round
                 print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
-                    j, train_scores[-1 * early_stopping_round], valid_scores[-1 * early_stopping_round])
+                    best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
             break
     return train_scores[-1], valid_scores[-1]
 
