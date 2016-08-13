@@ -52,7 +52,8 @@ submission
                                 2.28721, 2.27817, concat_4_gbtree_1
         concat_4, gblinear, {alpha=0.05, lambda=44, early_stop_round=1, round=2, rate=0.2},
                                 2.29869730537, not yet, concat_4_gblinear_1
-        concat_4_norm, gbtree
+        concat_4_norm, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample=0.7, round=777, rate=0.2},
+                                2.29613, not yet, concat_4_norm_gbtree_1
         concat_4_norm, gblinear, {alpha=0.1, lambda=13, early_stop_round=1, rate=0.2},
                                 2.32331138572, not yet, concat_4_norm_gblinear_1
 
