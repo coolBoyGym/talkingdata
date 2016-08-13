@@ -1,5 +1,6 @@
 # this module file is used to store some useful tools to find best arguments
 
+from random import random
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -62,31 +63,47 @@ def scatter3d_use_file():
     plt.show()
 
 
-def norm_argument_file_get_result(name, argument1, argument2, booster_type):
+def norm_argument_file_get_result(name, booster_type):
     path_input = '../output/argument.' + name + '.' + booster_type
     path_output = '../output/argument.' + name + '.' + booster_type + '.out'
     with open(path_input) as fin:
         with open(path_output, 'w') as fout:
-            arr = []
-            fout.write(argument1 + '\t' + argument2 + '\tvalue\n')
+            value = []
+            pair = {}
+            res = []
+            fout.write(name + ' ' + booster_type + ' value\n')
+            cnt = 0
             for line in fin:
                 l = line.split(' ')
-                if l[0] == argument1:
-                    l1 = float(l[1])
-                elif l[0] == argument2:
-                    l2 = float(l[1])
-                    res = float(l[3])
-                    arr.append((l1, l2, res))
+                value.append(float(l[5]))
+                pair[float(l[5])] = cnt
+                res.append(line)
+                cnt += 1
+            value.sort()
 
-            z = []
-            for i in range(len(arr)):
-                z.append(arr[i][2])
-            z.sort()
-            for j in z:
-                for k in arr:
-                    if k[2] == j:
-                        fout.write(str(k) + '\n')
+            flag = False
+            for i in range(len(value) - 1):
+                if value[i] == value[i + 1]:
+                    print 'duplicate one is ', value[i]
+                    print 'its index is', pair[value[i]]
+                    flag = True
+                    break
+            if not flag:
+                print 'no duplicate!'
+                for i in range(len(res)):
+                    fout.write(res[pair[value[i]]])
+            else:
+                for i in range(len(value)):
+                    print value[i]
 
+
+def check_duplicate(l):
+    flag = False
+    for i in range(len(l) - 1):
+        if l[i] == l[i+1]:
+            flag = True
+            break
+    return flag
 
 def find_best_argument(name):
     path_input = '../output/argument.' + name + '.gblinear.out'
@@ -114,8 +131,35 @@ def wire3d_demo():
     plt.show()
 
 
+def draw_two_argument_picture(feature_name, booster_model):
+    path_feature_file = '../output/argument.' + feature_name + '.' + booster_model + '.out'
+
+    fin = open(path_feature_file)
+    next(fin)
+    alp = []
+    lam = []
+    res = []
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    for line in fin:
+        l = line.split(' ')
+        s = l[1]
+        if s == '0.1':
+            alp.append(float(l[1]))
+            lam.append(float(l[3]))
+            res.append(float(l[5]))
+    # for i in range(len(lam)):
+    #     print lam[i]
+    ax.plot([p for p in lam], [p for p in res], 'ro')
+    ax.set_title("training results")
+    ax.set_xlabel('lambda')
+    ax.set_ylabel('valid_score')
+    plt.savefig('../output/' + feature_name + '_' + booster_model + '_alpha_0.1.png', dpi=75)
+    plt.show()
+
 # scatter3d_use_file()
 # wire3d_demo()
-norm_argument_file_get_result('concat_3', 'alpha', 'lambda', 'gblinear')
 # find_best_argument('concat_4')
-
+norm_argument_file_get_result('concat_4_norm', 'gblinear')
+# draw_two_argument_picture('concat_4_norm', 'gblinear')
