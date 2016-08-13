@@ -17,3 +17,8 @@ concat_3_gblinear
 alpha 0.01 lambda 10 2.32916788862 2.40911127508
 concat_3_gbtree
 max_depth 4 eta 0.05 subsample 0.7 colsample_bytree 0.6 2.22950330251 2.38446315655
+
+concat_3_norm_gbtree
+max_depth 4 eta 0.05 subsample 0.7 colsample_bytree 0.6 2.23408867668 2.38441965457
+concat_3_norm_gblinear
+alpha 0 lambda 10 2.32955361167 2.40859080021
