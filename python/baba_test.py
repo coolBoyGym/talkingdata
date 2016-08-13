@@ -5,9 +5,9 @@ import xgboost as xgb
 from sklearn.metrics import log_loss
 
 import train_impl as ti
-from model_impl import logistic_regression
+from model_impl import logistic_regression, opt_property
 
-ti.init_constant(dataset='ensemble_1', booster='gblinear', version=1, random_state=0)
+ti.init_constant(dataset='concat_1', booster='factorization_machine', version=1, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -87,6 +87,25 @@ if __name__ == '__main__':
                     print 'loss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % (
                         train_loss.mean(), train_score, valid_score, time.time() - start_time)
                     lr_model.write_log('%d\t%f\t%f\t%f\n' % (j, train_loss.mean(), train_score, valid_score))
+    elif ti.BOOSTER == 'factorization_machine':
+        train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
+        valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
+        learning_rate = 0.3
+        # gd, ftrl, adagrad, adadelta
+        opt_prop = opt_property('adagrad', learning_rate)
+        factor_order = 10
+        l1_w = 0
+        l1_v = 0
+        l2_w = 0
+        l2_v = 0gti gti 
+        l2_b = 0
+        num_round = 200
+        batch_size = 1000
+        early_stopping_round = 10
+        ti.tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l1_w=l1_w, l1_v=l1_v,
+                                      l2_w=l2_w, l2_v=l2_v, l2_b=l2_b, num_round=num_round, batch_size=batch_size,
+                                      early_stopping_round=early_stopping_round, verbose=True, save_log=False)
+
     elif ti.BOOSTER == 'average':
         model_name_list = ['concat_1_gblinear_1', 'concat_1_gbtree_1', 'concat_2_gblinear_1', 'concat_2_gbtree_1',
                            'concat_2_norm_gblinear_1', 'concat_2_norm_gbtree_1', 'concat_4_gbtree_1',

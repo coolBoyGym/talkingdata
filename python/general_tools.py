@@ -1,7 +1,5 @@
 # this module file is used to store some useful tools to find best arguments
 
-from random import random
-import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -105,10 +103,11 @@ def norm_argument_file_get_result(name, booster_type):
 def check_duplicate(l):
     flag = False
     for i in range(len(l) - 1):
-        if l[i] == l[i+1]:
+        if l[i] == l[i + 1]:
             flag = True
             break
     return flag
+
 
 def find_best_argument(name):
     path_input = '../output/argument.' + name + '.gblinear.out'
@@ -150,7 +149,7 @@ def plot_train_valid_score(path_log, x_col=None, train_col=None, valid_col=None)
 
 
 def plot_xgb_train_valid_score(path_log):
-    data = np.loadtxt(path_log, delimiter='\t', dtype=str, usecols=[1,2])
+    data = np.loadtxt(path_log, delimiter='\t', dtype=str, usecols=[1, 2])
     score = np.array(map(lambda x: [float(x[0].split(':')[1]), float(x[1].split(':')[1])], data))
     plt.plot(range(len(score)), score[:, 0], color=colors[2])
     plt.plot(range(len(score)), score[:, 1], color=colors[0])
@@ -190,12 +189,12 @@ if __name__ == '__main__':
     # wire3d_demo()
     # norm_argument_file_get_result('concat_3', 'alpha', 'lambda', 'gblinear')
     # find_best_argument('concat_4')
-    path_log = '../model/ensemble_1_gblinear_1.log'
-    # plot_train_valid_score(path_log, x_col=0, train_col=2, valid_col=3)
-    plot_xgb_train_valid_score(path_log)
+    path_log = '../model/concat_1_factorization_machine_1.log'
+    # path_log = '../model/ensemble_1_gbtree_1.log'
+    plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3)
+    # plot_xgb_train_valid_score(path_log)
     # scatter3d_use_file()
     # wire3d_demo()
     # find_best_argument('concat_4')
     # norm_argument_file_get_result('concat_4_norm', 'gblinear')
     # draw_two_argument_picture('concat_4_norm', 'gblinear')
-

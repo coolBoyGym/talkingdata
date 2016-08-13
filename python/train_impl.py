@@ -1,8 +1,11 @@
+import time
+
 import numpy as np
 import xgboost as xgb
 from sklearn.metrics import log_loss
 
 import feature
+from model_impl import factorization_machine
 
 VERSION = None
 BOOSTER = None
@@ -151,9 +154,9 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, gam
         "max_depth": max_depth,
         "subsample": subsample,
         "colsample_bytree": colsample_bytree,
-        "gamma":gamma,
-        "min_child_weight":min_child_weight,
-        "max_delta_step":max_delta_step,
+        "gamma": gamma,
+        "min_child_weight": min_child_weight,
+        "max_delta_step": max_delta_step,
         "objective": "multi:softprob",
         "seed": RANDOM_STATE,
         "eval_metric": "mlogloss",
@@ -256,7 +259,7 @@ def read_csr_feature(fin, batch_size):
     return csr_indices, csr_values, csr_shape, labels
 
 
-def train_with_batch_csr(model, indices, values, labels, batch_size):
+def train_with_batch_csr(model, indices, values, labels, batch_size, verbose=False):
     loss = []
     y = []
     y_prob = []
@@ -273,6 +276,10 @@ def train_with_batch_csr(model, indices, values, labels, batch_size):
             loss.append(batch_loss)
             y.extend(batch_y)
             y_prob.extend(batch_y_prob)
+            if verbose:
+                print batch_loss
+                print batch_y
+                print batch_y_prob
     return np.array(loss), np.array(y), np.array(y_prob)
 
 
@@ -291,6 +298,48 @@ def predict_with_batch_csr(model, indices, values, batch_size):
             y.extend(batch_y)
             y_prob.extend(batch_y_prob)
     return np.array(y), np.array(y_prob)
+
+
+def check_early_stop(valid_scores, early_stopping_round=50, early_stop_precision=0.0001, mode='no_decrease'):
+    if len(valid_scores) < early_stopping_round:
+        return False
+    if mode == 'increase':
+        if valid_scores[-1] - valid_scores[-1 * early_stopping_round] > early_stop_precision:
+            return True
+    else:
+        if valid_scores[-1 * early_stopping_round] - valid_scores[-1] < early_stop_precision:
+            return True
+    return False
+
+
+def tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l1_w=0, l1_v=0, l2_w=0, l2_v=0, l2_b=0,
+                               num_round=200, batch_size=100, early_stopping_round=10, verbose=True, save_log=True):
+    train_indices, train_values, train_labels = train_data
+    valid_indices, valid_values, valid_labels = valid_data
+    fm_model = factorization_machine(name=TAG, eval_metric='softmax_log_loss', num_class=12,
+                                     input_space=SPACE, factor_order=factor_order, l1_w=l1_w, l1_v=l1_v, l2_w=l2_w,
+                                     l2_v=l2_v, l2_b=l2_b, opt_prop=opt_prop)
+    train_scores = []
+    valid_scores = []
+    for j in range(num_round):
+        start_time = time.time()
+        train_loss, train_y, train_y_prob = train_with_batch_csr(fm_model, train_indices, train_values,
+                                                                 train_labels, batch_size, verbose=False)
+        valid_y, valid_y_prob = predict_with_batch_csr(fm_model, valid_indices, valid_values, batch_size)
+        train_score = log_loss(train_labels, train_y_prob)
+        valid_score = log_loss(valid_labels, valid_y_prob)
+        if verbose:
+            print 'round:%d\tloss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % \
+                  (j, train_loss.mean(), train_score, valid_score, time.time() - start_time)
+        if save_log:
+            write_log('%d\t%f\t%f\t%f\n' % (j, train_loss.mean(), train_score, valid_score))
+        train_scores.append(train_score)
+        valid_scores.append(valid_score)
+        if check_early_stop(valid_scores, early_stopping_round=early_stopping_round, mode='no_decrease'):
+            if verbose:
+                print 'early stop at round', j
+            break
+    return train_scores[-1], valid_scores[-1]
 
 
 def get_labels(train_size, valid_size):
