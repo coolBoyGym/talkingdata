@@ -7,7 +7,7 @@ from sklearn.metrics import log_loss
 import train_impl as ti
 from model_impl import logistic_regression
 
-ti.init_constant(dataset='ensemble_1', booster='gbtree', version=1, random_state=0)
+ti.init_constant(dataset='ensemble_1', booster='gblinear', version=1, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -17,19 +17,21 @@ if __name__ == '__main__':
         dtest = xgb.DMatrix(ti.PATH_TEST)
 
         early_stopping_round = 1
-        # train_score, valid_score = tune_gblinear(dtrain, dvalid, 0.1, 10, True, early_stopping_round)
-        train_score, valid_score = ti.tune_gblinear(dtrain, dvalid, 0.001, 10, True,
-                                                    early_stopping_rounds=early_stopping_round, dtest=dtest)
+        # train_score, valid_score = ti.tune_gblinear(dtrain, dvalid, 1, 1000, True, early_stopping_round)
+        # train_score, valid_score = ti.tune_gblinear(dtrain, dvalid, 0.001, 10, True,
+        #                                             early_stopping_rounds=early_stopping_round, dtest=dtest)
         # print train_score, valid_score
-        ti.train_gblinear(dtrain_complete, dtest, 0.001, 10, 2)
+        # ti.train_gblinear(dtrain_complete, dtest, 0.001, 10, 2)
 
-        # print train_score, valid_score
-        # for gblinear_alpha in [0.001]:
-        #     for gblinear_lambda in [10]:
-        #         train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, True,
-        #                                                  early_stopping_round)
-        #         print gblinear_alpha, gblinear_lambda, train_score, valid_score
-        # write_log('%f\t%f\t%f\t%f\n' % (gblinear_alpha, gblinear_lambda, train_score, valid_score))
+        for gblinear_alpha in [0]:
+            for gblinear_lambda in [100]:
+                for gblinear_lambda_bias in [0]:
+                    train_score, valid_score = ti.tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda,
+                                                                gblinear_lambda_bias=gblinear_lambda_bias,
+                                                                verbose_eval=True,
+                                                                early_stopping_rounds=early_stopping_round)
+                    # print gblinear_alpha, gblinear_lambda, train_score, valid_score
+                    # write_log('%f\t%f\t%f\t%f\n' % (gblinear_alpha, gblinear_lambda, train_score, valid_score))
     elif ti.BOOSTER == 'gbtree':
         dtrain = xgb.DMatrix(ti.PATH_TRAIN + '.train')
         dvalid = xgb.DMatrix(ti.PATH_TRAIN + '.valid')

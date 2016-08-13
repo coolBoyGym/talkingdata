@@ -73,7 +73,8 @@ def write_log(log_str):
         fout.write(log_str)
 
 
-def tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, verbose_eval, early_stopping_rounds=50, dtest=None):
+def tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, gblinear_lambda_bias, verbose_eval=True,
+                  early_stopping_rounds=50, dtest=None):
     global BOOSTER, RANDOME_STATE
     num_boost_round = 1000
 
@@ -82,6 +83,7 @@ def tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, verbose_eval,
         'silent': 1,
         'num_class': 12,
         'lambda': gblinear_lambda,
+        'lambda_bias': gblinear_lambda_bias,
         'alpha': gblinear_alpha,
         'objective': 'multi:softprob',
         'seed': RANDOME_STATE,
