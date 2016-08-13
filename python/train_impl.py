@@ -9,12 +9,14 @@ BOOSTER = None
 DATASET = None
 PATH_TRAIN = None
 PATH_TEST = None
+PATH_TRAIN_TRAIN = None
+PATH_TRAIN_VALID = None
 TAG = None
 PATH_MODEL_LOG = None
 PATH_MODEL_BIN = None
 PATH_MODEL_DUMP = None
 PATH_SUBMISSION = None
-RANDOME_STATE = 0
+RANDOM_STATE = 0
 
 SPACE = None
 RANK = None
@@ -24,19 +26,21 @@ NUM_CLASS = None
 
 def init_constant(dataset, booster, version, random_state=0):
     global DATASET, BOOSTER, VERSION, PATH_TRAIN, PATH_TEST, TAG, PATH_MODEL_LOG, PATH_MODEL_BIN, PATH_MODEL_DUMP, \
-        PATH_SUBMISSION, RANDOME_STATE, SPACE, RANK, SIZE, NUM_CLASS
+        PATH_SUBMISSION, RANDOM_STATE, SPACE, RANK, SIZE, NUM_CLASS, PATH_TRAIN_TRAIN, PATH_TRAIN_VALID
     DATASET = dataset
     BOOSTER = booster
     VERSION = version
     PATH_TRAIN = '../input/' + DATASET + '.train'
     PATH_TEST = '../input/' + DATASET + '.test'
+    PATH_TRAIN_TRAIN = PATH_TRAIN + '.train'
+    PATH_TRAIN_VALID = PATH_TRAIN + '.valid'
     TAG = '%s_%s_%d' % (DATASET, BOOSTER, VERSION)
     PATH_MODEL_LOG = '../model/' + TAG + '.log'
     PATH_MODEL_BIN = '../model/' + TAG + '.model'
     PATH_MODEL_DUMP = '../model/' + TAG + '.dump'
     PATH_SUBMISSION = '../output/' + TAG + '.submission'
     print TAG
-    RANDOME_STATE = random_state
+    RANDOM_STATE = random_state
     fea_tmp = feature.multi_feature(name=DATASET)
     fea_tmp.load_meta()
     SPACE = fea_tmp.get_space()
@@ -75,7 +79,7 @@ def write_log(log_str):
 
 def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, gblinear_lambda_bias=0, verbose_eval=True,
                   early_stopping_rounds=50, dtest=None):
-    global BOOSTER, RANDOME_STATE
+    global BOOSTER, RANDOM_STATE
     num_boost_round = 1000
 
     params = {
@@ -86,7 +90,7 @@ def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, gblinear_
         'lambda_bias': gblinear_lambda_bias,
         'alpha': gblinear_alpha,
         'objective': 'multi:softprob',
-        'seed': RANDOME_STATE,
+        'seed': RANDOM_STATE,
         'eval_metric': 'mlogloss',
     }
 
@@ -110,7 +114,7 @@ def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, gblinear_
 
 
 def train_gblinear(dtrain_complete, dtest, gblinear_alpha, gblinear_lambda, gblinear_lambda_bias, num_boost_round):
-    global BOOSTER, RANDOME_STATE
+    global BOOSTER, RANDOM_STATE
     params = {
         'booster': BOOSTER,
         'silent': 1,
@@ -119,7 +123,7 @@ def train_gblinear(dtrain_complete, dtest, gblinear_alpha, gblinear_lambda, gbli
         'lambda_bias': gblinear_lambda_bias,
         'alpha': gblinear_alpha,
         'objective': 'multi:softprob',
-        'seed': RANDOME_STATE,
+        'seed': RANDOM_STATE,
         'eval_metric': 'mlogloss',
     }
 
@@ -136,7 +140,7 @@ def train_gblinear(dtrain_complete, dtest, gblinear_alpha, gblinear_lambda, gbli
 def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, gamma=0, min_child_weight=1,
                 max_delta_step=0, verbose_eval=False,
                 early_stopping_rounds=50, dtest=None):
-    global BOOSTER, RANDOME_STATE
+    global BOOSTER, RANDOM_STATE
     num_boost_round = 2000
 
     params = {
@@ -151,7 +155,7 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, gam
         "min_child_weight":min_child_weight,
         "max_delta_step":max_delta_step,
         "objective": "multi:softprob",
-        "seed": RANDOME_STATE,
+        "seed": RANDOM_STATE,
         "eval_metric": "mlogloss",
     }
 
@@ -175,7 +179,7 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, gam
 
 
 def train_gbtree(dtrain_complete, dtest, eta, max_depth, subsample, colsample_bytree, num_boost_round):
-    global BOOSTER, RANDOME_STATE
+    global BOOSTER, RANDOM_STATE
     params = {
         "booster": BOOSTER,
         "silent": 1,
@@ -185,7 +189,7 @@ def train_gbtree(dtrain_complete, dtest, eta, max_depth, subsample, colsample_by
         "subsample": subsample,
         "colsample_bytree": colsample_bytree,
         "objective": "multi:softprob",
-        "seed": RANDOME_STATE,
+        "seed": RANDOM_STATE,
         "eval_metric": "mlogloss",
     }
 
@@ -343,8 +347,8 @@ def train_gblinear_get_result(train_round, train_alpha, train_lambda):
 
 def train_gbtree_find_argument(argument_file_name):
     global PATH_TRAIN, PATH_TEST
-    dtrain = xgb.DMatrix(PATH_TRAIN + '.train')
-    dvalid = xgb.DMatrix(PATH_TRAIN + '.valid')
+    dtrain_train = xgb.DMatrix(PATH_TRAIN_TRAIN)
+    dtrain_valid = xgb.DMatrix(PATH_TRAIN_VALID)
 
     max_depth = 4
     subsample = 0.8
@@ -362,10 +366,10 @@ def train_gbtree_find_argument(argument_file_name):
 
 def train_gbtree_confirm_argument(max_depth=4, eta=0.3, subsample=0.7, colsample_bytree=0.7, verbose_eval=False):
     global PATH_TRAIN, PATH_TEST
-    dtrain = xgb.DMatrix(PATH_TRAIN + '.train')
-    dvalid = xgb.DMatrix(PATH_TRAIN + '.valid')
+    dtrain_train = xgb.DMatrix(PATH_TRAIN_TRAIN)
+    dtrain_valid = xgb.DMatrix(PATH_TRAIN_VALID)
 
-    train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample,
+    train_score, valid_score = tune_gbtree(dtrain_train, dtrain_valid, eta, max_depth, subsample,
                                            colsample_bytree, verbose_eval)
     print train_score, valid_score
 

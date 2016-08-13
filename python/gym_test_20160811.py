@@ -6,9 +6,9 @@ ti.init_constant(dataset='concat_5', booster='gbtree', version=1, random_state=0
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
-        dtrain = xgb.DMatrix(ti.PATH_TRAIN + '.train')
-        dvalid = xgb.DMatrix(ti.PATH_TRAIN + '.valid')
-        dtrain_complete = xgb.DMatrix(ti.PATH_TRAIN)
+        dtrain_train = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
+        dtrain_valid = xgb.DMatrix(ti.PATH_TRAIN_VALID)
+        dtrain = xgb.DMatrix(ti.PATH_TRAIN)
         dtest = xgb.DMatrix(ti.PATH_TEST)
 
         # train_score, valid_score = tune_gblinear(dtrain, dvalid, 0.1, 66, True)
@@ -27,9 +27,9 @@ if __name__ == '__main__':
         #                    + str(train_score) + ' ' + str(valid_score) + '\n')
 
     elif ti.BOOSTER == 'gbtree':
-        dtrain = xgb.DMatrix(ti.PATH_TRAIN + '.train')
-        dvalid = xgb.DMatrix(ti.PATH_TRAIN + '.valid')
-        dtrain_complete = xgb.DMatrix(ti.PATH_TRAIN)
+        dtrain_train = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
+        dtrain_valid = xgb.DMatrix(ti.PATH_TRAIN_VALID)
+        dtrain = xgb.DMatrix(ti.PATH_TRAIN)
         dtest = xgb.DMatrix(ti.PATH_TEST)
         # for gblinear_alpha in [0.007, 0.008, 0.009, 0.01, 0.02]:
         #     print 'alpha', gblinear_alpha
@@ -37,13 +37,13 @@ if __name__ == '__main__':
         #         train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, False)
         #         print 'lambda', gblinear_lambda, np.mean(train_score), np.mean(valid_score)
     elif ti.BOOSTER == 'gbtree':
-        dtrain = xgb.DMatrix(ti.PATH_TRAIN + '.train')
-        dvalid = xgb.DMatrix(ti.PATH_TRAIN + '.valid')
-        dtrain_complete = xgb.DMatrix(ti.PATH_TRAIN)
+        dtrain_train = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
+        dtrain_valid = xgb.DMatrix(ti.PATH_TRAIN_VALID)
+        dtrain = xgb.DMatrix(ti.PATH_TRAIN)
         dtest = xgb.DMatrix(ti.PATH_TEST)
 
-        # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.1, 3, 0.8, 0.9, True)
-        # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.1, 3, 0.8, 0.9, True, dtest)
+        # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.1, 3, 0.8, 0.7, True)
+        # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.1, 3, 0.8, 0.7, True, dtest)
         # print train_score, valid_score
         # train_gbtree(dtrain_complete, dtest, 0.1, 3, 0.8, 0.9, 950)
 
@@ -66,6 +66,20 @@ if __name__ == '__main__':
                                    + str(valid_score) + '\n')
                         print 'max_depth', max_depth, 'eta', eta, 'subsample', subsample, 'colsample', \
                             colsample_bytree, train_score, valid_score
+        # fout = open(path_argument_file, 'a')
+        # print 'Training begin!'
+        #
+        # for max_depth in [3]:
+        #     for eta in [0.1]:
+        #         for subsample in [0.8]:
+        #             for colsample_bytree in[0.5+p*0.05 for p in range(11)]:
+        #                 train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample,
+        #                                                        colsample_bytree, True)
+        #                 fout.write('max_depth ' + str(max_depth) + ' eta ' + str(eta) + ' subsample ' + str(subsample)
+        #                            + ' colsample ' + str(colsample_bytree) + ' ' + str(train_score) + ' '
+        #                            + str(valid_score) + '\n')
+        #                 print 'max_depth', max_depth, 'eta', eta, 'subsample', subsample, 'colsample', \
+        #                     colsample_bytree, train_score, valid_score
 
     elif ti.BOOSTER == 'logistic_regression':
         pass

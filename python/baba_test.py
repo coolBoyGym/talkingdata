@@ -11,8 +11,8 @@ ti.init_constant(dataset='ensemble_1', booster='gblinear', version=1, random_sta
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
-        dtrain = xgb.DMatrix(ti.PATH_TRAIN + '.train')
-        dvalid = xgb.DMatrix(ti.PATH_TRAIN + '.valid')
+        dtrain = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
+        dvalid = xgb.DMatrix(ti.PATH_TRAIN_VALID)
         dtrain_complete = xgb.DMatrix(ti.PATH_TRAIN)
         dtest = xgb.DMatrix(ti.PATH_TEST)
 
@@ -33,8 +33,8 @@ if __name__ == '__main__':
                     # print gblinear_alpha, gblinear_lambda, train_score, valid_score
                     # write_log('%f\t%f\t%f\t%f\n' % (gblinear_alpha, gblinear_lambda, train_score, valid_score))
     elif ti.BOOSTER == 'gbtree':
-        dtrain = xgb.DMatrix(ti.PATH_TRAIN + '.train')
-        dvalid = xgb.DMatrix(ti.PATH_TRAIN + '.valid')
+        dtrain = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
+        dvalid = xgb.DMatrix(ti.PATH_TRAIN_VALID)
         dtrain_complete = xgb.DMatrix(ti.PATH_TRAIN)
         dtest = xgb.DMatrix(ti.PATH_TEST)
 
@@ -73,8 +73,8 @@ if __name__ == '__main__':
                 # lr_model.write_log('loss\ttrain-score\tvalid_score')
                 num_round = 500
                 batch_size = -1
-                train_indices, train_values, train_labels = ti.read_feature(open(ti.PATH_TRAIN + '.train'), -1, False)
-                valid_indices, valid_values, valid_labels = ti.read_feature(open(ti.PATH_TRAIN + '.valid'), -1, False)
+                train_indices, train_values, train_labels = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
+                valid_indices, valid_values, valid_labels = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
                 for j in range(num_round):
                     start_time = time.time()
                     # train_loss, train_preds, train_labels = train_with_batch(path_train + '.train', batch_size)
