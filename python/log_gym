@@ -89,6 +89,12 @@ model:gbtree
     early_stop的轮数
 
 
+2016.8.13 Sat
+
+对于ensemble中使用的feature 容易出现过拟合的现象 所以要调整参数来防止过拟合
+gbtree模型中的参数种类非常多样 都要尝试一下 并且不要被参数通常的范围给限制 比如在调试ensemble_2时 subsample 和 colsample在都取0.01时
+    居然取得了非常好的效果
+
 
 
 

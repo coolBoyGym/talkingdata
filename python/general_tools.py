@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from mpl_toolkits.mplot3d import axes3d
+import xgboost as xgb
 
 sns.set_style('darkgrid')
 colors = sns.color_palette()
@@ -67,8 +68,8 @@ def scatter3d_use_file():
 
 
 def norm_argument_file_get_result(name, booster_type):
-    path_input = '../output/argument.' + name + '.' + booster_type
-    path_output = '../output/argument.' + name + '.' + booster_type + '.out'
+    path_input = '../model/' + name + '_' + booster_type + '_1.log'
+    path_output = path_input + '.sorted'
     with open(path_input) as fin:
         with open(path_output, 'w') as fout:
             value = []
@@ -78,8 +79,8 @@ def norm_argument_file_get_result(name, booster_type):
             cnt = 0
             for line in fin:
                 l = line.split(' ')
-                value.append(float(l[5]))
-                pair[float(l[5])] = cnt
+                value.append(float(l[13]))
+                pair[float(l[13])] = cnt
                 res.append(line)
                 cnt += 1
             value.sort()
@@ -98,15 +99,6 @@ def norm_argument_file_get_result(name, booster_type):
             else:
                 for i in range(len(value)):
                     print value[i]
-
-
-def check_duplicate(l):
-    flag = False
-    for i in range(len(l) - 1):
-        if l[i] == l[i + 1]:
-            flag = True
-            break
-    return flag
 
 
 def find_best_argument(name):
@@ -187,7 +179,7 @@ def draw_two_argument_picture(feature_name, booster_model):
 if __name__ == '__main__':
     # scatter3d_use_file()
     # wire3d_demo()
-    # norm_argument_file_get_result('concat_3', 'alpha', 'lambda', 'gblinear')
+    norm_argument_file_get_result('ensemble_2', 'gbtree')
     # find_best_argument('concat_4')
     path_log = '../model/concat_6_multi_layer_perceptron_1.log'
     # path_log = '../model/concat_x_gbtree.log'

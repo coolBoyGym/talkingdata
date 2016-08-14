@@ -87,6 +87,7 @@ fea_device_day_event_num = feature.multi_feature(name='device_day_event_num', dt
 fea_device_hour_event_num = feature.multi_feature(name='device_hour_event_num', dtype='d')
 fea_device_day_hour_event_num = feature.multi_feature(name='device_day_hour_event_num', dtype='d')
 fea_device_weekday_event_num = feature.multi_feature(name='device_weekday_event_num', dtype='d')
+fea_device_weekday_event_num_freq = feature.multi_feature(name='device_weekday_event_num_freq', dtype='d')
 
 fea_installed_app_freq = feature.multi_feature(name='installed_app_freq', dtype='f')
 fea_active_app_freq = feature.multi_feature(name='active_app_freq', dtype='f')

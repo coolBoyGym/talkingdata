@@ -57,6 +57,9 @@ submission
         concat_4_norm, gblinear, {alpha=0.1, lambda=13, early_stop_round=1, rate=0.2},
                                 2.32331138572, not yet, concat_4_norm_gblinear_1
 
+        ensemble_2, gbtree, {max_depth=2, eta=0.01, subsample=0.01, colsample=0.01, early_stop_round=50,
+                                round=
+
     rocky
         concat_1, gbtree            max_depth 7 eta 0.07 subsample 0.8 colsample_bytree 0.5 2.35875357389 2.39043890146
         concat_1, gblinear          alpha 0 lambda 7.5  2.3499658672 2.38944255486
@@ -87,30 +90,9 @@ submission:
         ensemble, average, {[ 0.01968983,  0.0391137 ,  0.01906632,  0.00886792,  0.0204471 ,
                                 0.02016268,  0.25404595,  0.2369304 ,  0.22133675,  0.16033936,]}, 2.03700311,  2.28009707, average_1.log
 
-    rocky
-        concat_3_gblinear       alpha 0.01 lambda 10 2.32916788862 2.40911127508
-        concat_3_gbtree         max_depth 4 eta 0.05 subsample 0.7 colsample_bytree 0.6 2.22950330251 2.38446315655
-        concat_3_norm_gbtree    max_depth 4 eta 0.05 subsample 0.7 colsample_bytree 0.6 2.23408867668 2.38441965457
-        concat_3_norm_gblinear  alpha 0 lambda 10 2.32955361167 2.40859080021
+    gym:
+        ensemble_2, gbtree, {max_depth=2, eta=0.01, subsample=0.01, colsample=0.01, early_stop_round=50,
+                                round=3980, lambda=19, alpha=0.1, rate=0.2}
+                            valid_score=2.27704846522,  real_score=2.27079, ensemble_2_gbtree
 
-2016/8/14 Sun.
-
-feature:
-    baba:
-        device_long_lat: reconstruct
-        device_long_lat_norm: norm to [-1, 1]
-        device_weekday_event_num
-        ..._norm
-        device_day_hour_event_num: reconstruct
-        installed_app_label: convert to int
-        concat_6
-        concat_7
-        concat_8
-        concat_9
-
-model:
-
-submission:
-    baba:
-        concat_6_gbtree    {3, 0.1, 0.7, 0.7}   [709]	train-mlogloss:2.07709	eval-mlogloss:2.27821
-        concat_6_norm_gbtree    {3, 0.1, 0.7, 0.7}  [583]	train-mlogloss:2.00977	eval-mlogloss:2.28921
+        concat_1, factorization_machine,

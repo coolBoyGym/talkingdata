@@ -140,10 +140,13 @@ def train_gblinear(dtrain_complete, dtest, gblinear_alpha, gblinear_lambda, gbli
     make_submission(test_pred)
 
 
-def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, gamma=0, min_child_weight=1,
-                max_delta_step=0, verbose_eval=False, early_stopping_rounds=50, dtest=None):
+def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
+                gbtree_lambda=1, gbtree_alpha=0,
+                gamma=0, min_child_weight=1,
+                max_delta_step=0, verbose_eval=False,
+                early_stopping_rounds=50, dtest=None):
     global BOOSTER, RANDOM_STATE
-    num_boost_round = 2000
+    num_boost_round = 5000
 
     params = {
         "booster": BOOSTER,
@@ -153,6 +156,11 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, gam
         "max_depth": max_depth,
         "subsample": subsample,
         "colsample_bytree": colsample_bytree,
+        "lambda": gbtree_lambda,
+        "alpha": gbtree_alpha,
+        "gamma": gamma,
+        "min_child_weight":min_child_weight,
+        "max_delta_step":max_delta_step,
         "gamma": gamma,
         "min_child_weight": min_child_weight,
         "max_delta_step": max_delta_step,
@@ -180,7 +188,9 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, gam
     return train_score, valid_score
 
 
-def train_gbtree(dtrain_complete, dtest, eta, max_depth, subsample, colsample_bytree, num_boost_round):
+def train_gbtree(dtrain_complete, dtest, eta, max_depth, subsample, colsample_bytree,
+                 gbtree_lambda, gbtree_alpha, num_boost_round,
+                 gamma=0, min_child_weight=1, max_delta_step=0):
     global BOOSTER, RANDOM_STATE
     params = {
         "booster": BOOSTER,
@@ -190,6 +200,11 @@ def train_gbtree(dtrain_complete, dtest, eta, max_depth, subsample, colsample_by
         "max_depth": max_depth,
         "subsample": subsample,
         "colsample_bytree": colsample_bytree,
+        "lambda": gbtree_lambda,
+        "alpha": gbtree_alpha,
+        "gamma": gamma,
+        "min_child_weight": min_child_weight,
+        "max_delta_step": max_delta_step,
         "objective": "multi:softprob",
         "seed": RANDOM_STATE,
         "eval_metric": "mlogloss",
