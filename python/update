@@ -37,7 +37,7 @@ model
 
     baba
         lr: finish
-        fm
+        fm: part
         nn (as proposed on forum)
 
 
@@ -77,10 +77,13 @@ submission
 2016/8/13 Sat.
 
 feature:
-
+    ensemble_1
+    ensemble_2
 
 model:
-
+    baba:
+        fm: finish
+        mlp: finish
 
 submission:
     baba:

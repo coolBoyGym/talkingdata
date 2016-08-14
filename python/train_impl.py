@@ -5,7 +5,7 @@ import xgboost as xgb
 from sklearn.metrics import log_loss
 
 import feature
-from model_impl import factorization_machine
+from model_impl import factorization_machine, multi_layer_perceptron
 
 VERSION = None
 BOOSTER = None
@@ -273,7 +273,7 @@ def read_csr_feature(fin, batch_size):
     return csr_indices, csr_values, csr_shape, labels
 
 
-def train_with_batch_csr(model, indices, values, labels, batch_size, verbose=False):
+def train_with_batch_csr(model, indices, values, labels, drops=0, batch_size=None, verbose=False):
     loss = []
     y = []
     y_prob = []
@@ -286,7 +286,8 @@ def train_with_batch_csr(model, indices, values, labels, batch_size, verbose=Fal
             batch_values = values[i * batch_size: (i + 1) * batch_size]
             batch_labels = labels[i * batch_size: (i + 1) * batch_size]
             batch_indices, batch_values, batch_shape = libsvm_2_csr(batch_indices, batch_values)
-            batch_loss, batch_y, batch_y_prob = model.train(batch_indices, batch_values, batch_shape, batch_labels)
+            batch_loss, batch_y, batch_y_prob = model.train(batch_indices, batch_values, batch_shape, batch_labels,
+                                                            drops=drops)
             loss.append(batch_loss)
             y.extend(batch_y)
             y_prob.extend(batch_y_prob)
@@ -297,7 +298,7 @@ def train_with_batch_csr(model, indices, values, labels, batch_size, verbose=Fal
     return np.array(loss), np.array(y), np.array(y_prob)
 
 
-def predict_with_batch_csr(model, indices, values, batch_size):
+def predict_with_batch_csr(model, indices, values, drops=0, batch_size=0):
     y = []
     y_prob = []
     if batch_size == -1:
@@ -308,7 +309,7 @@ def predict_with_batch_csr(model, indices, values, batch_size):
             batch_indices = indices[i * batch_size: (i + 1) * batch_size]
             batch_values = values[i * batch_size: (i + 1) * batch_size]
             batch_indices, batch_values, batch_shape = libsvm_2_csr(batch_indices, batch_values)
-            batch_y, batch_y_prob = model.predict(batch_indices, batch_values, batch_shape)
+            batch_y, batch_y_prob = model.predict(batch_indices, batch_values, batch_shape, drops=drops)
             y.extend(batch_y)
             y_prob.extend(batch_y_prob)
     return np.array(y), np.array(y_prob)
@@ -339,6 +340,40 @@ def tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l
         train_loss, train_y, train_y_prob = train_with_batch_csr(fm_model, train_indices, train_values,
                                                                  train_labels, batch_size, verbose=False)
         valid_y, valid_y_prob = predict_with_batch_csr(fm_model, valid_indices, valid_values, batch_size)
+        train_score = log_loss(train_labels, train_y_prob)
+        valid_score = log_loss(valid_labels, valid_y_prob)
+        if verbose:
+            print '[%d]\tloss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % \
+                  (j, train_loss.mean(), train_score, valid_score, time.time() - start_time)
+        if save_log:
+            write_log('%d\t%f\t%f\t%f\n' % (j, train_loss.mean(), train_score, valid_score))
+        train_scores.append(train_score)
+        valid_scores.append(valid_score)
+        if check_early_stop(valid_scores, early_stopping_round=early_stopping_round, mode='no_decrease'):
+            if verbose:
+                best_iteration = j + 1 - early_stopping_round
+                print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
+                    best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
+            break
+    return train_scores[-1], valid_scores[-1]
+
+
+def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates, opt_prop, drops,
+                                num_round=200, batch_size=100, early_stopping_round=10, verbose=True, save_log=True):
+    train_indices, train_values, train_labels = train_data
+    valid_indices, valid_values, valid_labels = valid_data
+    mlp_model = multi_layer_perceptron(name=TAG, eval_metric='softmax_log_loss',
+                                       layer_sizes=layer_sizes,
+                                       layer_activates=layer_activates,
+                                       opt_prop=opt_prop)
+    train_scores = []
+    valid_scores = []
+    for j in range(num_round):
+        start_time = time.time()
+        train_loss, train_y, train_y_prob = train_with_batch_csr(mlp_model, train_indices, train_values,
+                                                                 train_labels, drops, batch_size, verbose=False)
+        valid_y, valid_y_prob = predict_with_batch_csr(mlp_model, valid_indices, valid_values, drops=[1] * len(drops),
+                                                       batch_size=batch_size)
         train_score = log_loss(train_labels, train_y_prob)
         valid_score = log_loss(valid_labels, valid_y_prob)
         if verbose:

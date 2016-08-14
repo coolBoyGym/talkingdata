@@ -3,11 +3,11 @@ import numpy as np
 import feature_impl
 
 
-def get_map(dtype):
-    if 'd' in dtype:
-        return np.int64
-    elif 'f' in dtype:
-        return np.float64
+def str_2_value(str_value):
+    try:
+        return int(str_value)
+    except ValueError:
+        return float(str_value)
 
 
 def get_max(x):
@@ -56,8 +56,14 @@ class feature:
     def get_feature_type(self):
         return self.__ftype
 
+    def set_feature_type(self, ftype):
+        self.__ftype = ftype
+
     def get_data_type(self):
         return self.__dtype
+
+    def set_data_type(self, dtype):
+        self.__dtype = dtype
 
     def set_space(self, space):
         self.__space = space
@@ -128,7 +134,7 @@ class num_feature(feature):
         with open('../feature/' + self.get_name(), 'r') as fin:
             next(fin)
             data = [line.strip() for line in fin]
-            values = map(get_map(self.get_data_type()), data)
+            values = map(str_2_value, data)
 
             values = np.array(values)
             indices = np.zeros_like(values, dtype=np.int64)
@@ -139,9 +145,8 @@ class num_feature(feature):
         feature.dump(self, extra)
         with open('../feature/' + self.get_name(), 'a') as fout:
             _, values = self.get_value()
-            fmt = '%' + self.get_data_type() + '\n'
             for i in range(len(values)):
-                fout.write(fmt % values[i])
+                fout.write(str(values[i]))
 
     def process(self, **argv):
         feature.process(self, **argv)
@@ -159,8 +164,8 @@ class one_hot_feature(feature):
         with open('../feature/' + self.get_name(), 'r') as fin:
             next(fin)
             data = [line.strip().split(':') for line in fin]
-            indices = map(get_map('d'), map(lambda x: x[0], data))
-            values = map(get_map(self.get_data_type()), map(lambda x: x[1], data))
+            indices = map(str_2_value, map(lambda x: x[0], data))
+            values = map(str_2_value, map(lambda x: x[1], data))
             indices = np.array(indices)
             values = np.array(values)
 
@@ -170,9 +175,8 @@ class one_hot_feature(feature):
         feature.dump(self, extra)
         with open('../feature/' + self.get_name(), 'a') as fout:
             indices, values = self.get_value()
-            fmt = '%d:%' + self.get_data_type() + '\n'
             for i in range(len(indices)):
-                fout.write(fmt % (indices[i], values[i]))
+                fout.write(str(indices[i]) + ':' + str(values[i]) + '\n')
 
     def process(self, **argv):
         feature.process(self, **argv)
@@ -194,10 +198,8 @@ class multi_feature(feature):
             values = []
             for line in fin:
                 entry = map(lambda x: x.split(':'), line.strip().split())
-                indices.append(map(lambda x: x[0], entry))
-                values.append(map(lambda x: x[1], entry))
-            indices = map(get_map('d'), indices)
-            values = map(get_map(self.get_data_type()), values)
+                indices.append(np.array(map(str_2_value, map(lambda x: x[0], entry))))
+                values.append(map(str_2_value, map(lambda x: x[1], entry)))
             indices = np.array(indices)
             values = np.array(values)
 
@@ -207,9 +209,11 @@ class multi_feature(feature):
         feature.dump(self, extra)
         with open('../feature/' + self.get_name(), 'a') as fout:
             indices, values = self.get_value()
-            fmt = '%d:%' + self.get_data_type()
             for i in range(len(indices)):
-                line = ' '.join([fmt % (indices[i][j], values[i][j]) for j in range(len(indices[i]))])
+                line_arr = []
+                for j in range(len(indices[i])):
+                    line_arr.append(str(indices[i][j]) + ':' + str(values[i][j]))
+                line = ' '.join(line_arr)
                 fout.write(line + '\n')
 
     def process(self, **argv):
