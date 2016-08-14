@@ -37,7 +37,7 @@ model
 
     baba
         lr: finish
-        fm
+        fm: part
         nn (as proposed on forum)
 
 
@@ -74,10 +74,13 @@ submission
 2016/8/13 Sat.
 
 feature:
-
+    ensemble_1
+    ensemble_2
 
 model:
-
+    baba:
+        fm: finish
+        mlp: finish
 
 submission:
     baba:
@@ -89,3 +92,25 @@ submission:
         concat_3_gbtree         max_depth 4 eta 0.05 subsample 0.7 colsample_bytree 0.6 2.22950330251 2.38446315655
         concat_3_norm_gbtree    max_depth 4 eta 0.05 subsample 0.7 colsample_bytree 0.6 2.23408867668 2.38441965457
         concat_3_norm_gblinear  alpha 0 lambda 10 2.32955361167 2.40859080021
+
+2016/8/14 Sun.
+
+feature:
+    baba:
+        device_long_lat: reconstruct
+        device_long_lat_norm: norm to [-1, 1]
+        device_weekday_event_num
+        ..._norm
+        device_day_hour_event_num: reconstruct
+        installed_app_label: convert to int
+        concat_6
+        concat_7
+        concat_8
+        concat_9
+
+model:
+
+submission:
+    baba:
+        concat_6_gbtree    {3, 0.1, 0.7, 0.7}   [709]	train-mlogloss:2.07709	eval-mlogloss:2.27821
+        concat_6_norm_gbtree    {3, 0.1, 0.7, 0.7}  [583]	train-mlogloss:2.00977	eval-mlogloss:2.28921

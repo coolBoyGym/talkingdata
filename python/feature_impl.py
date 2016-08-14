@@ -253,6 +253,27 @@ def device_day_event_num_proc(device_id, dict_device_event):
     return indices, values
 
 
+def device_weekday_event_num_proc(device_id, dict_device_event):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+        else:
+            weekdays = map(lambda x: get_time(x[1], ['weekday'])[0](), dict_device_event[did])
+            tmp = {0: 0, 1: 0}
+            for d in weekdays:
+                di = int(d < 5)
+                tmp[di] += 1
+            sorted_tmp = sorted(tmp.keys())
+            indices.append(sorted_tmp)
+            values.append(map(lambda x: tmp[x], sorted_tmp))
+    indices = np.array(indices)
+    values = np.array(values)
+    return indices, values
+
+
 def device_hour_event_num_proc(device_id, dict_device_event):
     indices = []
     values = []
@@ -316,6 +337,17 @@ def device_day_event_num_norm_proc(indices, values):
     return indices, norm_values
 
 
+def device_weekday_event_num_norm_proc(indices, values):
+    norm_values = []
+    max_num = 0
+    for v in values:
+        if len(v) > 0:
+            max_num = max(max_num, max(v))
+    for v in values:
+        norm_values.append(np.array(v, dtype=np.float64) / max_num)
+    return indices, norm_values
+
+
 def device_hour_event_num_norm_proc(indices, values):
     norm_values = []
     max_num = 0
@@ -335,23 +367,31 @@ def device_day_hour_event_num_norm_proc(indices, values):
             max_num = max(max_num, max(v))
     for v in values:
         norm_values.append(np.array(v, dtype=np.float64) / max_num)
-    return indices, values
+    return indices, norm_values
 
 
 def device_long_lat_proc(device_id, dict_device_event):
+    indices = []
     values = []
     for did in device_id:
         if did not in dict_device_event:
-            values.append([0] * 10)
+            indices.append([])
+            values.append([])
         else:
             tmp = dict_device_event[did]
             tmp_long = map(lambda x: x[2], tmp)
             tmp_lat = map(lambda x: x[3], tmp)
-            values.append([np.mean(tmp_long), np.std(tmp_long), np.max(tmp_long), np.min(tmp_long), np.median(tmp_long),
-                           np.mean(tmp_lat), np.std(tmp_lat), np.max(tmp_lat), np.min(tmp_lat), np.median(tmp_lat), ])
+            if abs(max(tmp_long)) < 0.01 and abs(min(tmp_long)) < 0.01 and abs(max(tmp_lat)) < 0.01 and \
+                            abs(min(tmp_lat)) < 0.01:
+                indices.append([])
+                values.append([])
+            else:
+                indices.append(range(10))
+                values.append(
+                    [np.mean(tmp_long), np.std(tmp_long), np.max(tmp_long), np.min(tmp_long), np.median(tmp_long),
+                     np.mean(tmp_lat), np.std(tmp_lat), np.max(tmp_lat), np.min(tmp_lat), np.median(tmp_lat), ])
+    indices = np.array(indices)
     values = np.array(values)
-    indices = np.zeros_like(values, dtype=np.int64)
-    indices += range(10)
     return indices, values
 
 
@@ -368,23 +408,34 @@ def device_long_lat_norm_proc(device_id, dict_device_event):
             min_long = min(min_long, min(tmp_long))
             max_lat = max(max_lat, max(tmp_lat))
             min_lat = min(min_lat, min(tmp_lat))
+    indices = []
     values = []
     for did in device_id:
         if did not in dict_device_event:
-            values.append([0] * 10)
+            indices.append([])
+            values.append([])
         else:
             tmp_long = np.array(map(lambda x: x[2], dict_device_event[did]), dtype=np.float64)
-            tmp_long -= min_long
-            tmp_long /= (max_long - min_long)
             tmp_lat = np.array(map(lambda x: x[3], dict_device_event[did]), dtype=np.float64)
-            tmp_lat -= min_lat
-            tmp_lat /= (max_lat - min_lat)
-            values.append(
-                [np.mean(tmp_long), np.std(tmp_long), np.max(tmp_long), np.min(tmp_long), np.median(tmp_long),
-                 np.mean(tmp_lat), np.std(tmp_lat), np.max(tmp_lat), np.min(tmp_lat), np.median(tmp_lat)])
+            if abs(max(tmp_long)) < 0.01 and abs(min(tmp_long)) < 0.01 and abs(max(tmp_lat)) < 0.01 and \
+                            abs(min(tmp_lat)) < 0.01:
+                indices.append([])
+                values.append([])
+            else:
+                tmp_long -= min_long
+                tmp_long /= (max_long - min_long)
+                tmp_long *= 2
+                tmp_long -= 1
+                tmp_lat -= min_lat
+                tmp_lat /= (max_lat - min_lat)
+                tmp_lat *= 2
+                tmp_lat -= 1
+                indices.append(range(10))
+                values.append(
+                    [np.mean(tmp_long), np.std(tmp_long), np.max(tmp_long), np.min(tmp_long), np.median(tmp_long),
+                     np.mean(tmp_lat), np.std(tmp_lat), np.max(tmp_lat), np.min(tmp_lat), np.median(tmp_lat)])
+    indices = np.array(indices)
     values = np.array(values)
-    indices = np.zeros_like(values, dtype=np.int64)
-    indices += range(10)
     return indices, values
 
 
