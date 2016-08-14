@@ -242,14 +242,37 @@ def read_feature(fin, batch_size, zero_pad=True):
     return indices, values, labels
 
 
-def libsvm_2_csr(indices, values):
-    global SPACE
+def libsvm_2_csr(indices, values, space):
     csr_indices = []
     csr_values = []
     for i in range(len(indices)):
         csr_indices.extend(map(lambda x: [i, x], indices[i]))
         csr_values.extend(values[i])
-    return csr_indices, csr_values, [len(indices), SPACE]
+    return csr_indices, csr_values, [len(indices), space]
+
+
+def csr_2_libsvm(csr_indices, csr_values, csr_shape, reorder=False):
+    data = np.hstack((csr_indices, np.reshape(csr_values, [-1, 1])))
+    if reorder:
+        data = sorted(data, key=lambda x: (x[0], x[1]))
+    print data
+    indices = []
+    values = []
+    for i in range(len(data)):
+        r, c, v = data[i]
+        if len(indices) <= r:
+            while len(indices) <= r:
+                indices.append([])
+                values.append([])
+            indices[r].append(c)
+            values[r].append(v)
+        elif len(indices) == r + 1:
+            indices[r].append(c)
+            values[r].append(v)
+    while len(indices) < csr_shape[0]:
+        indices.append([])
+        values.append([])
+    return indices, values
 
 
 def read_csr_feature(fin, batch_size):
@@ -283,17 +306,17 @@ def train_with_batch_csr(model, indices, values, labels, drops=0, batch_size=Non
     return np.array(loss), np.array(y), np.array(y_prob)
 
 
-def predict_with_batch_csr(model, indices, values, drops=0, batch_size=0):
+def predict_with_batch_csr(model, indices, values, drops=0, batch_size=None):
     y = []
     y_prob = []
     if batch_size == -1:
-        indices, values, shape = libsvm_2_csr(indices, values)
+        indices, values, shape = libsvm_2_csr(indices, values, SPACE)
         y, y_prob = model.predict(indices, values, shape)
     else:
         for i in range(len(indices) / batch_size + 1):
             batch_indices = indices[i * batch_size: (i + 1) * batch_size]
             batch_values = values[i * batch_size: (i + 1) * batch_size]
-            batch_indices, batch_values, batch_shape = libsvm_2_csr(batch_indices, batch_values)
+            batch_indices, batch_values, batch_shape = libsvm_2_csr(batch_indices, batch_values, SPACE)
             batch_y, batch_y_prob = model.predict(batch_indices, batch_values, batch_shape, drops=drops)
             y.extend(batch_y)
             y_prob.extend(batch_y_prob)
@@ -323,8 +346,8 @@ def tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l
     for j in range(num_round):
         start_time = time.time()
         train_loss, train_y, train_y_prob = train_with_batch_csr(fm_model, train_indices, train_values,
-                                                                 train_labels, batch_size, verbose=False)
-        valid_y, valid_y_prob = predict_with_batch_csr(fm_model, valid_indices, valid_values, batch_size)
+                                                                 train_labels, batch_size=batch_size, verbose=False)
+        valid_y, valid_y_prob = predict_with_batch_csr(fm_model, valid_indices, valid_values, batch_size=batch_size)
         train_score = log_loss(train_labels, train_y_prob)
         valid_score = log_loss(valid_labels, valid_y_prob)
         if verbose:
@@ -429,23 +452,23 @@ def train_gblinear_get_result(train_round, train_alpha, train_lambda):
     train_gblinear(dtrain, dtest, train_round, train_alpha, train_lambda)
 
 
-def train_gbtree_find_argument(argument_file_name):
-    global PATH_TRAIN, PATH_TEST
-    dtrain_train = xgb.DMatrix(PATH_TRAIN_TRAIN)
-    dtrain_valid = xgb.DMatrix(PATH_TRAIN_VALID)
-
-    max_depth = 4
-    subsample = 0.8
-
-    fout = open(argument_file_name, 'a')
-    for eta in [0.1, 0.15, 0.2, 0.3]:
-        print 'eta', eta
-        fout.write('eta ' + str(eta) + '\n')
-        for colsample_bytree in [0.6, 0.7, 0.8, 0.9]:
-            train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, True)
-            print 'colsample_bytree', colsample_bytree, train_score, valid_score
-            fout.write('colsample_bytree ' + str(colsample_bytree) + ' ' + str(train_score) + ' ' +
-                       str(valid_score) + '\n')
+# def train_gbtree_find_argument(argument_file_name):
+#     global PATH_TRAIN, PATH_TEST
+#     dtrain_train = xgb.DMatrix(PATH_TRAIN_TRAIN)
+#     dtrain_valid = xgb.DMatrix(PATH_TRAIN_VALID)
+#
+#     max_depth = 4
+#     subsample = 0.8
+#
+#     fout = open(argument_file_name, 'a')
+#     for eta in [0.1, 0.15, 0.2, 0.3]:
+#         print 'eta', eta
+#         fout.write('eta ' + str(eta) + '\n')
+#         for colsample_bytree in [0.6, 0.7, 0.8, 0.9]:
+#             train_score, valid_score = tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, True)
+#             print 'colsample_bytree', colsample_bytree, train_score, valid_score
+#             fout.write('colsample_bytree ' + str(colsample_bytree) + ' ' + str(train_score) + ' ' +
+#                        str(valid_score) + '\n')
 
 
 def train_gbtree_confirm_argument(max_depth=4, eta=0.3, subsample=0.7, colsample_bytree=0.7, verbose_eval=False):
@@ -470,3 +493,7 @@ def train_gbtree_get_result():
     colsample_bytree = 0.8
 
     train_gbtree(dtrain, dtest, num_boost_round, eta, max_depth, subsample, colsample_bytree)
+
+
+if __name__ == '__main__':
+    pass

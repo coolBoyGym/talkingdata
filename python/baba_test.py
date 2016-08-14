@@ -7,7 +7,7 @@ from sklearn.metrics import log_loss
 import train_impl as ti
 from model_impl import opt_property
 
-ti.init_constant(dataset='concat_8', booster='gbtree', version=1, random_state=0)
+ti.init_constant(dataset='concat_6', booster='multi_layer_perceptron', version=1, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -89,36 +89,37 @@ if __name__ == '__main__':
     elif ti.BOOSTER == 'factorization_machine':
         train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
         valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
-        learning_rate = 0.3
+        learning_rate = 0.1
         # gd, ftrl, adagrad, adadelta
         opt_prop = opt_property('adagrad', learning_rate)
         factor_order = 10
         l1_w = 0
         l1_v = 0
-        l2_w = 0
-        l2_v = 0
+        l2_w = 1
+        l2_v = 1
         l2_b = 0
         num_round = 200
-        batch_size = 100
+        batch_size = 10000
         early_stopping_round = 10
         ti.tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l1_w=l1_w, l1_v=l1_v,
                                       l2_w=l2_w, l2_v=l2_v, l2_b=l2_b, num_round=num_round, batch_size=batch_size,
-                                      early_stopping_round=early_stopping_round, verbose=True, save_log=False)
+                                      early_stopping_round=early_stopping_round, verbose=True, save_log=True)
     elif ti.BOOSTER == 'multi_layer_perceptron':
         train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
         valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
-        learning_rate = 1
-        opt_prop = opt_property('gd', learning_rate)
-        layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
-        layer_activates = ['relu', None]
+        learning_rate = 0.5
+        layer_sizes = [ti.SPACE, ti.NUM_CLASS]
         drops = [0.5]
-        for learning_rate in [0.1, 0.5, 1]:
+        # for learning_rate in [0.5]:
+        for act in ['sigmoid', 'relu', 'tanh', 'elu', 'softmax']:
+            layer_activates = [act]
+            opt_prop = opt_property('gd', learning_rate)
             # mlp_model.run(None, {mlp_model.dropouts: dropouts})
             # y, y_prob = mlp_model.run([mlp_model.y, mlp_model.y_prob],
             #                           {mlp_model.index_holder: indices, mlp_model.value_holder: values,
             #                            mlp_model.shape_holder: shape})#, mlp_model.dropouts: dropouts})
             ti.tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates, opt_prop,
-                                           drops, num_round=200, batch_size=1000, early_stopping_round=10,
+                                           drops, num_round=500, batch_size=10000, early_stopping_round=10,
                                            verbose=True, save_log=True)
     elif ti.BOOSTER == 'average':
         model_name_list = ['concat_1_gblinear_1', 'concat_1_gbtree_1', 'concat_2_gblinear_1', 'concat_2_gbtree_1',

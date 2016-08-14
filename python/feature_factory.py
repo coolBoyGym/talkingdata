@@ -482,32 +482,58 @@ if __name__ == '__main__':
     #                             fea_installed_app,
     #                             fea_installed_app_label])
 
+    # concat_feature('concat_7', [fea_phone_brand,
+    #                             fea_device_model,
+    #                             fea_installed_app,
+    #                             fea_installed_app_label,
+    #                             fea_device_long_lat])
+
     # concat_feature('concat_7_norm', [fea_phone_brand,
     #                                  fea_device_model,
     #                                  fea_installed_app,
     #                                  fea_installed_app_label,
     #                                  fea_device_long_lat_norm])
 
-    concat_feature('concat_8', [fea_phone_brand,
-                                fea_device_model,
-                                fea_installed_app,
-                                fea_installed_app_label,
-                                fea_device_event_num,
-                                fea_device_weekday_event_num,
-                                fea_device_day_event_num,
-                                fea_device_hour_event_num, ])
+    # concat_feature('concat_8', [fea_phone_brand,
+    #                             fea_device_model,
+    #                             fea_installed_app,
+    #                             fea_installed_app_label,
+    #                             fea_device_event_num,
+    #                             fea_device_weekday_event_num,
+    #                             fea_device_day_event_num,
+    #                             fea_device_hour_event_num, ])
+    #
+    # concat_feature('concat_8_norm', [fea_phone_brand,
+    #                                  fea_device_model,
+    #                                  fea_installed_app,
+    #                                  fea_installed_app_label,
+    #                                  fea_device_event_num_norm,
+    #                                  fea_device_weekday_event_num_norm,
+    #                                  fea_device_day_event_num_norm,
+    #                                  fea_device_hour_event_num_norm, ])
 
-    concat_feature('concat_8_norm', [fea_phone_brand,
-                                     fea_device_model,
-                                     fea_installed_app,
-                                     fea_installed_app_label,
-                                     fea_device_event_num_norm,
-                                     fea_device_weekday_event_num_norm,
-                                     fea_device_day_event_num_norm,
-                                     fea_device_hour_event_num_norm, ])
+    # concat_feature('concat_9', [fea_phone_brand,
+    #                             fea_device_model,
+    #                             fea_installed_app,
+    #                             fea_installed_app_label,
+    #                             fea_device_long_lat,
+    #                             fea_device_event_num,
+    #                             fea_device_weekday_event_num,
+    #                             fea_device_day_event_num,
+    #                             fea_device_hour_event_num, ])
 
-    split_dataset('concat_8', 0.2, zero_pad=True)
-    split_dataset('concat_8_norm', 0.2, zero_pad=True)
+    # concat_feature('concat_9_norm', [fea_phone_brand,
+    #                                  fea_device_model,
+    #                                  fea_installed_app,
+    #                                  fea_installed_app_label,
+    #                                  fea_device_long_lat_norm,
+    #                                  fea_device_event_num_norm,
+    #                                  fea_device_weekday_event_num_norm,
+    #                                  fea_device_day_event_num_norm,
+    #                                  fea_device_hour_event_num_norm, ])
+
+    # split_dataset('concat_8', 0.2, zero_pad=True)
+    # split_dataset('concat_8_norm', 0.2, zero_pad=True)
     # split_dataset('concat_8', 0.2, zero_pad=True)
     # split_dataset('concat_8_norm', 0.2, zero_pad=True)
     # split_dataset('concat_9', 0.2, zero_pad=True)
