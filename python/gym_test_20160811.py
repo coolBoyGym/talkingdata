@@ -1,8 +1,9 @@
 import xgboost as xgb
 
 import train_impl as ti
+from model_impl import opt_property
 
-ti.init_constant(dataset='ensemble_2', booster='gbtree', version=1, random_state=0)
+ti.init_constant(dataset='concat_1', booster='factorization_machine', version=1, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -75,3 +76,23 @@ if __name__ == '__main__':
 
     elif ti.BOOSTER == 'logistic_regression':
         pass
+
+    elif ti.BOOSTER == 'factorization_machine':
+        train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
+        valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
+        learning_rate = 0.3
+        # gd, ftrl, adagrad, adadelta
+        opt_prop = opt_property('adagrad', learning_rate)
+        # argument numbers
+        factor_order = 10
+        l1_w = 0
+        l1_v = 0
+        l2_w = 0
+        l2_v = 0
+        l2_b = 0
+        num_round = 200
+        batch_size = 100
+        early_stopping_round = 10
+        ti.tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l1_w=l1_w, l1_v=l1_v,
+                                      l2_w=l2_w, l2_v=l2_v, l2_b=l2_b, num_round=num_round, batch_size=batch_size,
+                                      early_stopping_round=early_stopping_round, verbose=True, save_log=False)

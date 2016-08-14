@@ -89,5 +89,7 @@ submission:
 
     gym:
         ensemble_2, gbtree, {max_depth=2, eta=0.01, subsample=0.01, colsample=0.01, early_stop_round=50,
-                                round=3387, lambda=19, alpha=0.1, rate=0.2}
-                            valid_score=2.27704846522,  real_score=
+                                round=3980, lambda=19, alpha=0.1, rate=0.2}
+                            valid_score=2.27704846522,  real_score=2.27079, ensemble_2_gbtree
+
+        concat_1, factorization_machine,
