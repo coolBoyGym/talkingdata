@@ -145,16 +145,24 @@ fea_concat_9_norm = feature.multi_feature(name='concat_9_norm', dtype='f')
 """
 model outputs, for ensemble use
 """
-
-
-# fea_concat_1_gblinear_1 = feature.multi_feature(name='concat_1_gblinear_1', dtype='f')
-# fea_concat_1_gblinear_2 = feature.multi_feature(name='concat_1_gblinear_2', dtype='f')
-# fea_concat_2_gblinear_1 = feature.multi_feature(name='concat_2_gblinear_1', dtype='f')
-# fea_concat_3_unify_gblinear_1 = feature.multi_feature(name='concat_3_unify_gblinear_1', dtype='f')
-# fea_concat_4_unify_gblinear_1 = feature.multi_feature(name='concat_4_unify_gblinear_1', dtype='f')
-# fea_concat_5_unify_gblinear_1 = feature.multi_feature(name='concat_5_unify_gblinear_1', dtype='f')
-# fea_concat_6_gblinear_1 = feature.multi_feature(name='concat_6_gblinear_1', dtype='f')
-# fea_concat_6_gbtree_1 = feature.multi_feature(name='concat_6_gbtree_1', dtype='f')
+fea_concat_1_gblinear_1 = feature.multi_feature(name='concat_1_gblinear_1', dtype='f')
+fea_concat_1_gbtree_1 = feature.multi_feature(name='concat_1_gblinear_1', dtype='f')
+fea_concat_2_gblinear_1 = feature.multi_feature(name='concat_2_gblinear_1', dtype='f')
+fea_concat_2_gbtree_1 = feature.multi_feature(name='concat_2_gbtree_1', dtype='f')
+fea_concat_2_norm_gblinear_1 = feature.multi_feature(name='concat_2_norm_gblinear_1', dtype='f')
+fea_concat_2_norm_gbtree_1 = feature.multi_feature(name='concat_2_norm_gbtree_1', dtype='f')
+fea_concat_3_gblinear_1 = feature.multi_feature(name='concat_3_gblinear_1', dtype='f')
+fea_concat_3_gbtree_1 = feature.multi_feature(name='concat_3_gbtree_1', dtype='f')
+fea_concat_3_norm_gblinear_1 = feature.multi_feature(name='concat_3_norm_gblinear_1', dtype='f')
+fea_concat_3_norm_gbtree_1 = feature.multi_feature(name='concat_3_norm_gbtree_1', dtype='f')
+fea_concat_4_gblinear_1 = feature.multi_feature(name='concat_4_gblinear_1', dtype='f')
+fea_concat_4_gbtree_1 = feature.multi_feature(name='concat_4_gbtree_1', dtype='f')
+fea_concat_4_norm_gblinear_1 = feature.multi_feature(name='concat_4_norm_gblinear_1', dtype='f')
+fea_concat_4_norm_gbtree_1 = feature.multi_feature(name='concat_4_norm_gbtree_1', dtype='f')
+fea_concat_5_gblinear_1 = feature.multi_feature(name='concat_5_gblinear_1', dtype='f')
+fea_concat_5_gbtree_1 = feature.multi_feature(name='concat_5_gbtree_1', dtype='f')
+fea_concat_5_norm_gblinear_1 = feature.multi_feature(name='concat_5_norm_gblinear_1', dtype='f')
+fea_concat_5_norm_gbtree_1 = feature.multi_feature(name='concat_5_norm_gbtree_1', dtype='f')
 
 
 def make_feature():
@@ -172,12 +180,13 @@ def make_feature():
 
     print 'finish in %d sec' % (time.time() - start_time)
 
-    device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
+    # for i in range(3):
+    #     print dict_device_event[i]
+    #     print "\nA new one!\n"
+    #
+    # exit(0)
 
-    # for iii in device_id:
-    #     if iii in dict_device_event:
-    #         print dict_device_event[iii]
-    #         exit(0)
+    device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
 
     # fea_phone_brand.process(device_id=device_id, dict_device_brand_model=dict_device_brand_model)
     # fea_phone_brand.dump()
@@ -492,8 +501,12 @@ if __name__ == '__main__':
     #                             fea_device_model,
     #                             fea_installed_app,
     #                             fea_installed_app_label])
-    # fea_concat_1 = feature.multi_feature(name='concat_1')
-    # fea_concat_1.load()
+
+    # concat_feature('concat_7', [fea_phone_brand,
+    #                             fea_device_model,
+    #                             fea_installed_app,
+    #                             fea_installed_app_label,
+    #                             fea_device_long_lat])
 
     # concat_feature('concat_7_norm', [fea_phone_brand,
     #                                  fea_device_model,
@@ -514,6 +527,26 @@ if __name__ == '__main__':
     #                                  fea_device_model,
     #                                  fea_installed_app,
     #                                  fea_installed_app_label,
+    #                                  fea_device_event_num_norm,
+    #                                  fea_device_weekday_event_num_norm,
+    #                                  fea_device_day_event_num_norm,
+    #                                  fea_device_hour_event_num_norm, ])
+
+    # concat_feature('concat_9', [fea_phone_brand,
+    #                             fea_device_model,
+    #                             fea_installed_app,
+    #                             fea_installed_app_label,
+    #                             fea_device_long_lat,
+    #                             fea_device_event_num,
+    #                             fea_device_weekday_event_num,
+    #                             fea_device_day_event_num,
+    #                             fea_device_hour_event_num, ])
+
+    # concat_feature('concat_9_norm', [fea_phone_brand,
+    #                                  fea_device_model,
+    #                                  fea_installed_app,
+    #                                  fea_installed_app_label,
+    #                                  fea_device_long_lat_norm,
     #                                  fea_device_event_num_norm,
     #                                  fea_device_weekday_event_num_norm,
     #                                  fea_device_day_event_num_norm,

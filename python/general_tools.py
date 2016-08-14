@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from mpl_toolkits.mplot3d import axes3d
-import train_impl as ti
-import xgboost as xgb
 
 sns.set_style('darkgrid')
 colors = sns.color_palette()
@@ -177,16 +175,15 @@ def draw_two_argument_picture(feature_name, booster_model):
     plt.show()
 
 
-def check_if_imbalanced():
-    dtrain_train = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
-    print dtrain_train.get_label()
-
-
 if __name__ == '__main__':
     # scatter3d_use_file()
     # wire3d_demo()
+    # norm_argument_file_get_result('ensemble_2', 'gbtree')
     norm_argument_file_get_result('concat_7', 'gbtree')
     # find_best_argument('concat_4')
+    path_log = '../model/concat_6_multi_layer_perceptron_1.log'
+    # path_log = '../model/concat_x_gbtree.log'
+    plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3)
     # path_log = '../model/concat_1_factorization_machine_1.log'
     # path_log = '../model/ensemble_1_gbtree_1.log'
     # plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3)
@@ -203,5 +200,3 @@ if __name__ == '__main__':
     # find_best_argument('concat_4')
     # norm_argument_file_get_result('concat_4_norm', 'gblinear')
     # draw_two_argument_picture('concat_4_norm', 'gblinear')
-    # check_if_imbalanced()
-
