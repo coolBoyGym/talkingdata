@@ -185,19 +185,19 @@ def check_if_imbalanced():
 if __name__ == '__main__':
     # scatter3d_use_file()
     # wire3d_demo()
-    norm_argument_file_get_result('ensemble_2', 'gbtree')
+    norm_argument_file_get_result('concat_7', 'gbtree')
     # find_best_argument('concat_4')
-    path_log = '../model/concat_1_factorization_machine_1.log'
+    # path_log = '../model/concat_1_factorization_machine_1.log'
     # path_log = '../model/ensemble_1_gbtree_1.log'
-    plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3)
+    # plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3)
     # plot_xgb_train_valid_score(path_log)
     # path_log = '../model/ensemble_1_gblinear_1.log'
     # plot_train_valid_score(path_log, x_col=0, train_col=2, valid_col=3)
     # plot_xgb_train_valid_score(path_log)
     # path_log = '../model/concat_5_norm_multi_layer_perceptron_1.log'
-    path_log = '../model/concat_x_gbtree.log'
+    # path_log = '../model/concat_x_gbtree.log'
     # plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3)
-    plot_xgb_train_valid_score(path_log)
+    # plot_xgb_train_valid_score(path_log)
     # scatter3d_use_file()
     # wire3d_demo()
     # find_best_argument('concat_4')

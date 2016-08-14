@@ -3,7 +3,7 @@ import xgboost as xgb
 import train_impl as ti
 from model_impl import opt_property
 
-ti.init_constant(dataset='concat_1', booster='factorization_machine', version=1, random_state=0)
+ti.init_constant(dataset='concat_10', booster='gbtree', version=1, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -43,36 +43,36 @@ if __name__ == '__main__':
         dtrain = xgb.DMatrix(ti.PATH_TRAIN)
         dtest = xgb.DMatrix(ti.PATH_TEST)
 
-        # train_score, valid_score = ti.tune_gbtree(dtrain_train, dtrain_valid, 0.01, 2, 0.01, 0.01, 19, 0.1,
-        #                                           early_stopping_rounds=50, verbose_eval=True)
-        # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.1, 3, 0.8, 0.7, True, dtest)
+        # train_score, valid_score = ti.tune_gbtree(dtrain_train, dtrain_valid, 0.1, 3, 0.7, 0.8, 1, 0.1,
+        #                                           early_stopping_rounds=50, verbose_eval=True, dtest=dtest)
+        # train_score, valid_score = ti.tune_gbtree(dtrain, dvalid, 0.1, 3, 0.8, 0.7, True, dtest)
         # print train_score, valid_score
-        ti.train_gbtree(dtrain, dtest, 0.01, 2, 0.01, 0.01, 19, 0.1, 3980)
+        # ti.train_gbtree(dtrain, dtest, 0.1, 3, 0.7, 0.8, 1, 0.1, 720)
 
         # max_depth = 3
         # eta = 0.1
         # subsample = 0.7
         # colsample_bytree = 0.7
 
-        # fout = open(ti.PATH_MODEL_LOG, 'a')
-        # print 'Training begin!'
-        #
-        # for max_depth in [2]:
-        #     for eta in [0.01]:
-        #         for subsample in [0.01]:
-        #             for colsample_bytree in [0.01]:
-        #                 for gbtree_lambda in [19]:
-        #                     for gbtree_alpha in [0.1]:
-        #                         train_score, valid_score = ti.tune_gbtree(dtrain_train, dtrain_valid, eta,
-        #                                                                   max_depth, subsample,
-        #                                                                   colsample_bytree,
-        #                                                                   gbtree_lambda, gbtree_alpha,
-        #                                                                   early_stopping_rounds=50,
-        #                                                                   verbose_eval=True)
-        #                         fout.write('max_depth ' + str(max_depth) + ' eta ' + str(eta) + ' subsample ' +
-        #                                    str(subsample) + ' colsample ' + str(colsample_bytree) + ' lambda ' +
-        #                                    str(gbtree_lambda) + ' alpha ' + str(gbtree_alpha) + ' ' +
-        #                                    str(train_score) + ' ' + str(valid_score) + '\n')
+        fout = open(ti.PATH_MODEL_LOG, 'a')
+        print 'Training begin!'
+
+        for max_depth in [3]:
+            for eta in [0.1]:
+                for subsample in [0.5, 0.6, 0.9, 1]:
+                    for colsample_bytree in [0.8]:
+                        for gbtree_lambda in [1]:
+                            for gbtree_alpha in [0.1]:
+                                train_score, valid_score = ti.tune_gbtree(dtrain_train, dtrain_valid, eta,
+                                                                          max_depth, subsample,
+                                                                          colsample_bytree,
+                                                                          gbtree_lambda, gbtree_alpha,
+                                                                          early_stopping_rounds=30,
+                                                                          verbose_eval=True)
+                                fout.write('max_depth ' + str(max_depth) + ' eta ' + str(eta) + ' subsample ' +
+                                           str(subsample) + ' colsample ' + str(colsample_bytree) + ' lambda ' +
+                                           str(gbtree_lambda) + ' alpha ' + str(gbtree_alpha) + ' ' +
+                                           str(train_score) + ' ' + str(valid_score) + '\n')
 
     elif ti.BOOSTER == 'logistic_regression':
         pass

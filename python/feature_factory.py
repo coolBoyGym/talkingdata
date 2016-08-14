@@ -87,7 +87,7 @@ fea_device_day_event_num = feature.multi_feature(name='device_day_event_num', dt
 fea_device_hour_event_num = feature.multi_feature(name='device_hour_event_num', dtype='d')
 fea_device_day_hour_event_num = feature.multi_feature(name='device_day_hour_event_num', dtype='d')
 fea_device_weekday_event_num = feature.multi_feature(name='device_weekday_event_num', dtype='d')
-fea_device_weekday_event_num_freq = feature.multi_feature(name='device_weekday_event_num_freq', dtype='d')
+
 
 fea_installed_app_freq = feature.multi_feature(name='installed_app_freq', dtype='f')
 fea_active_app_freq = feature.multi_feature(name='active_app_freq', dtype='f')
@@ -97,8 +97,10 @@ fea_device_long_lat_norm = feature.multi_feature(name='device_long_lat_norm', dt
 fea_device_event_num_norm = feature.num_feature(name='device_event_num_norm', dtype='f')
 fea_device_day_event_num_norm = feature.multi_feature(name='device_day_event_num_norm', dtype='f')
 fea_device_hour_event_num_norm = feature.multi_feature(name='device_hour_event_num_norm', dtype='f')
+fea_device_hour_event_num_freq = feature.multi_feature(name='device_hour_event_num_freq', dtype='f')
 fea_device_day_hour_event_num_norm = feature.multi_feature(name='device_day_hour_event_num_norm', dtype='f')
 fea_device_weekday_event_num_norm = feature.multi_feature(name='device_weekday_event_num_norm', dtype='f')
+fea_device_weekday_event_num_freq = feature.multi_feature(name='device_weekday_event_num_freq', dtype='f')
 
 """
 event features
@@ -170,13 +172,12 @@ def make_feature():
 
     print 'finish in %d sec' % (time.time() - start_time)
 
-    # for i in range(3):
-    #     print dict_device_event[i]
-    #     print "\nA new one!\n"
-    #
-    # exit(0)
-
     device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
+
+    # for iii in device_id:
+    #     if iii in dict_device_event:
+    #         print dict_device_event[iii]
+    #         exit(0)
 
     # fea_phone_brand.process(device_id=device_id, dict_device_brand_model=dict_device_brand_model)
     # fea_phone_brand.dump()
@@ -287,13 +288,18 @@ def make_feature():
     # fea_device_hour_event_num_norm.process(indices=indices, values=values)
     # fea_device_hour_event_num_norm.dump()
 
-    fea_device_day_hour_event_num.process(device_id=device_id, dict_device_event=dict_device_event)
-    fea_device_day_hour_event_num.dump()
+    # fea_device_day_hour_event_num.process(device_id=device_id, dict_device_event=dict_device_event)
+    # fea_device_day_hour_event_num.dump()
+    #
+    # indices, values = fea_device_day_hour_event_num.get_value()
+    # fea_device_day_hour_event_num_norm.process(indices=indices, values=values)
+    # fea_device_day_hour_event_num_norm.dump()
 
-    indices, values = fea_device_day_hour_event_num.get_value()
-    fea_device_day_hour_event_num_norm.process(indices=indices, values=values)
-    fea_device_day_hour_event_num_norm.dump()
+    # fea_device_weekday_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
+    # fea_device_weekday_event_num_freq.dump()
 
+    fea_device_hour_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
+    fea_device_hour_event_num_freq.dump()
 
 def concat_feature(name, fea_list):
     extra = ','.join([fea.get_name() for fea in fea_list])
@@ -513,6 +519,13 @@ if __name__ == '__main__':
     #                                  fea_device_day_event_num_norm,
     #                                  fea_device_hour_event_num_norm, ])
 
+    # concat_feature('concat_10', [fea_phone_brand,
+    #                              fea_device_model,
+    #                              fea_installed_app,
+    #                              fea_installed_app_label,
+    #                              fea_device_hour_event_num_freq,
+    #                              fea_device_weekday_event_num_freq])
+
     # split_dataset('concat_8', 0.2, zero_pad=True)
     # split_dataset('concat_8_norm', 0.2, zero_pad=True)
     # split_dataset('concat_8', 0.2, zero_pad=True)
@@ -521,6 +534,6 @@ if __name__ == '__main__':
     # split_dataset('concat_9_norm', 0.2, zero_pad=True)
     # pass
 
-    split_dataset('concat_8', 0.2, zero_pad=True)
-
+    split_dataset('concat_10', 0.2, zero_pad=True)
+    #
     # make_feature()
