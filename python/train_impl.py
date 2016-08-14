@@ -159,8 +159,8 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
         "lambda": gbtree_lambda,
         "alpha": gbtree_alpha,
         "gamma": gamma,
-        "min_child_weight":min_child_weight,
-        "max_delta_step":max_delta_step,
+        "min_child_weight": min_child_weight,
+        "max_delta_step": max_delta_step,
         "gamma": gamma,
         "min_child_weight": min_child_weight,
         "max_delta_step": max_delta_step,
@@ -292,7 +292,7 @@ def csr_2_libsvm(csr_indices, csr_values, csr_shape, reorder=False):
 
 def read_csr_feature(fin, batch_size):
     indices, values, labels = read_feature(fin, batch_size, False)
-    csr_indices, csr_values, csr_shape = libsvm_2_csr(indices, values)
+    csr_indices, csr_values, csr_shape = libsvm_2_csr(indices, values, SPACE)
     return csr_indices, csr_values, csr_shape, labels
 
 
@@ -301,14 +301,14 @@ def train_with_batch_csr(model, indices, values, labels, drops=0, batch_size=Non
     y = []
     y_prob = []
     if batch_size == -1:
-        indices, values, shape = libsvm_2_csr(indices, values)
+        indices, values, shape = libsvm_2_csr(indices, values, SPACE)
         loss, y, y_prob = model.train(indices, values, shape, labels)
     else:
         for i in range(len(indices) / batch_size + 1):
             batch_indices = indices[i * batch_size: (i + 1) * batch_size]
             batch_values = values[i * batch_size: (i + 1) * batch_size]
             batch_labels = labels[i * batch_size: (i + 1) * batch_size]
-            batch_indices, batch_values, batch_shape = libsvm_2_csr(batch_indices, batch_values)
+            batch_indices, batch_values, batch_shape = libsvm_2_csr(batch_indices, batch_values, SPACE)
             batch_loss, batch_y, batch_y_prob = model.train(batch_indices, batch_values, batch_shape, batch_labels,
                                                             drops=drops)
             loss.append(batch_loss)
