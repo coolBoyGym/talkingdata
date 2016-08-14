@@ -87,6 +87,7 @@ fea_device_day_event_num = feature.multi_feature(name='device_day_event_num', dt
 fea_device_hour_event_num = feature.multi_feature(name='device_hour_event_num', dtype='d')
 fea_device_day_hour_event_num = feature.multi_feature(name='device_day_hour_event_num', dtype='d')
 fea_device_weekday_event_num = feature.multi_feature(name='device_weekday_event_num', dtype='d')
+fea_device_weekday_event_num_freq = feature.multi_feature(name='device_weekday_event_num_freq', dtype='d')
 
 fea_installed_app_freq = feature.multi_feature(name='installed_app_freq', dtype='f')
 fea_active_app_freq = feature.multi_feature(name='active_app_freq', dtype='f')
@@ -168,6 +169,12 @@ def make_feature():
     # dict_app = pkl.load(open('../data/dict_id_app.pkl', 'rb'))
 
     print 'finish in %d sec' % (time.time() - start_time)
+
+    # for i in range(3):
+    #     print dict_device_event[i]
+    #     print "\nA new one!\n"
+    #
+    # exit(0)
 
     device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
 
@@ -488,29 +495,32 @@ if __name__ == '__main__':
     #                                  fea_installed_app_label,
     #                                  fea_device_long_lat_norm])
 
-    concat_feature('concat_8', [fea_phone_brand,
-                                fea_device_model,
-                                fea_installed_app,
-                                fea_installed_app_label,
-                                fea_device_event_num,
-                                fea_device_weekday_event_num,
-                                fea_device_day_event_num,
-                                fea_device_hour_event_num, ])
+    # concat_feature('concat_8', [fea_phone_brand,
+    #                             fea_device_model,
+    #                             fea_installed_app,
+    #                             fea_installed_app_label,
+    #                             fea_device_event_num,
+    #                             fea_device_weekday_event_num,
+    #                             fea_device_day_event_num,
+    #                             fea_device_hour_event_num, ])
+    #
+    # concat_feature('concat_8_norm', [fea_phone_brand,
+    #                                  fea_device_model,
+    #                                  fea_installed_app,
+    #                                  fea_installed_app_label,
+    #                                  fea_device_event_num_norm,
+    #                                  fea_device_weekday_event_num_norm,
+    #                                  fea_device_day_event_num_norm,
+    #                                  fea_device_hour_event_num_norm, ])
 
-    concat_feature('concat_8_norm', [fea_phone_brand,
-                                     fea_device_model,
-                                     fea_installed_app,
-                                     fea_installed_app_label,
-                                     fea_device_event_num_norm,
-                                     fea_device_weekday_event_num_norm,
-                                     fea_device_day_event_num_norm,
-                                     fea_device_hour_event_num_norm, ])
-
-    split_dataset('concat_8', 0.2, zero_pad=True)
-    split_dataset('concat_8_norm', 0.2, zero_pad=True)
+    # split_dataset('concat_8', 0.2, zero_pad=True)
+    # split_dataset('concat_8_norm', 0.2, zero_pad=True)
     # split_dataset('concat_8', 0.2, zero_pad=True)
     # split_dataset('concat_8_norm', 0.2, zero_pad=True)
     # split_dataset('concat_9', 0.2, zero_pad=True)
     # split_dataset('concat_9_norm', 0.2, zero_pad=True)
-    pass
-    split_dataset('ensemble_2', 0.2, zero_pad=True)
+    # pass
+
+    split_dataset('concat_8', 0.2, zero_pad=True)
+
+    # make_feature()
