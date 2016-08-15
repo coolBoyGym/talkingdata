@@ -1,8 +1,8 @@
 import xgboost as xgb
-
+from scipy.sparse import csr_matrix
 import train_impl as ti
 
-ti.init_constant(dataset='concat_3_norm', booster='gblinear', version=1, random_state=0)
+ti.init_constant(dataset='concat_6', booster='rdforest', version=1, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -45,5 +45,23 @@ if __name__ == '__main__':
         #                                   colsample_bytree, False)
         #                print 'max_depth',max_depth,'eta', eta,'subsample', subsample,'colsample_bytree',
         #                                   colsample_bytree, train_score, valid_score
-    elif ti.BOOSTER == 'logistic_regression':
-        pass
+    elif ti.BOOSTER == 'rdforest':
+        fin = open(ti.PATH_TRAIN_TRAIN, 'r')
+        train_indices, train_values, train_shape, train_labels = ti.read_csr_feature(fin, -1)
+        Xtrain = csr_matrix((train_values, (train_indices[:, 0], train_indices[:, 1])), shape=train_shape)
+        fin = open(ti.PATH_TRAIN_VALID, 'r')
+        valid_indices, valid_values, valid_shape, valid_labels = ti.read_csr_feature(fin, -1)
+        Xvalid = csr_matrix((valid_values, (valid_indices[:, 0], valid_indices[:, 1])), shape=valid_shape)
+        fin = open(ti.PATH_TRAIN, 'r')
+        wtrain_indices, wtrain_values, wtrain_shape, wtrain_labels = ti.read_csr_feature(fin, -1)
+        wXtrain = csr_matrix((wtrain_values, (wtrain_indices[:, 0], wtrain_indices[:, 1])), shape=wtrain_shape)
+        fin = open(ti.PATH_TEST, 'r')
+        test_indices, test_values, test_shape, test_labels = ti.read_csr_feature(fin, -1)
+        Xtest = csr_matrix((test_values, (test_indices[:, 0], test_indices[:, 1])), shape=test_shape)
+
+        # for n_estimators in [50,100,200,300,500]:
+        #     train_score, valid_score = ti.tune_rdforest(Xtrain, train_labels, Xvalid, valid_labels, n_estimators=n_estimators)
+        #     print 'n_estimators', n_estimators, train_score, valid_score
+        train_score, valid_score = ti.tune_rdforest(Xtrain, train_labels, Xvalid, valid_labels, n_estimators=100, max_features=None)
+        print train_score, valid_score
+        # ti.train_rdforest(wXtrain, wtrain_labels, Xtest, n_estimators=100)

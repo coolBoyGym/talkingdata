@@ -1,10 +1,11 @@
 import time
-
+from scipy.sparse import csr_matrix
 import numpy as np
 import xgboost as xgb
 from sklearn.metrics import log_loss
 
 import feature
+from sklearn.ensemble import RandomForestClassifier
 from model_impl import factorization_machine, multi_layer_perceptron
 
 VERSION = None
@@ -78,6 +79,24 @@ def write_log(log_str):
     global PATH_MODEL_LOG
     with open(PATH_MODEL_LOG, 'a') as fout:
         fout.write(log_str)
+
+
+def tune_rdforest(Xtrain, train_labels, Xvalid, valid_labels, n_estimators=10, max_depth=None, max_features='auto'):
+    clf = RandomForestClassifier(n_estimators=n_estimators, n_jobs=8, max_depth=max_depth, max_features=max_features)
+    clf.fit(Xtrain, train_labels)
+    train_pred = clf.predict(Xtrain)
+    train_score = log_loss(train_labels, train_pred)
+    valid_pred = clf.predict(Xvalid)
+    valid_score = log_loss(valid_labels, valid_pred)
+    return train_score, valid_score
+
+
+def train_rdforest(Xtrain, train_labels, Xtest, n_estimators=10, max_depth=None, max_features='auto'):
+    clf = RandomForestClassifier(n_estimators=n_estimators, n_jobs=8, max_depth=max_depth, max_features=max_features)
+    clf.fit(Xtrain, train_labels)
+    test_pred = clf.predict_proba(Xtest)
+    test_pred = np.transpose(np.array(map(lambda x: x[:, 0], test_pred))) / (NUM_CLASS - 1)
+    make_submission(test_pred)
 
 
 def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, gblinear_lambda_bias=0, verbose_eval=True,
@@ -257,7 +276,7 @@ def libsvm_2_csr(indices, values, space):
         csr_indices.extend(map(lambda x: [i, x], indices[i]))
         csr_values.extend(values[i])
     return csr_indices, csr_values, [len(indices), space]
-
+    #return np.array(csr_indices), np.array(csr_values), [len(indices), SPACE]
 
 def csr_2_libsvm(csr_indices, csr_values, csr_shape, reorder=False):
     data = np.hstack((csr_indices, np.reshape(csr_values, [-1, 1])))
@@ -281,6 +300,7 @@ def csr_2_libsvm(csr_indices, csr_values, csr_shape, reorder=False):
         indices.append([])
         values.append([])
     return indices, values
+    return np.array(csr_indices), np.array(csr_values), [len(indices), SPACE]
 
 
 def read_csr_feature(fin, batch_size):
@@ -526,4 +546,28 @@ def train_gbtree_get_result():
 
 
 if __name__ == '__main__':
-    pass
+    init_constant(dataset='concat_6', booster=None, version=0)
+    fin = open(PATH_TRAIN_TRAIN, 'r')
+    train_indices, train_values, train_shape, train_labels = read_csr_feature(fin, -1)
+    Xtrain = csr_matrix((train_values, (train_indices[:, 0], train_indices[:, 1])), shape=train_shape)
+    fin = open(PATH_TRAIN_VALID, 'r')
+    valid_indices, valid_values, valid_shape, valid_labels = read_csr_feature(fin, -1)
+    Xvalid = csr_matrix((valid_values, (valid_indices[:, 0], valid_indices[:, 1])), shape=valid_shape)
+
+    clf = RandomForestClassifier(n_estimators=200, n_jobs=8, max_depth=None)
+    clf.fit(Xtrain, train_labels)
+    train_pred = clf.predict_proba(Xtrain)
+    train_pred = np.transpose(np.array(map(lambda x: x[:, 0], train_pred)))
+
+    train_pred = np.array(map(lambda x: np.exp(x) / np.sum(np.exp(x)), train_pred))
+
+    # train_pred = np.transpose(np.array(map(lambda x: x[:, 0], train_pred))) / (NUM_CLASS-1)
+    train_score = log_loss(train_labels, train_pred)
+    valid_pred = clf.predict_proba(Xvalid)
+    valid_pred = np.transpose(np.array(map(lambda x: x[:, 0], valid_pred)))
+
+    valid_pred = np.array(map(lambda x: np.exp(x) / np.sum(np.exp(x)), valid_pred))
+
+    # valid_pred = np.transpose(np.array(map(lambda x: x[:, 0], valid_pred))) / (NUM_CLASS-1)
+    valid_score = log_loss(valid_labels, valid_pred)
+    print train_score, valid_score
