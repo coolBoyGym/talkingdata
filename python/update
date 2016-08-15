@@ -105,3 +105,34 @@ submission:
         concat_7, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample=0.9, early_stop_round=25,
                                 round=673, lambda=1, alpha=0.1, rate=0.2}
                              valid_score=2.2813284161, real_score=not yet, concat_7_gbtree
+
+2016/8/14 Sun.
+
+2016/8/15 Mon.
+
+feature:
+
+model:
+    baba:
+        blending
+        bagging
+
+submisison:
+    baba:
+        concat_6_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 0.5]
+            learning_rate = 0.2
+            num_round = 470
+            471	2.205019	2.205045	2.258668
+            score: 2.24483
+
+    rocky:
+        concat_6_mlp:
+            opt_algo:
+            drops:
+            multi-layer:
+
+    gym:
+        mlp on other features

@@ -179,7 +179,7 @@ if __name__ == '__main__':
     # scatter3d_use_file()
     # wire3d_demo()
     # norm_argument_file_get_result('ensemble_2', 'gbtree')
-    norm_argument_file_get_result('concat_7', 'gbtree')
+    # norm_argument_file_get_result('concat_7', 'gbtree')
     # find_best_argument('concat_4')
     path_log = '../model/concat_6_multi_layer_perceptron_1.log'
     # path_log = '../model/concat_x_gbtree.log'

@@ -1,6 +1,6 @@
 import cPickle as pkl
 
-# import tensorflow as tf
+import tensorflow as tf
 
 from model import *
 
@@ -29,16 +29,24 @@ class ftrl_property(opt_property):
         self.l2_regularization_strength = l2_regularization_strength
 
 
+class adadelta_property(opt_property):
+    def __init__(self, learning_rate=0.001, rho=0.95, epsilon=1e-8, ):
+        opt_property.__init__(self, 'adadelta', learning_rate)
+        self.rho = rho
+        self.epsilon = epsilon
+
+
 class adagrad_property(opt_property):
     def __init__(self, learning_rate, initial_accumulator_value=0.1):
         opt_property.__init__(self, 'adagrad', learning_rate)
         self.initial_accumulator_value = initial_accumulator_value
 
 
-class adadelta_property(opt_property):
-    def __init__(self, learning_rate=0.001, rho=0.95, epsilon=1e-8, ):
-        opt_property.__init__(self, 'adadelta', learning_rate)
-        self.rho = rho
+class adam_property(opt_property):
+    def __init__(self, learning_rate=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
+        opt_property.__init__(self, 'adam', learning_rate)
+        self.beta1 = beta1
+        self.beta2 = beta2
         self.epsilon = epsilon
 
 
@@ -174,9 +182,10 @@ class tf_classifier(classifier):
     def predict(self, indices, values, shape, drops=0):
         return self.run([self.y, self.y_prob], feed_dict={self.x: (indices, values, shape), self.drops: drops})
 
-    def dump(self, path_dump):
+    def dump(self):
         var_map = {}
-        for name, var in self.vars():
+        for name, var in self.vars:
+            print self.run(var)
             var_map[name] = self.run(var)
         pkl.dump(var_map, open(self.get_bin_path(), 'wb'))
         print 'model dumped at', self.get_bin_path()

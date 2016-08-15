@@ -116,7 +116,7 @@ def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, gblinear_
     return train_score, valid_score
 
 
-def train_gblinear(dtrain_complete, dtest, gblinear_alpha, gblinear_lambda, gblinear_lambda_bias, num_boost_round):
+def train_gblinear(dtrain, dtest, gblinear_alpha, gblinear_lambda, gblinear_lambda_bias, num_boost_round):
     global BOOSTER, RANDOM_STATE
     params = {
         'booster': BOOSTER,
@@ -130,8 +130,8 @@ def train_gblinear(dtrain_complete, dtest, gblinear_alpha, gblinear_lambda, gbli
         'eval_metric': 'mlogloss',
     }
 
-    watchlist = [(dtrain_complete, 'train')]
-    bst = xgb.train(params, dtrain_complete, num_boost_round, evals=watchlist, verbose_eval=True)
+    watchlist = [(dtrain, 'train')]
+    bst = xgb.train(params, dtrain, num_boost_round, evals=watchlist, verbose_eval=True)
 
     bst.save_model(PATH_MODEL_BIN)
     bst.dump_model(PATH_MODEL_DUMP)
@@ -140,11 +140,8 @@ def train_gblinear(dtrain_complete, dtest, gblinear_alpha, gblinear_lambda, gbli
     make_submission(test_pred)
 
 
-def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
-                gbtree_lambda=1, gbtree_alpha=0,
-                gamma=0, min_child_weight=1,
-                max_delta_step=0, verbose_eval=False,
-                early_stopping_rounds=50, dtest=None):
+def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, gbtree_lambda=1, gbtree_alpha=0, gamma=0,
+                min_child_weight=1, max_delta_step=0, verbose_eval=False, early_stopping_rounds=50, dtest=None):
     global BOOSTER, RANDOM_STATE
     num_boost_round = 2000
 
@@ -158,9 +155,6 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
         "colsample_bytree": colsample_bytree,
         "lambda": gbtree_lambda,
         "alpha": gbtree_alpha,
-        "gamma": gamma,
-        "min_child_weight": min_child_weight,
-        "max_delta_step": max_delta_step,
         "gamma": gamma,
         "min_child_weight": min_child_weight,
         "max_delta_step": max_delta_step,
@@ -188,9 +182,8 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
     return train_score, valid_score
 
 
-def train_gbtree(dtrain_complete, dtest, eta, max_depth, subsample, colsample_bytree,
-                 gbtree_lambda, gbtree_alpha, num_boost_round,
-                 gamma=0, min_child_weight=1, max_delta_step=0):
+def train_gbtree(dtrain, dtest, eta, max_depth, subsample, colsample_bytree, gbtree_lambda, gbtree_alpha,
+                 num_boost_round, gamma=0, min_child_weight=1, max_delta_step=0):
     global BOOSTER, RANDOM_STATE
     params = {
         "booster": BOOSTER,
@@ -210,8 +203,8 @@ def train_gbtree(dtrain_complete, dtest, eta, max_depth, subsample, colsample_by
         "eval_metric": "mlogloss",
     }
 
-    watchlist = [(dtrain_complete, 'train')]
-    bst = xgb.train(params, dtrain_complete, num_boost_round, evals=watchlist, verbose_eval=True)
+    watchlist = [(dtrain, 'train')]
+    bst = xgb.train(params, dtrain, num_boost_round, evals=watchlist, verbose_eval=True)
 
     bst.save_model(PATH_MODEL_BIN)
     bst.dump_model(PATH_MODEL_DUMP)
@@ -413,6 +406,28 @@ def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activ
                     best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
             break
     return train_scores[-1], valid_scores[-1]
+
+
+def train_multi_layer_perceptron(train_data, test_data, layer_sizes, layer_activates, opt_prop, drops, num_round,
+                                 batch_size):
+    train_indices, train_values, train_labels = train_data
+    test_indices, test_values, test_labels = test_data
+    mlp_model = multi_layer_perceptron(name=TAG, eval_metric='softmax_log_loss',
+                                       layer_sizes=layer_sizes,
+                                       layer_activates=layer_activates,
+                                       opt_prop=opt_prop)
+    for j in range(num_round):
+        start_time = time.time()
+        train_loss, train_y, train_y_prob = train_with_batch_csr(mlp_model, train_indices, train_values,
+                                                                 train_labels, drops, batch_size, verbose=False)
+        train_score = log_loss(train_labels, train_y_prob)
+        print '[%d]\tloss: %f \ttrain_score: %f\ttime: %d' % \
+              (j, train_loss.mean(), train_score, time.time() - start_time)
+
+    test_y, test_y_prob = predict_with_batch_csr(mlp_model, test_indices, test_values, [1] * len(drops),
+                                                 batch_size=batch_size)
+    mlp_model.dump()
+    make_submission(test_y_prob)
 
 
 def get_labels(train_size, valid_size):
