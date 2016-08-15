@@ -95,6 +95,21 @@ model:gbtree
 gbtree模型中的参数种类非常多样 都要尝试一下 并且不要被参数通常的范围给限制 比如在调试ensemble_2时 subsample 和 colsample在都取0.01时
     居然取得了非常好的效果
 
+2016.8.14 Sun
+
+特征选择是一个非常重要的过程 将我们的得分提升到了2.26798 特别要注意的是 比赛中所使用的是真实的数据 各个特征之间是有一定的相关性的 不是简单地
+    越多就越好
+
+生成新feature的过程:
+    1.feature_impl.py中编写对应的函数
+        def device_weekday_event_num_freq_proc(device_id, dict_device_event):
+    2.feature_factory.py中注册对应的feature
+        fea_device_weekday_event_num_freq = feature.multi_feature(name='device_weekday_event_num_freq', dtype='f')
+    3.feature_factory.py中的make_feature()函数中生成对应的feature文件
+        fea_device_weekday_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
+        fea_device_weekday_event_num_freq.dump()
+
+dict_device_event中数据的格式为： [(3164698, '2016-05-06 23:47:05', 0.0, 0.0)]
 
 
 

@@ -146,7 +146,7 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
                 max_delta_step=0, verbose_eval=False,
                 early_stopping_rounds=50, dtest=None):
     global BOOSTER, RANDOM_STATE
-    num_boost_round = 5000
+    num_boost_round = 2000
 
     params = {
         "booster": BOOSTER,

@@ -95,4 +95,13 @@ submission:
                                 round=3980, lambda=19, alpha=0.1, rate=0.2}
                             valid_score=2.27704846522,  real_score=2.27079, ensemble_2_gbtree
 
-        concat_1, factorization_machine,
+        concat_1, factorization_machine, {learning_rate=0.15, l1_w=0.2, l1_v=0.1, num_round=300, batch_size=15,
+                                early_stopping_round=10, } valid_score=2.35431 real_score=not yet
+
+        concat_6, gbtree, {max_depth=3, eta=0.1, subsample=0.7, colsample=0.8, early_stop_round=25,
+                                round=720, lambda=1, alpha=0.1, rate=0.2}
+                             valid_score=2.27860747937, real_score=2.26798, concat_6_gbtree
+
+        concat_7, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample=0.9, early_stop_round=25,
+                                round=673, lambda=1, alpha=0.1, rate=0.2}
+                             valid_score=2.2813284161, real_score=not yet, concat_7_gbtree
