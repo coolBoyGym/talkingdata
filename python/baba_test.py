@@ -108,12 +108,12 @@ if __name__ == '__main__':
         train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
         valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
         learning_rate = 0.5
-        layer_sizes = [ti.SPACE, ti.NUM_CLASS]
-        layer_activates = [None]
-        # for learning_rate in [0.5]:
-        for d in [0.9, 0.7, 0.5, 0.3, 0.1]:
+        layer_activates = ['relu', None]
+        drops = [0.5, 0.5]
+        # for n in [500, 400, 300, 200, 100]:
+        for learning_rate in [0.4, 0.3, 0.2, 0.1]:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
             opt_prop = opt_property('gd', learning_rate)
-            drops = [d]
             # mlp_model.run(None, {mlp_model.dropouts: dropouts})
             # y, y_prob = mlp_model.run([mlp_model.y, mlp_model.y_prob],
             #                           {mlp_model.index_holder: indices, mlp_model.value_holder: values,

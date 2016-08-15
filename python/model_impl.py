@@ -30,15 +30,14 @@ class ftrl_property(opt_property):
 
 
 class adagrad_property(opt_property):
-    def __init__(self, learning_rate,
-                 initial_accumulator_value=0.1):
+    def __init__(self, learning_rate, initial_accumulator_value=0.1):
         opt_property.__init__(self, 'adagrad', learning_rate)
         self.initial_accumulator_value = initial_accumulator_value
 
 
 class adadelta_property(opt_property):
-    def __init__(self, name, learning_rate=0.001, rho=0.95, epsilon=1e-8, ):
-        opt_property.__init__(self, name, learning_rate)
+    def __init__(self, learning_rate=0.001, rho=0.95, epsilon=1e-8, ):
+        opt_property.__init__(self, 'adadelta', learning_rate)
         self.rho = rho
         self.epsilon = epsilon
 
