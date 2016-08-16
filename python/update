@@ -113,9 +113,6 @@ submission:
 feature:
 
 model:
-    baba:
-        blending
-        bagging
 
 submission:
     baba:
@@ -136,3 +133,23 @@ submission:
 
     gym:
         mlp on other features
+
+2016/8/16:
+
+feature:
+    baba:
+        ensemble_3: [concat_1_gbtree_1, concat_1_gblinear_1, concat_6]
+        ensemble_4: [concat_(1-5)_(norm)_gb(tree/linear)_1, concat_6]
+
+model:
+
+submission:
+    baba:
+        ensemble_3_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 0.5]
+            learning_rate = 0.2
+            num_round = 470
+            345	2.184544	2.184539	2.257029
+        ensemble_4_mlp_1:

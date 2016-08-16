@@ -88,7 +88,6 @@ fea_device_hour_event_num = feature.multi_feature(name='device_hour_event_num', 
 fea_device_day_hour_event_num = feature.multi_feature(name='device_day_hour_event_num', dtype='d')
 fea_device_weekday_event_num = feature.multi_feature(name='device_weekday_event_num', dtype='d')
 
-
 fea_installed_app_freq = feature.multi_feature(name='installed_app_freq', dtype='f')
 fea_active_app_freq = feature.multi_feature(name='active_app_freq', dtype='f')
 fea_installed_app_label_freq = feature.multi_feature(name='installed_app_label_freq', dtype='f')
@@ -146,7 +145,7 @@ fea_concat_9_norm = feature.multi_feature(name='concat_9_norm', dtype='f')
 model outputs, for ensemble use
 """
 fea_concat_1_gblinear_1 = feature.multi_feature(name='concat_1_gblinear_1', dtype='f')
-fea_concat_1_gbtree_1 = feature.multi_feature(name='concat_1_gblinear_1', dtype='f')
+fea_concat_1_gbtree_1 = feature.multi_feature(name='concat_1_gbtree_1', dtype='f')
 fea_concat_2_gblinear_1 = feature.multi_feature(name='concat_2_gblinear_1', dtype='f')
 fea_concat_2_gbtree_1 = feature.multi_feature(name='concat_2_gbtree_1', dtype='f')
 fea_concat_2_norm_gblinear_1 = feature.multi_feature(name='concat_2_norm_gblinear_1', dtype='f')
@@ -163,6 +162,7 @@ fea_concat_5_gblinear_1 = feature.multi_feature(name='concat_5_gblinear_1', dtyp
 fea_concat_5_gbtree_1 = feature.multi_feature(name='concat_5_gbtree_1', dtype='f')
 fea_concat_5_norm_gblinear_1 = feature.multi_feature(name='concat_5_norm_gblinear_1', dtype='f')
 fea_concat_5_norm_gbtree_1 = feature.multi_feature(name='concat_5_norm_gbtree_1', dtype='f')
+fea_concat_6_gbtree_1 = feature.multi_feature(name='concat_6_gbtree_1', dtype='f')
 
 
 def make_feature():
@@ -309,6 +309,7 @@ def make_feature():
 
     fea_device_hour_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
     fea_device_hour_event_num_freq.dump()
+
 
 def concat_feature(name, fea_list):
     extra = ','.join([fea.get_name() for fea in fea_list])
@@ -567,6 +568,28 @@ if __name__ == '__main__':
     # split_dataset('concat_9_norm', 0.2, zero_pad=True)
     # pass
 
-    split_dataset('concat_10', 0.2, zero_pad=True)
+    # concat_feature('ensemble_4', [fea_concat_1_gbtree_1,
+    #                               fea_concat_1_gblinear_1,
+    #                               fea_concat_2_gbtree_1,
+    #                               fea_concat_2_gblinear_1,
+    #                               fea_concat_2_norm_gbtree_1,
+    #                               fea_concat_2_norm_gblinear_1,
+    #                               fea_concat_3_gbtree_1,
+    #                               fea_concat_3_gblinear_1,
+    #                               fea_concat_3_norm_gbtree_1,
+    #                               fea_concat_3_norm_gblinear_1,
+    #                               fea_concat_4_gbtree_1,
+    #                               fea_concat_4_gblinear_1,
+    #                               fea_concat_4_norm_gbtree_1,
+    #                               fea_concat_4_norm_gblinear_1,
+    #                               fea_concat_5_gbtree_1,
+    #                               fea_concat_5_gblinear_1,
+    #                               # fea_concat_5_norm_gbtree_1,
+    #                               # fea_concat_5_norm_gblinear_1,
+    #                               fea_concat_6_gbtree_1,
+    #                               fea_concat_6])
+    #
+    # split_dataset('ensemble_4', 0.2, zero_pad=True)
     #
     # make_feature()
+    pass

@@ -3,7 +3,7 @@ import xgboost as xgb
 
 import train_impl as ti
 
-ti.init_constant(dataset='concat_6', booster='multi_layer_perceptron', version=2, random_state=0)
+ti.init_constant(dataset='ensemble_4', booster='multi_layer_perceptron', version=1, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -13,25 +13,26 @@ if __name__ == '__main__':
         dtest = xgb.DMatrix(ti.PATH_TEST)
 
         early_stopping_round = 1
-        # train_score, valid_score = ti.tune_gblinear(dtrain, dvalid, 1, 1000, True, early_stopping_round)
+        train_score, valid_score = ti.tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=1000,
+                                                    verbose_eval=True, early_stopping_rounds=early_stopping_round)
         # train_score, valid_score = ti.tune_gblinear(dtrain, dvalid, 0.001, 10, True,
         #                                             early_stopping_rounds=early_stopping_round, dtest=dtest)
-        # print train_score, valid_score
+        print train_score, valid_score
         # ti.train_gblinear(dtrain_complete, dtest, 0.001, 10, 2)
 
-        for gblinear_alpha in [0]:
-            for gblinear_lambda in [100]:
-                for gblinear_lambda_bias in [0]:
-                    train_score, valid_score = ti.tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda,
-                                                                gblinear_lambda_bias=gblinear_lambda_bias,
-                                                                verbose_eval=True,
-                                                                early_stopping_rounds=early_stopping_round)
-                    # print gblinear_alpha, gblinear_lambda, train_score, valid_score
-                    # write_log('%f\t%f\t%f\t%f\n' % (gblinear_alpha, gblinear_lambda, train_score, valid_score))
+        # for gblinear_alpha in [0]:
+        #     for gblinear_lambda in [100]:
+        #         for gblinear_lambda_bias in [0]:
+        #             train_score, valid_score = ti.tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda,
+        #                                                         gblinear_lambda_bias=gblinear_lambda_bias,
+        #                                                         verbose_eval=True,
+        #                                                         early_stopping_rounds=early_stopping_round)
+        #             # print gblinear_alpha, gblinear_lambda, train_score, valid_score
+        #             # write_log('%f\t%f\t%f\t%f\n' % (gblinear_alpha, gblinear_lambda, train_score, valid_score))
     elif ti.BOOSTER == 'gbtree':
         dtrain = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
         dvalid = xgb.DMatrix(ti.PATH_TRAIN_VALID)
-        dtrain_complete = xgb.DMatrix(ti.PATH_TRAIN)
+        # dtrain_complete = xgb.DMatrix(ti.PATH_TRAIN)
         dtest = xgb.DMatrix(ti.PATH_TEST)
 
         max_depth = 3
@@ -40,21 +41,23 @@ if __name__ == '__main__':
         colsample_bytree = 0.7
         early_stopping_round = 50
 
-        # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.1, 10, 0.0001, 0.0001, True, early_stopping_rounds=50)
+        train_score, valid_score = ti.tune_gbtree(dtrain, dvalid, eta=0.1, max_depth=3, subsample=0.7,
+                                                  colsample_bytree=0.7, verbose_eval=True,
+                                                  early_stopping_rounds=50, dtest=dtest)
         # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.1, 4, 0.7, 0.7, True, dtest)
         # print train_score, valid_score
         # train_gbtree(dtrain_complete, dtest, 0.1, 3, 0.7, 0.7, 300)
 
         # start_time = time.time()
         # colsample_bytree = 0.7
-        for max_depth in [3]:
-            for eta in [0.1]:
-                for subsample in [0.7]:
-                    for colsample_bytree in [0.7]:
-                        train_score, valid_score = ti.tune_gbtree(dtrain, dvalid, eta, max_depth, subsample,
-                                                                  colsample_bytree, verbose_eval=True,
-                                                                  early_stopping_rounds=early_stopping_round)
-                        # print max_depth, eta, subsample, train_score, valid_score, time.time() - start_time
+        # for max_depth in [3]:
+        #     for eta in [0.1]:
+        #         for subsample in [0.7]:
+        #             for colsample_bytree in [0.7]:
+        #                 train_score, valid_score = ti.tune_gbtree(dtrain, dvalid, eta, max_depth, subsample,
+        #                                                           colsample_bytree, verbose_eval=True,
+        #                                                           early_stopping_rounds=early_stopping_round)
+        #                 # print max_depth, eta, subsample, train_score, valid_score, time.time() - start_time
     elif ti.BOOSTER == 'logistic_regression':
         pass
     elif ti.BOOSTER == 'factorization_machine':
@@ -81,24 +84,20 @@ if __name__ == '__main__':
         dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
         # dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1, False)
         # dtest = ti.read_feature(open(ti.PATH_TEST), -1, False)
-        layer_sizes = [ti.SPACE, 1000, 100, ti.NUM_CLASS]
-        layer_activates = ['relu', 'relu', None]
-        drops = [0.3, 0.3, 0.3]
+        layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+        layer_activates = ['relu', None]
+        drops = [0.5, 0.5]
         opt_algo = 'gd'
-        learning_rate = 0.1
+        learning_rate = 0.2
         num_round = 500
+        batch_size = 10000
 
-        # for n in [100, 50]:
+        # for n in [1000, 800, 600, 400]:
         # for learning_rate in [0.4, 0.3, 0.2, 0.1]:
         # for opt_algo in ['gd']:
-        # mlp_model.run(None, {mlp_model.dropouts: dropouts})
-        # y, y_prob = mlp_model.run([mlp_model.y, mlp_model.y_prob],
-        #                           {mlp_model.index_holder: indices, mlp_model.value_holder: values,
-        #                            mlp_model.shape_holder: shape})#, mlp_model.dropouts: dropouts})
         ti.tune_multi_layer_perceptron(dtrain_train, dtrain_valid, layer_sizes, layer_activates, opt_algo,
-                                       learning_rate, drops, num_round=num_round, batch_size=1000,
-                                       early_stopping_round=50,
-                                       verbose=True, save_log=True)
+                                       learning_rate, drops, num_round=num_round, batch_size=batch_size,
+                                       early_stopping_round=10, verbose=True, save_log=True, save_model=True)
 
         # ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
         #                                 num_round=num_round, batch_size=10000)

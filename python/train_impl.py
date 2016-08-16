@@ -407,7 +407,8 @@ def tune_factorization_machine(train_data, valid_data, factor_order, opt_algo, l
 
 
 def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
-                                num_round=200, batch_size=100, early_stopping_round=10, verbose=True, save_log=True):
+                                num_round=200, batch_size=100, early_stopping_round=10, verbose=True, save_log=True,
+                                save_model=False):
     train_indices, train_values, train_labels = train_data
     valid_indices, valid_values, valid_labels = valid_data
     mlp_model = multi_layer_perceptron(name=TAG, eval_metric='softmax_log_loss',
@@ -438,6 +439,8 @@ def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activ
                 print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
                     best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
             break
+    if save_model:
+        mlp_model.dump()
     return train_scores[-1], valid_scores[-1]
 
 
