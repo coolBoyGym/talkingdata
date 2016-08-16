@@ -134,6 +134,8 @@ fea_concat_8 = feature.multi_feature(name='concat_8', dtype='d')
 fea_concat_8_norm = feature.multi_feature(name='concat_8_norm', dtype='f')
 fea_concat_9 = feature.multi_feature(name='concat_9', dtype='d')
 fea_concat_9_norm = feature.multi_feature(name='concat_9_norm', dtype='f')
+fea_ensemble_test = feature.multi_feature(name='ensmeble_test', dtype='f')
+
 # fea_concat_1 = feature.multi_feature(name='concat_1', dtype='f')
 # fea_concat_2 = feature.multi_feature(name='concat_2', dtype='f')
 # fea_concat_3 = feature.multi_feature(name='concat_3', dtype='f')
@@ -309,6 +311,48 @@ def make_feature():
 
     fea_device_hour_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
     fea_device_hour_event_num_freq.dump()
+
+def ensemble_concat_feature(name, fea_list):
+    spaces = []
+    for fea in fea_list:
+        spaces.append(fea.get_space())
+    print 'spaces', str(spaces)
+
+    fea_concat = feature.multi_feature(name=name)
+
+    collect_indices = []
+    collect_values = []
+
+    for i in range(len(fea_list)):
+        fea = fea_list[i]
+        concat_indices, concat_values = fea.get_value()
+        concat_indices += sum(spaces[:i])
+        collect_indices.append(concat_indices)
+        collect_values.append(concat_values)
+
+    concat_indices = []
+    concat_values = []
+    for i in range(fea_list[0].get_size()):
+        tmp_indices = []
+        tmp_values = []
+        for j in range(len(fea_list)):
+            tmp_indices.extend(feature.get_array(collect_indices[j][i]))
+            tmp_values.extend(feature.get_array(collect_values[j][i]))
+        concat_indices.append(np.array(tmp_indices))
+        concat_values.append(tmp_values)
+
+    concat_indices = np.array(concat_indices)
+    concat_values = np.array(concat_values)
+
+    fea_concat.set_value(indices=concat_indices, values=concat_values)
+    max_indices = map(feature.get_max, concat_indices)
+    len_indices = map(lambda x: len(x), concat_values)
+    fea_concat.set_space(max(max_indices) + 1)
+    fea_concat.set_rank(max(len_indices))
+    fea_concat.set_size(len(concat_indices))
+
+    return fea_concat
+
 
 
 def concat_feature(name, fea_list):
@@ -560,6 +604,8 @@ if __name__ == '__main__':
     #                              fea_device_hour_event_num_freq,
     #                              fea_device_weekday_event_num_freq])
 
+    # concat_feature('concat_6_ensemble',[fea_concat_6, fea_ensemble_test])
+
     # split_dataset('concat_8', 0.2, zero_pad=True)
     # split_dataset('concat_8_norm', 0.2, zero_pad=True)
     # split_dataset('concat_8', 0.2, zero_pad=True)
@@ -590,6 +636,7 @@ if __name__ == '__main__':
     #                               fea_concat_6])
     #
     # split_dataset('ensemble_4', 0.2, zero_pad=True)
+    split_dataset('concat_7_norm', 0.2, zero_pad=True)
     #
     # make_feature()
     pass
