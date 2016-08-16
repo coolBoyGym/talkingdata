@@ -1,11 +1,7 @@
-import time
-
 import numpy as np
 import xgboost as xgb
-from sklearn.metrics import log_loss
 
 import train_impl as ti
-from model_impl import opt_property
 
 ti.init_constant(dataset='concat_6', booster='multi_layer_perceptron', version=2, random_state=0)
 
@@ -60,38 +56,13 @@ if __name__ == '__main__':
                                                                   early_stopping_rounds=early_stopping_round)
                         # print max_depth, eta, subsample, train_score, valid_score, time.time() - start_time
     elif ti.BOOSTER == 'logistic_regression':
-        for l1_alpha in [0]:
-            for l2_lambda in [10]:
-                print '##########################################################################'
-                print l1_alpha, l2_lambda
-                lr_model = logistic_regression(name=ti.TAG, eval_metric='softmax_log_loss', num_class=12,
-                                               input_space=ti.SPACE, l1_alpha=l1_alpha, l2_lambda=l2_lambda,
-                                               optimizer='adadelta', learning_rate=0.1, )
-
-                # lr_model.write_log_header()
-                # lr_model.write_log('loss\ttrain-score\tvalid_score')
-                num_round = 500
-                batch_size = -1
-                train_indices, train_values, train_labels = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
-                valid_indices, valid_values, valid_labels = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
-                for j in range(num_round):
-                    start_time = time.time()
-                    # train_loss, train_preds, train_labels = train_with_batch(path_train + '.train', batch_size)
-                    # valid_preds, valid_labels = predict_with_batch(path_train + '.valid', batch_size)
-                    train_loss, train_y, train_y_prob = ti.train_with_batch_csr(lr_model, train_indices, train_values,
-                                                                                train_labels, batch_size)
-                    valid_y, valid_y_prob = ti.predict_with_batch_csr(lr_model, valid_indices, valid_values, batch_size)
-                    train_score = log_loss(train_labels, train_y_prob)
-                    valid_score = log_loss(valid_labels, valid_y_prob)
-                    print 'loss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % (
-                        train_loss.mean(), train_score, valid_score, time.time() - start_time)
-                    lr_model.write_log('%d\t%f\t%f\t%f\n' % (j, train_loss.mean(), train_score, valid_score))
+        pass
     elif ti.BOOSTER == 'factorization_machine':
         dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
         dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
         learning_rate = 0.1
         # gd, ftrl, adagrad, adadelta
-        opt_prop = opt_property('adagrad', learning_rate)
+        opt_algo = 'gd'
         factor_order = 10
         l1_w = 0
         l1_v = 0
@@ -101,35 +72,36 @@ if __name__ == '__main__':
         num_round = 200
         batch_size = 10000
         early_stopping_round = 10
-        ti.tune_factorization_machine(dtrain_train, dtrain_valid, factor_order, opt_prop, l1_w=l1_w, l1_v=l1_v,
-                                      l2_w=l2_w, l2_v=l2_v, l2_b=l2_b, num_round=num_round, batch_size=batch_size,
-                                      early_stopping_round=early_stopping_round, verbose=True, save_log=True)
+        ti.tune_factorization_machine(dtrain_train, dtrain_valid, factor_order, opt_algo, learning_rate, l1_w=l1_w,
+                                      l1_v=l1_v, l2_w=l2_w, l2_v=l2_v, l2_b=l2_b, num_round=num_round,
+                                      batch_size=batch_size, early_stopping_round=early_stopping_round, verbose=True,
+                                      save_log=True)
     elif ti.BOOSTER == 'multi_layer_perceptron':
-        # dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
-        # dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
-        dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1, False)
-        dtest = ti.read_feature(open(ti.PATH_TEST), -1, False)
-        layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
-        layer_activates = ['relu', None]
-        drops = [0.5, 0.5]
-        learning_rate = 0.2
-        num_round = 1
+        dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
+        dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
+        # dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1, False)
+        # dtest = ti.read_feature(open(ti.PATH_TEST), -1, False)
+        layer_sizes = [ti.SPACE, 1000, 100, ti.NUM_CLASS]
+        layer_activates = ['relu', 'relu', None]
+        drops = [0.3, 0.3, 0.3]
+        opt_algo = 'gd'
+        learning_rate = 0.1
+        num_round = 500
 
-        # for n in [500, 400, 300, 200, 100]:
+        # for n in [100, 50]:
         # for learning_rate in [0.4, 0.3, 0.2, 0.1]:
-        #     # for opt_algo in ['gd']:
-        #     opt_prop = opt_property('gd', learning_rate)
-        #     # mlp_model.run(None, {mlp_model.dropouts: dropouts})
-        #     # y, y_prob = mlp_model.run([mlp_model.y, mlp_model.y_prob],
-        #     #                           {mlp_model.index_holder: indices, mlp_model.value_holder: values,
-        #     #                            mlp_model.shape_holder: shape})#, mlp_model.dropouts: dropouts})
-        #     ti.tune_multi_layer_perceptron(dtrain_train, dtrain_valid, layer_sizes, layer_activates, opt_prop,
-        #                                    drops, num_round=num_round, batch_size=10000, early_stopping_round=10,
-        #                                    verbose=True, save_log=True)
+        # for opt_algo in ['gd']:
+        # mlp_model.run(None, {mlp_model.dropouts: dropouts})
+        # y, y_prob = mlp_model.run([mlp_model.y, mlp_model.y_prob],
+        #                           {mlp_model.index_holder: indices, mlp_model.value_holder: values,
+        #                            mlp_model.shape_holder: shape})#, mlp_model.dropouts: dropouts})
+        ti.tune_multi_layer_perceptron(dtrain_train, dtrain_valid, layer_sizes, layer_activates, opt_algo,
+                                       learning_rate, drops, num_round=num_round, batch_size=1000,
+                                       early_stopping_round=50,
+                                       verbose=True, save_log=True)
 
-        opt_prop = opt_property('gd', learning_rate)
-        ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes, layer_activates, opt_prop, drops,
-                                        num_round=num_round, batch_size=10000)
+        # ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
+        #                                 num_round=num_round, batch_size=10000)
     elif ti.BOOSTER == 'average':
         model_name_list = ['concat_1_gblinear_1', 'concat_1_gbtree_1', 'concat_2_gblinear_1', 'concat_2_gbtree_1',
                            'concat_2_norm_gblinear_1', 'concat_2_norm_gbtree_1', 'concat_4_gbtree_1',

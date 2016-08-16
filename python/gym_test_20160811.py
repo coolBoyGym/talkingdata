@@ -1,7 +1,6 @@
 import xgboost as xgb
 
 import train_impl as ti
-from model_impl import opt_property
 
 ti.init_constant(dataset='concat_10', booster='gbtree', version=1, random_state=0)
 
@@ -27,11 +26,11 @@ if __name__ == '__main__':
         #         fout.write('alpha ' + str(gblinear_alpha) + ' lambda ' + str(gblinear_lambda) + ' '
         #                    + str(train_score) + ' ' + str(valid_score) + '\n')
 
-    # elif ti.BOOSTER == 'gbtree':
-    #     dtrain_train = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
-    #     dtrain_valid = xgb.DMatrix(ti.PATH_TRAIN_VALID)
-    #     dtrain = xgb.DMatrix(ti.PATH_TRAIN)
-    #     dtest = xgb.DMatrix(ti.PATH_TEST)
+        # elif ti.BOOSTER == 'gbtree':
+        #     dtrain_train = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
+        #     dtrain_valid = xgb.DMatrix(ti.PATH_TRAIN_VALID)
+        #     dtrain = xgb.DMatrix(ti.PATH_TRAIN)
+        #     dtest = xgb.DMatrix(ti.PATH_TEST)
         # for gblinear_alpha in [0.007, 0.008, 0.009, 0.01, 0.02]:
         #     print 'alpha', gblinear_alpha
         #     for gblinear_lambda in [13, 14, 15]:
@@ -82,7 +81,7 @@ if __name__ == '__main__':
         valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
         learning_rate = 0.3
         # gd, ftrl, adagrad, adadelta
-        opt_prop = opt_property('adagrad', learning_rate)
+        opt_algo = 'gd'
         # argument numbers
         factor_order = 10
         l1_w = 0
@@ -93,6 +92,7 @@ if __name__ == '__main__':
         num_round = 200
         batch_size = 100
         early_stopping_round = 10
-        ti.tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l1_w=l1_w, l1_v=l1_v,
-                                      l2_w=l2_w, l2_v=l2_v, l2_b=l2_b, num_round=num_round, batch_size=batch_size,
-                                      early_stopping_round=early_stopping_round, verbose=True, save_log=False)
+        ti.tune_factorization_machine(train_data, valid_data, factor_order, opt_algo, learning_rate, l1_w=l1_w,
+                                      l1_v=l1_v, l2_w=l2_w, l2_v=l2_v, l2_b=l2_b, num_round=num_round,
+                                      batch_size=batch_size, early_stopping_round=early_stopping_round, verbose=True,
+                                      save_log=False)

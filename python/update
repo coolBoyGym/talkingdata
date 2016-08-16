@@ -117,7 +117,7 @@ model:
         blending
         bagging
 
-submisison:
+submission:
     baba:
         concat_6_mlp_1:
             layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]

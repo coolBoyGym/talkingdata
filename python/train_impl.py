@@ -1,11 +1,12 @@
 import time
-from scipy.sparse import csr_matrix
+
 import numpy as np
 import xgboost as xgb
+from scipy.sparse import csr_matrix
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import log_loss
 
 import feature
-from sklearn.ensemble import RandomForestClassifier
 from model_impl import factorization_machine, multi_layer_perceptron
 
 VERSION = None
@@ -276,7 +277,8 @@ def libsvm_2_csr(indices, values, space):
         csr_indices.extend(map(lambda x: [i, x], indices[i]))
         csr_values.extend(values[i])
     return csr_indices, csr_values, [len(indices), space]
-    #return np.array(csr_indices), np.array(csr_values), [len(indices), SPACE]
+    # return np.array(csr_indices), np.array(csr_values), [len(indices), SPACE]
+
 
 def csr_2_libsvm(csr_indices, csr_values, csr_shape, reorder=False):
     data = np.hstack((csr_indices, np.reshape(csr_values, [-1, 1])))
@@ -362,13 +364,23 @@ def check_early_stop(valid_scores, early_stopping_round=50, early_stop_precision
     return False
 
 
-def tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l1_w=0, l1_v=0, l2_w=0, l2_v=0, l2_b=0,
-                               num_round=200, batch_size=100, early_stopping_round=10, verbose=True, save_log=True):
+def tune_factorization_machine(train_data, valid_data, factor_order, opt_algo, learning_rate, l1_w=0, l1_v=0, l2_w=0,
+                               l2_v=0, l2_b=0, num_round=200, batch_size=100, early_stopping_round=10, verbose=True,
+                               save_log=True):
     train_indices, train_values, train_labels = train_data
     valid_indices, valid_values, valid_labels = valid_data
-    fm_model = factorization_machine(name=TAG, eval_metric='softmax_log_loss', num_class=12,
-                                     input_space=SPACE, factor_order=factor_order, opt_prop=opt_prop, l1_w=l1_w,
-                                     l1_v=l1_v, l2_w=l2_w, l2_v=l2_v, l2_b=l2_b)
+    fm_model = factorization_machine(name=TAG,
+                                     eval_metric='softmax_log_loss',
+                                     num_class=12,
+                                     input_space=SPACE,
+                                     factor_order=factor_order,
+                                     opt_algo=opt_algo,
+                                     learning_rate=learning_rate,
+                                     l1_w=l1_w,
+                                     l1_v=l1_v,
+                                     l2_w=l2_w,
+                                     l2_v=l2_v,
+                                     l2_b=l2_b)
     train_scores = []
     valid_scores = []
     for j in range(num_round):
@@ -394,14 +406,15 @@ def tune_factorization_machine(train_data, valid_data, factor_order, opt_prop, l
     return train_scores[-1], valid_scores[-1]
 
 
-def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates, opt_prop, drops,
+def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
                                 num_round=200, batch_size=100, early_stopping_round=10, verbose=True, save_log=True):
     train_indices, train_values, train_labels = train_data
     valid_indices, valid_values, valid_labels = valid_data
     mlp_model = multi_layer_perceptron(name=TAG, eval_metric='softmax_log_loss',
                                        layer_sizes=layer_sizes,
                                        layer_activates=layer_activates,
-                                       opt_prop=opt_prop)
+                                       opt_algo=opt_algo,
+                                       learning_rate=learning_rate)
     train_scores = []
     valid_scores = []
     for j in range(num_round):
@@ -428,14 +441,15 @@ def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activ
     return train_scores[-1], valid_scores[-1]
 
 
-def train_multi_layer_perceptron(train_data, test_data, layer_sizes, layer_activates, opt_prop, drops, num_round,
-                                 batch_size):
+def train_multi_layer_perceptron(train_data, test_data, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
+                                 num_round, batch_size):
     train_indices, train_values, train_labels = train_data
     test_indices, test_values, test_labels = test_data
     mlp_model = multi_layer_perceptron(name=TAG, eval_metric='softmax_log_loss',
                                        layer_sizes=layer_sizes,
                                        layer_activates=layer_activates,
-                                       opt_prop=opt_prop)
+                                       opt_algo=opt_algo,
+                                       learning_rate=learning_rate)
     for j in range(num_round):
         start_time = time.time()
         train_loss, train_y, train_y_prob = train_with_batch_csr(mlp_model, train_indices, train_values,
