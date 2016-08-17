@@ -19,6 +19,7 @@ def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval
         var_map = {}
     for var_name, var_shape, init_method, dtype in init_actions:
         if var_name in var_map:
+            var_map[var_name] = tf.Variable(var_map[var_name])
             print var_name, 'already exists'
         else:
             if init_method == 'zero':
@@ -120,14 +121,14 @@ class tf_classifier(classifier):
     def run(self, fetches, feed_dict=None):
         return self.__sess.run(fetches, feed_dict)
 
-    def train(self, indices, values, shape, labels, drops=0):
+    def train(self, indices, values, shapes, labels, drops=0):
         _, l, y, y_prob = self.run(fetches=[self.optimizer, self.loss, self.y, self.y_prob],
-                                   feed_dict={self.x: (indices, values, shape), self.y_true: labels,
+                                   feed_dict={self.x: (indices, values, shapes), self.y_true: labels,
                                               self.drops: drops})
         return l, y, y_prob
 
-    def predict(self, indices, values, shape, drops=0):
-        return self.run([self.y, self.y_prob], feed_dict={self.x: (indices, values, shape), self.drops: drops})
+    def predict(self, indices, values, shapes, drops=0):
+        return self.run([self.y, self.y_prob], feed_dict={self.x: (indices, values, shapes), self.drops: drops})
 
     def dump(self):
         var_map = {}
@@ -137,10 +138,11 @@ class tf_classifier(classifier):
         print 'model dumped at', self.get_bin_path()
 
 
-class tf_classifier_multi(tf_classifier):
+class tf_classifier_multi(classifier):
     def __init__(self, name, eval_metric, num_class, num_input, init_actions, init_path=None, stddev=0.01, minval=-0.01,
                  maxval=0.01, **argv):
         classifier.__init__(self, name, eval_metric, num_class)
+        self.__num_input = num_input
         self.__graph = tf.Graph()
         with self.__graph.as_default():
             self.x = [tf.sparse_placeholder(tf.float32) for i in range(num_input)]
@@ -150,6 +152,38 @@ class tf_classifier_multi(tf_classifier):
             self.__sess = tf.Session()
             self.y, self.y_prob, self.loss, self.optimizer = self.build_graph(**argv)
             tf.initialize_all_variables().run(session=self.__sess)
+
+    def get_num_input(self):
+        return self.__num_input
+
+    def train(self, indices, values, shapes, labels, drops=0):
+        feed_dict = {self.y_true: labels, self.drops: drops}
+        for i in range(len(self.x)):
+            feed_dict[self.x[i]] = (indices[i], values[i], shapes[i])
+        _, l, y, y_prob = self.run(fetches=[self.optimizer, self.loss, self.y, self.y_prob], feed_dict=feed_dict)
+        return l, y, y_prob
+
+    def predict(self, indices, values, shapes, drops=0):
+        feed_dict = {self.drops: drops}
+        for i in range(len(self.x)):
+            feed_dict[self.x[i]] = (indices[i], values[i], shapes[i])
+        return self.run([self.y, self.y_prob], feed_dict=feed_dict)
+
+    def __del__(self):
+        self.__sess.close()
+
+    def build_graph(self, **argv):
+        pass
+
+    def run(self, fetches, feed_dict=None):
+        return self.__sess.run(fetches, feed_dict)
+
+    def dump(self):
+        var_map = {}
+        for name, var in self.vars.iteritems():
+            var_map[name] = self.run(var)
+        pkl.dump(var_map, open(self.get_bin_path(), 'wb'))
+        print 'model dumped at', self.get_bin_path()
 
 
 # class logistic_regression(tf_classifier):
@@ -227,31 +261,31 @@ class multi_layer_perceptron(tf_classifier):
 
 
 class multiplex_neural_network(tf_classifier_multi):
-    def __init__(self, name, eval_metric, layer_sizes, layer_activates, opt_algo, learning_rate):
+    def __init__(self, name, eval_metric, layer_sizes, layer_activates, opt_algo, learning_rate, init_path=None):
         init_actions = []
         for i in range(len(layer_sizes[0])):
             init_actions.append(('w0_%d' % i, [layer_sizes[0][i], layer_sizes[1]], 'normal', tf.float32))
             init_actions.append(('b0_%d' % i, [layer_sizes[1]], 'zero', tf.float32))
         init_actions.append(('w1', [layer_sizes[1] * len(layer_sizes[0]), layer_sizes[2]], 'normal', tf.float32))
         init_actions.append(('b1', [layer_sizes[2]], 'zero', tf.float32))
-        print init_actions
         for i in range(2, len(layer_sizes) - 1):
             init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], 'normal', tf.float32))
             init_actions.append(('b%d' % i, [layer_sizes[i + 1]], 'zero', tf.float32))
         tf_classifier_multi.__init__(self, name, eval_metric, layer_sizes[-1], len(layer_sizes[0]),
                                      init_actions=init_actions,
-                                     num_input=len(layer_sizes[0]),
+                                     init_path=init_path,
                                      layer_activates=layer_activates,
                                      opt_algo=opt_algo,
                                      learning_rate=learning_rate)
 
-    def build_graph(self, num_input, layer_activates, opt_algo, learning_rate):
+    def build_graph(self, layer_activates, opt_algo, learning_rate):
+        num_input = self.get_num_input()
         w0 = [self.vars['w0_%d' % i] for i in range(num_input)]
         b0 = [self.vars['b0_%d' % i] for i in range(num_input)]
         l = tf.nn.dropout(
             activate(tf.concat(1, [tf.sparse_tensor_dense_matmul(self.x[i], w0[i]) + b0[i] for i in range(num_input)]),
                      layer_activates[0]), self.drops[0])
-        for i in range(1, len(self.vars) / 2 - num_input):
+        for i in range(1, len(self.vars) / 2 - num_input + 1):
             wi = self.vars['w%d' % i]
             bi = self.vars['b%d' % i]
             l = tf.nn.dropout(activate(tf.matmul(l, wi) + bi, layer_activates[i]), keep_prob=self.drops[i])

@@ -49,6 +49,9 @@ class feature:
         self.__size = size
         self.__indices = None
         self.__values = None
+        self.__sub_features = None
+        self.__sub_spaces = None
+        self.__sub_ranks = None
 
     def get_name(self):
         return self.__name
@@ -82,6 +85,24 @@ class feature:
 
     def get_size(self):
         return self.__size
+
+    def set_sub_features(self, sub_features):
+        self.__sub_features = sub_features
+
+    def get_sub_features(self):
+        return self.__sub_features
+
+    def set_sub_spaces(self, sub_spaces):
+        self.__sub_spaces = sub_spaces
+
+    def get_sub_spaces(self):
+        return self.__sub_spaces
+
+    def set_sub_ranks(self, sub_ranks):
+        self.__sub_ranks = sub_ranks
+
+    def get_sub_ranks(self):
+        return self.__sub_ranks
 
     def process(self, **argv):
         self.__indices, self.__values = self.__proc(**argv)
@@ -121,8 +142,26 @@ class feature:
                 size = None
             else:
                 size = int(size)
-
             self.__init__(self.__name, ftype, dtype, space, rank, size)
+
+    def load_meta_extra(self):
+        with open('../feature/' + self.__name, 'r') as fin:
+            meta = fin.readline().strip().split()
+            if len(meta) > 5:
+                extra = meta[5]
+                fea_names = extra.split(',')
+                spaces = []
+                ranks = []
+                for fn in fea_names:
+                    fea_tmp = feature(name=fn)
+                    fea_tmp.load_meta()
+                    spaces.append(fea_tmp.get_space())
+                    ranks.append(fea_tmp.get_rank())
+                self.set_sub_features(fea_names)
+                self.set_sub_spaces(spaces)
+                self.set_sub_ranks(ranks)
+                return True
+        return False
 
 
 class num_feature(feature):
@@ -135,10 +174,8 @@ class num_feature(feature):
             next(fin)
             data = [line.strip() for line in fin]
             values = map(str_2_value, data)
-
             values = np.array(values)
             indices = np.zeros_like(values, dtype=np.int64)
-
             self.set_value(indices=indices, values=values)
 
     def dump(self, extra=None):
@@ -168,7 +205,6 @@ class one_hot_feature(feature):
             values = map(str_2_value, map(lambda x: x[1], data))
             indices = np.array(indices)
             values = np.array(values)
-
             self.set_value(indices=indices, values=values)
 
     def dump(self, extra=None):
@@ -200,10 +236,9 @@ class multi_feature(feature):
                 entry = map(lambda x: x.split(':'), line.strip().split())
                 indices.append(np.array(map(str_2_value, map(lambda x: x[0], entry))))
                 values.append(map(str_2_value, map(lambda x: x[1], entry)))
-            indices = np.array(indices)
-            values = np.array(values)
-
-            self.set_value(indices=indices, values=values)
+        indices = np.array(indices)
+        values = np.array(values)
+        self.set_value(indices=indices, values=values)
 
     def dump(self, extra=None):
         feature.dump(self, extra)
