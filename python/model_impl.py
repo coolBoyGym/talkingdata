@@ -109,14 +109,13 @@ class tf_classifier(classifier):
         self.__sess.close()
 
     def build_graph(self, **argv):
-        # return None, None, None, None
         pass
 
-    def get_graph(self):
-        return self.__graph
-
-    def get_sess(self):
-        return self.__sess
+    # def get_graph(self):
+    #     return self.__graph
+    #
+    # def get_sess(self):
+    #     return self.__sess
 
     def run(self, fetches, feed_dict=None):
         return self.__sess.run(fetches, feed_dict)
@@ -138,22 +137,37 @@ class tf_classifier(classifier):
         print 'model dumped at', self.get_bin_path()
 
 
-class logistic_regression(tf_classifier):
-    def __init__(self, name, eval_metric, num_class, input_space, opt_algo, learning_rate, l1_w=0, l2_w=0, l2_b=0):
-        tf_classifier.__init__(self, name, eval_metric, num_class,
-                               [('w', [input_space, num_class], 'normal', tf.float32),
-                                ('b', [num_class], 'zero', tf.float32)],
-                               opt_algo=opt_algo, learning_rate=learning_rate, l1_w=l1_w, l2_w=l2_w, l2_b=l2_b)
+class tf_classifier_multi(tf_classifier):
+    def __init__(self, name, eval_metric, num_class, num_input, init_actions, init_path=None, stddev=0.01, minval=-0.01,
+                 maxval=0.01, **argv):
+        classifier.__init__(self, name, eval_metric, num_class)
+        self.__graph = tf.Graph()
+        with self.__graph.as_default():
+            self.x = [tf.sparse_placeholder(tf.float32) for i in range(num_input)]
+            self.y_true = tf.placeholder(tf.float32)
+            self.drops = tf.placeholder(tf.float32)
+            self.vars = init_var_map(init_actions, init_path, stddev=stddev, minval=minval, maxval=maxval)
+            self.__sess = tf.Session()
+            self.y, self.y_prob, self.loss, self.optimizer = self.build_graph(**argv)
+            tf.initialize_all_variables().run(session=self.__sess)
 
-    def build_graph(self, opt_algo, learning_rate, l1_w, l2_w, l2_b):
-        tf_classifier.build_graph(self)
-        w = self.vars['w']
-        b = self.vars['b']
-        y = tf.sparse_tensor_dense_matmul(self.x, w) + b
-        y_prob, loss = get_loss(self.get_eval_metric(), y, self.y_true)
-        loss += l1_w * get_l1_loss(w) + l2_w * tf.nn.l2_loss(w) + l2_b * tf.nn.l2_loss(b)
-        optimizer = get_optimizer(opt_algo, learning_rate, loss)
-        return y, y_prob, loss, optimizer
+
+# class logistic_regression(tf_classifier):
+#     def __init__(self, name, eval_metric, num_class, input_space, opt_algo, learning_rate, l1_w=0, l2_w=0, l2_b=0):
+#         tf_classifier.__init__(self, name, eval_metric, num_class,
+#                                [('w', [input_space, num_class], 'normal', tf.float32),
+#                                 ('b', [num_class], 'zero', tf.float32)],
+#                                opt_algo=opt_algo, learning_rate=learning_rate, l1_w=l1_w, l2_w=l2_w, l2_b=l2_b)
+#
+#     def build_graph(self, opt_algo, learning_rate, l1_w, l2_w, l2_b):
+#         tf_classifier.build_graph(self)
+#         w = self.vars['w']
+#         b = self.vars['b']
+#         y = tf.sparse_tensor_dense_matmul(self.x, w) + b
+#         y_prob, loss = get_loss(self.get_eval_metric(), y, self.y_true)
+#         loss += l1_w * get_l1_loss(w) + l2_w * tf.nn.l2_loss(w) + l2_b * tf.nn.l2_loss(b)
+#         optimizer = get_optimizer(opt_algo, learning_rate, loss)
+#         return y, y_prob, loss, optimizer
 
 
 class factorization_machine(tf_classifier):
@@ -162,12 +176,11 @@ class factorization_machine(tf_classifier):
         tf_classifier.__init__(self, name, eval_metric, num_class,
                                init_actions=[('w', [input_space, num_class], 'normal', tf.float32),
                                              ('v', [input_space, factor_order * num_class], 'normal', tf.float32),
-                                             ('b', [num_class], 'zero', tf.float32)], stddev=0.0001,
+                                             ('b', [num_class], 'zero', tf.float32)],
                                factor_order=factor_order, opt_algo=opt_algo, learning_rate=learning_rate,
                                l1_w=l1_w, l1_v=l1_v, l2_w=l2_w, l2_v=l2_v, l2_b=l2_b)
 
     def build_graph(self, factor_order, opt_algo, learning_rate, l1_w, l1_v, l2_w, l2_v, l2_b):
-        tf_classifier.build_graph(self, )
         x_square = tf.SparseTensor(self.x.indices, tf.square(self.x.values), self.x.shape)
         w = self.vars['w']
         v = self.vars['v']
@@ -189,20 +202,59 @@ class multi_layer_perceptron(tf_classifier):
         for i in range(len(layer_sizes) - 1):
             init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], 'normal', tf.float32))
             init_actions.append(('b%d' % i, [layer_sizes[i + 1]], 'zero', tf.float32))
+        print init_actions
         tf_classifier.__init__(self, name, eval_metric, layer_sizes[-1],
-                               init_actions=init_actions, stddev=0.01,
-                               layer_activates=layer_activates, opt_algo=opt_algo, learning_rate=learning_rate)
+                               init_actions=init_actions,
+                               layer_activates=layer_activates,
+                               opt_algo=opt_algo,
+                               learning_rate=learning_rate)
 
     def build_graph(self, layer_activates, opt_algo, learning_rate):
-        tf_classifier.build_graph(self)
         w0 = self.vars['w0']
         b0 = self.vars['b0']
         # self.dropouts = tf.placeholder(dtype=tf.float32, shape=[None])
-        l = activate(tf.sparse_tensor_dense_matmul(self.x, w0) + b0, layer_activates[0])
+        l = tf.nn.dropout(activate(tf.sparse_tensor_dense_matmul(self.x, w0) + b0, layer_activates[0]),
+                          keep_prob=self.drops[0])
+        print 0, layer_activates[0]
         for i in range(1, len(self.vars) / 2):
+            print i, layer_activates[i]
             wi = self.vars['w%d' % i]
             bi = self.vars['b%d' % i]
-            l = activate(tf.matmul(tf.nn.dropout(l, keep_prob=self.drops[i - 1]), wi) + bi, layer_activates[i])
+            l = tf.nn.dropout(activate(tf.matmul(l, wi) + bi, layer_activates[i]), keep_prob=self.drops[i])
+        y_prob, loss = get_loss(self.get_eval_metric(), l, self.y_true)
+        optimizer = get_optimizer(opt_algo, learning_rate, loss)
+        return l, y_prob, loss, optimizer
+
+
+class multiplex_neural_network(tf_classifier_multi):
+    def __init__(self, name, eval_metric, layer_sizes, layer_activates, opt_algo, learning_rate):
+        init_actions = []
+        for i in range(len(layer_sizes[0])):
+            init_actions.append(('w0_%d' % i, [layer_sizes[0][i], layer_sizes[1]], 'normal', tf.float32))
+            init_actions.append(('b0_%d' % i, [layer_sizes[1]], 'zero', tf.float32))
+        init_actions.append(('w1', [layer_sizes[1] * len(layer_sizes[0]), layer_sizes[2]], 'normal', tf.float32))
+        init_actions.append(('b1', [layer_sizes[2]], 'zero', tf.float32))
+        print init_actions
+        for i in range(2, len(layer_sizes) - 1):
+            init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], 'normal', tf.float32))
+            init_actions.append(('b%d' % i, [layer_sizes[i + 1]], 'zero', tf.float32))
+        tf_classifier_multi.__init__(self, name, eval_metric, layer_sizes[-1], len(layer_sizes[0]),
+                                     init_actions=init_actions,
+                                     num_input=len(layer_sizes[0]),
+                                     layer_activates=layer_activates,
+                                     opt_algo=opt_algo,
+                                     learning_rate=learning_rate)
+
+    def build_graph(self, num_input, layer_activates, opt_algo, learning_rate):
+        w0 = [self.vars['w0_%d' % i] for i in range(num_input)]
+        b0 = [self.vars['b0_%d' % i] for i in range(num_input)]
+        l = tf.nn.dropout(
+            activate(tf.concat(1, [tf.sparse_tensor_dense_matmul(self.x[i], w0[i]) + b0[i] for i in range(num_input)]),
+                     layer_activates[0]), self.drops[0])
+        for i in range(1, len(self.vars) / 2 - num_input):
+            wi = self.vars['w%d' % i]
+            bi = self.vars['b%d' % i]
+            l = tf.nn.dropout(activate(tf.matmul(l, wi) + bi, layer_activates[i]), keep_prob=self.drops[i])
         y_prob, loss = get_loss(self.get_eval_metric(), l, self.y_true)
         optimizer = get_optimizer(opt_algo, learning_rate, loss)
         return l, y_prob, loss, optimizer

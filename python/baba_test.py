@@ -1,9 +1,9 @@
-import numpy as np
 import xgboost as xgb
 
 import train_impl as ti
+from model_impl import multiplex_neural_network
 
-ti.init_constant(dataset='concat_7_norm', booster='factorization_machine', version=2, random_state=0)
+ti.init_constant(dataset='concat_6', booster='multi_layer_perceptron', version=3, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -61,8 +61,8 @@ if __name__ == '__main__':
     elif ti.BOOSTER == 'logistic_regression':
         pass
     elif ti.BOOSTER == 'factorization_machine':
-        dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
-        dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
+        dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
+        dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
         learning_rate = 0.01
         # gd, ftrl, adagrad, adadelta
         opt_algo = 'adagrad'
@@ -77,17 +77,18 @@ if __name__ == '__main__':
         early_stopping_round = 10
         for factor_order in [2, 4, 8, 16, 32, 64, 128]:
             ti.tune_factorization_machine(dtrain_train, dtrain_valid, factor_order, opt_algo, learning_rate, l1_w=l1_w,
-                                      l1_v=l1_v, l2_w=l2_w, l2_v=l2_v, l2_b=l2_b, num_round=num_round,
-                                      batch_size=batch_size, early_stopping_round=early_stopping_round, verbose=True,
-                                      save_log=True)
+                                          l1_v=l1_v, l2_w=l2_w, l2_v=l2_v, l2_b=l2_b, num_round=num_round,
+                                          batch_size=batch_size, early_stopping_round=early_stopping_round,
+                                          verbose=True,
+                                          save_log=True)
     elif ti.BOOSTER == 'multi_layer_perceptron':
-        dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
-        dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
+        dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
+        dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
         # dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1, False)
         # dtest = ti.read_feature(open(ti.PATH_TEST), -1, False)
         layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
         layer_activates = ['relu', None]
-        drops = [1, 1]
+        drops = [0.5, 0.5]
         opt_algo = 'gd'
         learning_rate = 0.2
         num_round = 500
@@ -98,32 +99,37 @@ if __name__ == '__main__':
         # for opt_algo in ['gd']:
         ti.tune_multi_layer_perceptron(dtrain_train, dtrain_valid, layer_sizes, layer_activates, opt_algo,
                                        learning_rate, drops, num_round=num_round, batch_size=batch_size,
-                                       early_stopping_round=10, verbose=True, save_log=True, save_model=True)
+                                       early_stopping_round=10, verbose=True, save_log=False, save_model=False)
 
         # ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
         #                                 num_round=num_round, batch_size=10000)
+    elif ti.BOOSTER == 'multiplex_neural_network':
+        mnn_model = multiplex_neural_network(ti.TAG, 'softmax_log_loss', layer_sizes=[[10, 20, 40], 10, 3],
+                                             layer_activates=['relu', None], opt_algo='gd', learning_rate=0.01)
+
     elif ti.BOOSTER == 'average':
-        model_name_list = ['concat_1_gblinear_1', 'concat_1_gbtree_1', 'concat_2_gblinear_1', 'concat_2_gbtree_1',
-                           'concat_2_norm_gblinear_1', 'concat_2_norm_gbtree_1', 'concat_4_gbtree_1',
-                           'concat_5_gbtree_1', 'concat_5_norm_gblinear_1', 'concat_5_norm_gbtree_1']
-
-        train_size = 59716
-        valid_size = 14929
-        train_labels, valid_labels = ti.get_labels(train_size, valid_size)
-        model_preds = ti.get_model_preds(model_name_list)
-
-        model_weights = np.array([0.01968983, 0.0391137, 0.01906632, 0.00886792, 0.0204471,
-                                  0.02016268, 0.25404595, 0.2369304, 0.22133675, 0.16033936, ])
-        model_weights /= model_weights.sum()
-        train_score, valid_score = ti.average_predict(model_preds, train_size=train_size, valid_size=valid_size,
-                                                      train_labels=train_labels, valid_labels=valid_labels,
-                                                      model_weights=model_weights)
-        print train_score, valid_score
-        # with open('../model/average_1.log', 'a') as fout:
-        #     while True:
-        #         model_weights = np.random.random([len(model_name_list)])
-        #         model_weights /= model_weights.sum()
-        #         train_score, valid_score = average_predict(model_preds, model_weights=model_weights)
-        #         print model_weights, train_score, valid_score
-        #         fout.write('\t'.join(map(lambda x: str(x), model_weights)) + '\t' + str(train_score) + '\t' + str(
-        #             valid_score) + '\n')
+        # model_name_list = ['concat_1_gblinear_1', 'concat_1_gbtree_1', 'concat_2_gblinear_1', 'concat_2_gbtree_1',
+        #                    'concat_2_norm_gblinear_1', 'concat_2_norm_gbtree_1', 'concat_4_gbtree_1',
+        #                    'concat_5_gbtree_1', 'concat_5_norm_gblinear_1', 'concat_5_norm_gbtree_1']
+        #
+        # train_size = 59716
+        # valid_size = 14929
+        # train_labels, valid_labels = ti.get_labels(train_size, valid_size)
+        # model_preds = ti.get_model_preds(model_name_list)
+        #
+        # model_weights = np.array([0.01968983, 0.0391137, 0.01906632, 0.00886792, 0.0204471,
+        #                           0.02016268, 0.25404595, 0.2369304, 0.22133675, 0.16033936, ])
+        # model_weights /= model_weights.sum()
+        # train_score, valid_score = ti.average_predict(model_preds, train_size=train_size, valid_size=valid_size,
+        #                                               train_labels=train_labels, valid_labels=valid_labels,
+        #                                               model_weights=model_weights)
+        # print train_score, valid_score
+        # # with open('../model/average_1.log', 'a') as fout:
+        # #     while True:
+        # #         model_weights = np.random.random([len(model_name_list)])
+        # #         model_weights /= model_weights.sum()
+        # #         train_score, valid_score = average_predict(model_preds, model_weights=model_weights)
+        # #         print model_weights, train_score, valid_score
+        # #         fout.write('\t'.join(map(lambda x: str(x), model_weights)) + '\t' + str(train_score) + '\t' + str(
+        # #             valid_score) + '\n')
+        pass

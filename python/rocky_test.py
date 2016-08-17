@@ -68,10 +68,10 @@ if __name__ == '__main__':
         # ti.train_rdforest(wXtrain, wtrain_labels, Xtest, n_estimators=100)
 
     elif ti.BOOSTER == 'multi_layer_perceptron':
-        dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
-        dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
-        dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1, False)
-        dtest = ti.read_feature(open(ti.PATH_TEST), -1, False)
+        dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
+        dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
+        dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1)
+        dtest = ti.read_feature(open(ti.PATH_TEST), -1)
         layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
         layer_activates = ['relu','relu', None]
         drops = [0.5, 0.5]

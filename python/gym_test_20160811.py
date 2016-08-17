@@ -82,8 +82,8 @@ if __name__ == '__main__':
         pass
 
     elif ti.BOOSTER == 'multi_layer_perceptron':
-        train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
-        valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
+        train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
+        valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
         learning_rate = 0.2
         layer_activates = ['relu', None]
         drops = [0.5, 0.5]
@@ -101,8 +101,8 @@ if __name__ == '__main__':
                                            verbose=True, save_log=True)
 
     elif ti.BOOSTER == 'factorization_machine':
-        train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
-        valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
+        train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
+        valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
         learning_rate = 0.3
         # gd, ftrl, adagrad, adadelta
         opt_algo = 'gd'
