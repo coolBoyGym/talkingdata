@@ -3,6 +3,8 @@ import cPickle as pkl
 import numpy as np
 import seaborn as sns
 
+import re
+
 sns.set_style('darkgrid')
 
 data_app_events = '../data/raw/app_events.csv'
@@ -108,6 +110,8 @@ def make_app_id():
 
 
 def aggregate_app_label():
+    # data_app_labels = '../data/raw/app_labels.csv'
+    # each app is connected with one set, the items in the set are app labels this app has.
     data = np.loadtxt(data_app_labels, delimiter=',', skiprows=1, dtype=np.int64)
     print data.shape
 
@@ -128,6 +132,157 @@ def aggregate_app_label():
 
     pkl.dump(dict_app_label, open('../data/dict_app_label.pkl', 'wb'))
 
+
+def aggregate_label_category():
+    # data_label_categories = '../data/raw/label_categories.csv'
+    data = np.loadtxt(data_label_categories, delimiter=',', skiprows=1, dtype=[('label_id', int), ('category', 'S100')])
+    # print data.shape
+
+    dict_label = pkl.load(open('../data/dict_id_label.pkl'))
+    dict_label_category = {}
+
+    for i in range(len(data)):
+        label_id, label_category = data[i]
+        if label_id in dict_label:
+            lid = dict_label[label_id]
+            dict_label_category[lid] = change_group_name_2_number(change_category_2_group(label_category))
+
+    pkl.dump(dict_label_category, open('../data/dict_label_category_group_number.pkl', 'wb'))
+
+def change_group_name_2_number(x):
+    if x == 'Games':
+        return 0
+    elif x == 'Property':
+        return 1
+    elif x == 'Industry tag':
+        return 2
+    elif x == 'Custom':
+        return 3
+    elif x == 'Tencent':
+        return 4
+    elif x == 'Other':
+        return 5
+    elif x == 'Finance':
+        return 6
+    elif x == 'Fun':
+        return 7
+    elif x == 'Services':
+        return 8
+    elif x == 'Family':
+        return 9
+    elif x == 'Productivity':
+        return 10
+    elif x == 'Religion':
+        return 11
+    elif x == 'Video':
+        return 12
+    elif x == 'Travel':
+        return 13
+    elif x == 'Education':
+        return 14
+    elif x == 'Vitality':
+        return 15
+    elif x == 'Shopping':
+        return 16
+    elif x == 'Sports':
+        return 17
+    elif x == 'Music':
+        return 18
+    else:
+        return 5
+
+def change_category_2_group(x):
+    if re.search('([gG]am)|([pP]oker)|([cC]hess)|([pP]uzz)|([bB]all)|([pP]ursu)|([fF]ight)|([sS]imulat)|([sS]hoot)',
+                 x) is not None:
+        return('Games')
+    # Then I went through existing abbreviations like RPG, MMO and so on
+    elif re.search('(RPG)|(SLG)|(RAC)|(MMO)|(MOBA)', x) is not None:
+        return('Games')
+    # Still small list of items left which is not covered by regex
+    elif x in ['billards', 'World of Warcraft', 'Tower Defense', 'Tomb', 'Ninja', 'Europe and Fantasy', 'Senki',
+             'Shushan', 'Lottery ticket', 'majiang', 'tennis', 'Martial arts']:
+        return('Games')
+    elif x in ['Property Industry 2.0', 'Property Industry new', 'Property Industry 1.0']:
+        return('Property')
+    elif re.search('([eE]state)', x) is not None:
+        return('Property')
+    elif re.search('([fF]amili)|([mM]othe)|([fF]athe)|(bab)|([rR]elative)|([pP]regnan)|([pP]arent)|([mM]arriag)|([lL]ove)',
+                 x) is not None:
+        return('Family')
+    elif re.search('([fF]un)|([cC]ool)|([tT]rend)|([cC]omic)|([aA]nima)|([pP]ainti)|\
+                 ([fF]iction)|([pP]icture)|(joke)|([hH]oroscope)|([pP]assion)|([sS]tyle)|\
+                 ([cC]ozy)|([bB]log)', x) is not None:
+        return('Fun')
+    elif x in ['Parkour avoid class', 'community', 'Enthusiasm', 'cosplay', 'IM']:
+        return('Fun')
+    elif x == 'Personal Effectiveness 1' or x == 'Personal Effectiveness':
+        return('Productivity')
+    elif re.search('([iI]ncome)|([pP]rofitabil)|([lL]iquid)|([rR]isk)|([bB]ank)|([fF]uture)|([fF]und)|([sS]tock)|([sS]hare)',
+                 x) is not None:
+        return('Finance')
+    elif re.search('([fF]inanc)|([pP]ay)|(P2P)|([iI]nsura)|([lL]oan)|([cC]ard)|([mM]etal)|\
+                  ([cC]ost)|([wW]ealth)|([bB]roker)|([bB]usiness)|([eE]xchange)', x) is not None:
+        return('Finance')
+    elif x in ['High Flow', 'Housekeeping', 'Accounting', 'Debit and credit', 'Recipes', 'Heritage Foundation', 'IMF',]:
+        return('Finance')
+    elif x == 'And the Church':
+        return ('Religion')
+    elif re.search('([sS]ervice)', x) is not None:
+        return('Services')
+    elif re.search('([aA]viation)|([aA]irlin)|([bB]ooki)|([tT]ravel)|\
+                  ([hH]otel)|([tT]rain)|([tT]axi)|([rR]eservati)|([aA]ir)|([aA]irport)', x) is not None:
+        return('Travel')
+    elif re.search('([jJ]ourne)|([tT]ransport)|([aA]ccommodat)|([nN]avigat)|([tT]ouris)|([fF]light)|([bB]us)', x) is not None:
+        return('Travel')
+    elif x in ['High mobility', 'Destination Region', 'map', 'Weather', 'Rentals']:
+        return('Travel')
+    elif re.search('([cC]ustom)', x) is not None:
+        return('Custom')
+    elif x in ['video', 'round', 'the film', 'movie']:
+        return('Video')
+    elif x in ['Smart Shopping', 'online malls', 'online shopping by group, like groupon', 'takeaway ordering',
+             'online shopping, price comparing', 'Buy class', 'Buy', 'shopping sharing',
+             'Smart Shopping 1', 'online shopping navigation']:
+        return('Shopping')
+    elif re.search('([eE]ducati)|([rR]ead)|([sS]cienc)|([bB]ooks)', x) is not None:
+        return('Education')
+    elif x in ['literature', 'Maternal and child population', 'psychology', 'exams', 'millitary and wars', 'news',
+             'foreign language', 'magazine and journal', 'dictionary', 'novels', 'art and culture', 'Entertainment News',
+             'College Students', 'math', 'Western Mythology', 'Technology Information', 'study abroad',
+             'Chinese Classical Mythology']:
+        return('Education')
+    elif x in ['vitality', '1 vitality']:
+        return('Vitality')
+    elif x in [ 'sports and gym', 'Health Management', 'Integrated Living', 'Medical', 'Free exercise', 'A beauty care',
+             'fashion', 'fashion outfit', 'lose weight', 'health', 'Skin care applications', 'Wearable Health']:
+        return('Vitality')
+    elif x in ['sports', 'Sports News']:
+        return ('Sports')
+    elif x == 'music':
+        return ('Music')
+    elif re.search('([hH]otel)', x) is not None:
+        return('Travel')
+    elif x in ['1 free', 'The elimination of class', 'unknown', 'free', 'comfortable', 'Cozy 1', 'other',
+               'Total Cost 1', 'Classical 1', 'Quality 1', 'classical', 'quality', 'Car Owners', 'Noble 1',
+               'Pirated content', 'Securities', 'professional skills', 'Jobs', 'Reputation', 'Simple 1', '1 reputation',
+               'Condition of the vehicles', 'magic', 'Internet Securities', 'weibo', 'Housing Advice', 'notes', 'farm',
+               'Nature 1', 'Total Cost', 'Sea Amoy', 'show', 'Car', 'pet raising up', 'dotal-lol', 'Express',
+               'radio', 'Occupational identity', 'Utilities', 'Trust', 'Contacts', 'Simple', 'Automotive News',
+               'Sale of cars', 'File Editor', 'network disk', 'class managemetn', 'management', 'natural',
+               'Points Activities', 'Decoration', 'store management', 'Maternal and child supplies', 'Tour around',
+               'coupon', 'User Community', 'Vermicelli', 'noble', 'poetry', 'Antique collection', 'Reviews',
+               'Scheduling', 'Beauty Nail', 'shows', 'Hardware Related', 'Smart Home', 'Sellers',
+               'Desktop Enhancements',
+               'library', 'entertainment', 'Calendar', 'Ping', 'System Tools', 'KTV', 'Behalf of the drive',
+               'household products', 'Information', 'Man playing favorites', 'App Store', 'Engineering Drawing',
+               'Academic Information', 'Appliances', 'Peace - Search', 'Make-up application', 'WIFI', 'phone',
+               'Doctors',
+               'Smart Appliances', 'reality show', 'Harem', 'trickery', 'Jin Yong', 'effort', 'Xian Xia', 'Romance',
+               'tribe', 'email', 'mesasge', 'Editor', 'Clock', 'search', 'Intelligent hardware', 'Browser',
+               'Furniture']:
+        return('Other')
+    else:
+        return x
 
 # def stat_app_label():
 #     dict1 = pkl.load(open('../data/app_label_dict1.pkl', 'rb'))
@@ -399,4 +554,5 @@ def aggregate_app_event():
 
 
 if __name__ == '__main__':
-    build_event_dict()
+    # build_event_dict()
+    aggregate_label_category()
