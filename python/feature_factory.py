@@ -102,8 +102,8 @@ fea_device_weekday_event_num_norm = feature.multi_feature(name='device_weekday_e
 fea_device_weekday_event_num_freq = feature.multi_feature(name='device_weekday_event_num_freq', dtype='f')
 
 # two new features
-fea_active_app_label_group_freq = feature.multi_feature(name='active_app_label_group_freq', dtype='f')
-fea_active_app_label_group_diff_hour_freq = feature.multi_feature(name='active_app_label_group_diff_hour_freq', dtype='f')
+fea_active_app_label_category = feature.multi_feature(name='active_app_label_category', dtype='d')
+fea_active_app_label_diff_hour_category = feature.multi_feature(name='active_app_label_diff_hour_category', dtype='f')
 
 """
 event features
@@ -317,15 +317,15 @@ def make_feature():
     # fea_device_hour_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
     # fea_device_hour_event_num_freq.dump()
 
-    # fea_active_app_label_group_freq.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                         dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-    #                                         dict_label_category_group=dict_label_category_group)
-    # fea_active_app_label_group_freq.dump()
+    # fea_active_app_label_category.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                       dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+    #                                       dict_label_category_group=dict_label_category_group)
+    # fea_active_app_label_category.dump()
 
-    fea_active_app_label_group_diff_hour_freq.process(device_id=device_id, dict_device_event=dict_device_event,
-                                                      dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-                                                      dict_label_category_group=dict_label_category_group)
-    fea_active_app_label_group_diff_hour_freq.dump()
+    fea_active_app_label_diff_hour_category.process(device_id=device_id, dict_device_event=dict_device_event,
+                                                    dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+                                                    dict_label_category_group=dict_label_category_group)
+    fea_active_app_label_diff_hour_category.dump()
 
 
 def ensemble_concat_feature(name, fea_list):
@@ -648,7 +648,13 @@ if __name__ == '__main__':
     #                              fea_installed_app,
     #                              fea_installed_app_label,
     #                              fea_active_app_label_group_freq])
-
+    #
+    # concat_feature('concat_12', [fea_phone_brand,
+    #                              fea_device_model,
+    #                              fea_installed_app,
+    #                              fea_installed_app_label,
+    #                              fea_active_app_label_diff_hour_category])
+    #
     # concat_feature('concat_6_ensemble',[fea_concat_6, fea_ensemble_test])
 
     # split_dataset('concat_8', 0.2, zero_pad=True)
@@ -681,7 +687,7 @@ if __name__ == '__main__':
     #                               fea_concat_6])
     #
     # split_dataset('ensemble_4', 0.2, zero_pad=True)
-    split_dataset('concat_11', 0.2, zero_pad=True)
+    split_dataset('concat_12', 0.2, zero_pad=True)
     # make_feature()
 
     # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
