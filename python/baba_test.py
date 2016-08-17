@@ -3,7 +3,7 @@ import xgboost as xgb
 
 import train_impl as ti
 
-ti.init_constant(dataset='ensemble_4', booster='multi_layer_perceptron', version=1, random_state=0)
+ti.init_constant(dataset='concat_7_norm', booster='factorization_machine', version=2, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -63,19 +63,20 @@ if __name__ == '__main__':
     elif ti.BOOSTER == 'factorization_machine':
         dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
         dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
-        learning_rate = 0.1
+        learning_rate = 0.01
         # gd, ftrl, adagrad, adadelta
-        opt_algo = 'gd'
+        opt_algo = 'adagrad'
         factor_order = 10
         l1_w = 0
         l1_v = 0
-        l2_w = 1
-        l2_v = 1
+        l2_w = 0
+        l2_v = 0
         l2_b = 0
         num_round = 200
         batch_size = 10000
         early_stopping_round = 10
-        ti.tune_factorization_machine(dtrain_train, dtrain_valid, factor_order, opt_algo, learning_rate, l1_w=l1_w,
+        for factor_order in [2, 4, 8, 16, 32, 64, 128]:
+            ti.tune_factorization_machine(dtrain_train, dtrain_valid, factor_order, opt_algo, learning_rate, l1_w=l1_w,
                                       l1_v=l1_v, l2_w=l2_w, l2_v=l2_v, l2_b=l2_b, num_round=num_round,
                                       batch_size=batch_size, early_stopping_round=early_stopping_round, verbose=True,
                                       save_log=True)
@@ -86,7 +87,7 @@ if __name__ == '__main__':
         # dtest = ti.read_feature(open(ti.PATH_TEST), -1, False)
         layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
         layer_activates = ['relu', None]
-        drops = [0.5, 0.5]
+        drops = [1, 1]
         opt_algo = 'gd'
         learning_rate = 0.2
         num_round = 500

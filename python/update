@@ -150,6 +150,43 @@ submission:
             layer_activates = ['relu', None]
             drops = [0.5, 0.5]
             learning_rate = 0.2
-            num_round = 470
             345	2.184544	2.184539	2.257029
-        ensemble_4_mlp_1:
+        ensemble_4_mlp_1
+
+2016/8/17:
+feature:
+    gym:
+        time_label_group:
+        concat_11:
+        concat_12:
+
+model:
+    baba:
+        fnn
+
+submission:
+    rocky:
+        concat_7_norm:
+            gblinear:
+            gbtree:
+            mlp:
+
+        random_forest:
+
+        blending:
+
+    gym:
+        concat_10_norm:
+            gblinear:
+            gbtree:
+            mlp:
+
+    baba:
+        concat_6:
+            fm:
+
+        concat_7_norm:
+            fm:
+
+        concat_10_norm:
+            fm:
