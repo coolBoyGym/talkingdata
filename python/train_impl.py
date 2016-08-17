@@ -109,7 +109,7 @@ def train_rdforest(Xtrain, train_labels, Xtest, n_estimators=10, max_depth=None,
     make_submission(test_pred)
 
 
-def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, gblinear_lambda_bias=0, verbose_eval=True,
+def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, verbose_eval=True,
                   early_stopping_rounds=50, dtest=None):
     global BOOSTER, RANDOM_STATE
     num_boost_round = 1000
@@ -119,7 +119,6 @@ def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, gblinear_
         'silent': 1,
         'num_class': 12,
         'lambda': gblinear_lambda,
-        'lambda_bias': gblinear_lambda_bias,
         'alpha': gblinear_alpha,
         'objective': 'multi:softprob',
         'seed': RANDOM_STATE,
