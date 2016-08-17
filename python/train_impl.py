@@ -117,6 +117,18 @@ def train_rdforest(Xtrain, train_labels, Xtest, n_estimators=10, max_depth=None,
     test_pred = np.transpose(np.array(map(lambda x: x[:, 0], test_pred))) / (NUM_CLASS - 1)
     make_submission(test_pred)
 
+def ensemble_rdforest(Xtrain, train_labels, Xvalid, valid_labels, n_estimators=10, max_depth=None, max_features='auto', dtest=None):
+    clf = RandomForestClassifier(n_estimators=n_estimators, n_jobs=4, max_depth=max_depth,
+                                 max_features=max_features)
+    clf.fit(Xtrain, train_labels)
+    train_pred = clf.predict_proba(Xtrain)
+    train_score = log_loss(train_labels, train_pred)
+    valid_pred = clf.predict_proba(Xvalid)
+    valid_score = log_loss(valid_labels, valid_pred)
+    print 'n_estimators', n_estimators, 'max_depth', max_depth, 'max_features', max_features, train_score, valid_score
+    test_pred = clf.predict_proba(dtest)
+    fea_out = get_feature_model_output(train_pred, valid_pred, test_pred)
+    return fea_out
 
 def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, verbose_eval=True,
                   early_stopping_rounds=50, dtest=None):
@@ -827,21 +839,38 @@ if __name__ == '__main__':
     fin = open(PATH_TRAIN_VALID, 'r')
     valid_indices, valid_values, valid_shape, valid_labels = read_csr_feature(fin, -1)
     Xvalid = csr_matrix((valid_values, (valid_indices[:, 0], valid_indices[:, 1])), shape=valid_shape)
+    fin = open(PATH_TEST, 'r')
+    test_indices, test_values, test_shape, test_labels = read_csr_feature(fin, -1)
+    Xtest = csr_matrix((test_values, (test_indices[:, 0], test_indices[:, 1])), shape=test_shape)
+    fin = open(PATH_TRAIN, 'r')
+    wtrain_indices, wtrain_values, wtrain_shape, wtrain_labels = read_csr_feature(fin, -1)
+    wXtrain = csr_matrix((wtrain_values, (wtrain_indices[:, 0], wtrain_indices[:, 1])), shape=wtrain_shape)
 
-    clf = RandomForestClassifier(n_estimators=200, n_jobs=8, max_depth=None)
-    clf.fit(Xtrain, train_labels)
-    train_pred = clf.predict_proba(Xtrain)
-    train_pred = np.transpose(np.array(map(lambda x: x[:, 0], train_pred)))
+    n_estimators = 1000
+    max_depth = 40
+    max_features = 0.1
 
-    train_pred = np.array(map(lambda x: np.exp(x) / np.sum(np.exp(x)), train_pred))
+    # for n_estimators in [1000, 2000, 3000]:
+    #     for max_depth in [40, 50 ,60 ,70]:
+    #         for max_features in [0.05, 0.1, 0.2]:
+    clf = RandomForestClassifier(n_estimators=n_estimators, n_jobs=4, max_depth=max_depth,
+                                             max_features=max_features)
+    wtrain_labels_1 = label_2_group_id(wtrain_labels)
+    clf.fit(wXtrain, wtrain_labels_1)
+    train_pred = clf.predict_proba(wXtrain)
+    # print train_pred
+    # train_pred = np.transpose(np.array(map(lambda x: x[:, 0], train_pred)))
+    #
+    # train_pred = np.array(map(lambda x: np.exp(x) / np.sum(np.exp(x)), train_pred))
 
-    # train_pred = np.transpose(np.array(map(lambda x: x[:, 0], train_pred))) / (NUM_CLASS-1)
-    train_score = log_loss(train_labels, train_pred)
+    train_score = log_loss(wtrain_labels, train_pred)
     valid_pred = clf.predict_proba(Xvalid)
-    valid_pred = np.transpose(np.array(map(lambda x: x[:, 0], valid_pred)))
+    # print valid_pred
+    # valid_pred = np.transpose(np.array(map(lambda x: x[:, 0], valid_pred)))
+    #
+    # valid_pred = np.array(map(lambda x: np.exp(x) / np.sum(np.exp(x)), valid_pred))
 
-    valid_pred = np.array(map(lambda x: np.exp(x) / np.sum(np.exp(x)), valid_pred))
-
-    # valid_pred = np.transpose(np.array(map(lambda x: x[:, 0], valid_pred))) / (NUM_CLASS-1)
     valid_score = log_loss(valid_labels, valid_pred)
-    print train_score, valid_score
+    print 'n_estimators', n_estimators, 'max_depth', max_depth, 'max_features', max_features, train_score, valid_score
+    test_pred = clf.predict_proba(Xtest)
+    make_submission(test_pred)

@@ -46,3 +46,12 @@ first layer 800
 second layer 500, 800, 1500, 2000, 3000
 lr=0.5
 差别不大 均在2.275附近，曲线也近似
+
+
+
+concat_7_norm gbtree
+max_depth 7 eta 0.05 subsample 0.8 colsample_bytree 0.5 1.89917527015 2.27997448448
+
+500, lr=0.2
+[364]	train_score: 2.195357	valid_score: 2.261290
+

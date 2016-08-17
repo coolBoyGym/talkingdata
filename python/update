@@ -170,6 +170,27 @@ feature:
 model:
 
 submission:
+    rocky:
+        concat_6
+        (100,10) lr=0.5
+        [137]	train_score: 2.369727	valid_score: 2.365398
+        (100,20) lr=0.5
+        [141]	train_score: 2.362218	valid_score: 2.358099
+        (100,50) lr=0.5
+        [181]	train_score: 2.322096	valid_score: 2.328415
+        (100,100) lr=0.5
+        [158]	train_score: 2.306684	valid_score: 2.312795
+        (100,80) lr=0.5
+        [362]	train_score: 2.320007	valid_score: 2.329979
+        (100,120) lr=0.5
+        [348]	train_score: 2.312351	valid_score: 2.321759
+        (100,150) lr=0.5
+        [391]	train_score: 2.284677	valid_score: 2.295818
+
+        first layer 800
+        second layer 500, 800, 1500, 2000, 3000
+        lr=0.5
+        差别不大 均在2.275附近，曲线也近似
     baba:
         ensemble_3_mlp_1:
             layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
@@ -180,6 +201,7 @@ submission:
         ensemble_4_mlp_1
 
 2016/8/17:
+19 days left
 feature:
     gym:
         time_label_group:
@@ -195,9 +217,22 @@ submission:
         concat_7_norm:
             gblinear:
             gbtree:
+                max_depth=7, eta=0.05, subsample=0.8, colsample_bytree=0.5
+                train_logloss=1.89917527015, valid_losloss=2.27997448448
+                score=2.26694
             mlp:
+                layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+                layer_activates = ['relu', None]
+                drops = [0.5, 0.5]
+                learning_rate = 0.2
+                [444]	train_score: 2.211561	valid_score: 2.259309
+                score=2.24387
 
-        random_forest:
+        concat_6
+            random_forest:
+                n_estimators=1000 max_depth=40 max_features=0.1
+                1.78502652928 2.30420502512
+                score=2.29714
 
         blending:
 
