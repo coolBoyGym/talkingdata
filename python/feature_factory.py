@@ -180,8 +180,6 @@ def make_feature():
     # dict_model = pkl.load(open('../data/dict_id_model.pkl', 'rb'))
     # dict_app = pkl.load(open('../data/dict_id_app.pkl', 'rb'))
 
-    print 'finish in %d sec' % (time.time() - start_time)
-
     # for i in range(3):
     #     print dict_device_event[i]
     #     print "\nA new one!\n"
@@ -189,6 +187,8 @@ def make_feature():
     # exit(0)
 
     device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
+
+    print 'finish in %d sec' % (time.time() - start_time)
 
     # fea_phone_brand.process(device_id=device_id, dict_device_brand_model=dict_device_brand_model)
     # fea_phone_brand.dump()
@@ -309,6 +309,8 @@ def make_feature():
     # fea_device_weekday_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
     # fea_device_weekday_event_num_freq.dump()
 
+    # fea_device_hour_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
+    # fea_device_hour_event_num_freq.dump()
     fea_device_hour_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
     fea_device_hour_event_num_freq.dump()
 
@@ -460,6 +462,30 @@ def split_dataset(name, cv_rate, zero_pad=False):
                 train_out.write(line)
 
     print 'train_size', train_size, 'valid_size', valid_size, 'test_size', test_size
+
+
+# def get_hour_event_num_distribution(device_id, dict_device_event):
+#     tmp = {}
+#     for did in device_id:
+#         if did in dict_device_event:
+#             hours = map(lambda x: get_time(x[1], ['hour'])[0], dict_device_event[did])
+#             for d in hours:
+#                 if d in tmp:
+#                     tmp[d] += 1
+#                 else:
+#                     tmp[d] = 1
+#
+#     sum_tmp = 0.0
+#     for k in tmp.keys():
+#         sum_tmp += tmp[k]
+#     res = {}
+#     for i in range(len(tmp)):
+#         res[i] = tmp[i] / sum_tmp
+#
+#     sorted_tmp = sorted(res.keys())
+#     indices = sorted_tmp
+#     values = map(lambda x: res[x], sorted_tmp)
+#     return indices, tmp, values
 
 
 if __name__ == '__main__':
@@ -636,7 +662,13 @@ if __name__ == '__main__':
     #                               fea_concat_6])
     #
     # split_dataset('ensemble_4', 0.2, zero_pad=True)
-    split_dataset('concat_7_norm', 0.2, zero_pad=True)
-    #
+    split_dataset('ensemble_3', 0.2, zero_pad=True)
     # make_feature()
-    pass
+
+    # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
+    # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
+    #
+    # indices, res, num = get_hour_event_num_distribution(device_id=device_id, dict_device_event=dict_device_event)
+    # print indices
+    # print res
+    # print num
