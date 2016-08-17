@@ -106,6 +106,10 @@ submission:
                                 round=673, lambda=1, alpha=0.1, rate=0.2}
                              valid_score=2.2813284161, real_score=not yet, concat_7_gbtree
 
+        concat_10, gbtree, {max_depth=3, eta=0.1, subsample=0.6, colsample=0.8, early_stop_round=30,
+                                round=512, lambda=1, alpha=0.1, rate=0.2}
+                             valid_score=2.28447753216, real_score=not yet, concat_10_gbtree
+
 2016/8/14 Sun.
 
 2016/8/15 Mon.
@@ -113,6 +117,11 @@ submission:
 feature:
 
 model:
+    baba:
+        blending
+        bagging
+
+submission:
 
 submission:
     baba:
@@ -133,6 +142,26 @@ submission:
 
     gym:
         mlp on other features
+
+        concat_6_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 0.5]
+            learning_rate = 0.2
+            num_round = 500
+            457	2.207887	2.207884	2.258564
+            score:not yet
+
+        concat_10_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 0.5]
+            learning_rate = 0.2
+            [475]	train_score: 2.202560	valid_score: 2.258602
+            score:not yet
+
+
+
 
 2016/8/16:
 
@@ -175,12 +204,6 @@ submission:
 
         blending:
 
-    gym:
-        concat_10_norm:
-            gblinear:
-            gbtree:
-            mlp:
-
     baba:
         concat_6:
             fm:
@@ -190,3 +213,26 @@ submission:
 
         concat_10_norm:
             fm:
+
+    gym:
+        ensemble_3_mlp_1:
+            layer_sizes = [ti.SPACE, 90, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 0.5]
+            learning_rate = 0.2
+            num_round = 500
+            327	2.189949	2.189951	2.257159
+
+        concat_10_gblinear_1:
+            alpha 0.1 lambda 45 2.16418639228 2.27902957404
+
+        concat_10_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 0.5]
+            learning_rate = 0.2
+            num_round = 500
+
+
+
+

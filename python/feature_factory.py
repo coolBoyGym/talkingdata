@@ -134,6 +134,8 @@ fea_concat_8 = feature.multi_feature(name='concat_8', dtype='d')
 fea_concat_8_norm = feature.multi_feature(name='concat_8_norm', dtype='f')
 fea_concat_9 = feature.multi_feature(name='concat_9', dtype='d')
 fea_concat_9_norm = feature.multi_feature(name='concat_9_norm', dtype='f')
+fea_ensemble_test = feature.multi_feature(name='ensmeble_test', dtype='f')
+
 # fea_concat_1 = feature.multi_feature(name='concat_1', dtype='f')
 # fea_concat_2 = feature.multi_feature(name='concat_2', dtype='f')
 # fea_concat_3 = feature.multi_feature(name='concat_3', dtype='f')
@@ -178,8 +180,6 @@ def make_feature():
     # dict_model = pkl.load(open('../data/dict_id_model.pkl', 'rb'))
     # dict_app = pkl.load(open('../data/dict_id_app.pkl', 'rb'))
 
-    print 'finish in %d sec' % (time.time() - start_time)
-
     # for i in range(3):
     #     print dict_device_event[i]
     #     print "\nA new one!\n"
@@ -187,6 +187,8 @@ def make_feature():
     # exit(0)
 
     device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
+
+    print 'finish in %d sec' % (time.time() - start_time)
 
     # fea_phone_brand.process(device_id=device_id, dict_device_brand_model=dict_device_brand_model)
     # fea_phone_brand.dump()
@@ -307,8 +309,52 @@ def make_feature():
     # fea_device_weekday_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
     # fea_device_weekday_event_num_freq.dump()
 
+    # fea_device_hour_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
+    # fea_device_hour_event_num_freq.dump()
     fea_device_hour_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
     fea_device_hour_event_num_freq.dump()
+
+def ensemble_concat_feature(name, fea_list):
+    spaces = []
+    for fea in fea_list:
+        spaces.append(fea.get_space())
+    print 'spaces', str(spaces)
+
+    fea_concat = feature.multi_feature(name=name)
+
+    collect_indices = []
+    collect_values = []
+
+    for i in range(len(fea_list)):
+        fea = fea_list[i]
+        concat_indices, concat_values = fea.get_value()
+        concat_indices += sum(spaces[:i])
+        collect_indices.append(concat_indices)
+        collect_values.append(concat_values)
+
+    concat_indices = []
+    concat_values = []
+    for i in range(fea_list[0].get_size()):
+        tmp_indices = []
+        tmp_values = []
+        for j in range(len(fea_list)):
+            tmp_indices.extend(feature.get_array(collect_indices[j][i]))
+            tmp_values.extend(feature.get_array(collect_values[j][i]))
+        concat_indices.append(np.array(tmp_indices))
+        concat_values.append(tmp_values)
+
+    concat_indices = np.array(concat_indices)
+    concat_values = np.array(concat_values)
+
+    fea_concat.set_value(indices=concat_indices, values=concat_values)
+    max_indices = map(feature.get_max, concat_indices)
+    len_indices = map(lambda x: len(x), concat_values)
+    fea_concat.set_space(max(max_indices) + 1)
+    fea_concat.set_rank(max(len_indices))
+    fea_concat.set_size(len(concat_indices))
+
+    return fea_concat
+
 
 
 def concat_feature(name, fea_list):
@@ -416,6 +462,30 @@ def split_dataset(name, cv_rate, zero_pad=False):
                 train_out.write(line)
 
     print 'train_size', train_size, 'valid_size', valid_size, 'test_size', test_size
+
+
+# def get_hour_event_num_distribution(device_id, dict_device_event):
+#     tmp = {}
+#     for did in device_id:
+#         if did in dict_device_event:
+#             hours = map(lambda x: get_time(x[1], ['hour'])[0], dict_device_event[did])
+#             for d in hours:
+#                 if d in tmp:
+#                     tmp[d] += 1
+#                 else:
+#                     tmp[d] = 1
+#
+#     sum_tmp = 0.0
+#     for k in tmp.keys():
+#         sum_tmp += tmp[k]
+#     res = {}
+#     for i in range(len(tmp)):
+#         res[i] = tmp[i] / sum_tmp
+#
+#     sorted_tmp = sorted(res.keys())
+#     indices = sorted_tmp
+#     values = map(lambda x: res[x], sorted_tmp)
+#     return indices, tmp, values
 
 
 if __name__ == '__main__':
@@ -560,6 +630,8 @@ if __name__ == '__main__':
     #                              fea_device_hour_event_num_freq,
     #                              fea_device_weekday_event_num_freq])
 
+    # concat_feature('concat_6_ensemble',[fea_concat_6, fea_ensemble_test])
+
     # split_dataset('concat_8', 0.2, zero_pad=True)
     # split_dataset('concat_8_norm', 0.2, zero_pad=True)
     # split_dataset('concat_8', 0.2, zero_pad=True)
@@ -590,6 +662,13 @@ if __name__ == '__main__':
     #                               fea_concat_6])
     #
     # split_dataset('ensemble_4', 0.2, zero_pad=True)
-    #
+    split_dataset('ensemble_3', 0.2, zero_pad=True)
     # make_feature()
-    pass
+
+    # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
+    # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
+    #
+    # indices, res, num = get_hour_event_num_distribution(device_id=device_id, dict_device_event=dict_device_event)
+    # print indices
+    # print res
+    # print num

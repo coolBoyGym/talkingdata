@@ -1,12 +1,11 @@
 import time
-
+from scipy.sparse import csr_matrix
 import numpy as np
 import xgboost as xgb
-from scipy.sparse import csr_matrix
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import log_loss
 
 import feature
+from sklearn.ensemble import RandomForestClassifier
 from model_impl import factorization_machine, multi_layer_perceptron
 
 VERSION = None
@@ -75,6 +74,16 @@ def make_feature_model_output(train_pred, valid_pred, test_pred):
     fea_pred.set_value(indices, values)
     fea_pred.dump()
 
+def get_feature_model_output(train_pred, valid_pred, test_pred):
+    fea_pred = feature.multi_feature(name=TAG, dtype='f', space=12, rank=12,
+                                     size=len(train_pred) + len(valid_pred) + len(test_pred))
+    indices = np.array([range(12)] * (len(train_pred) + len(valid_pred) + len(test_pred)))
+    values = np.vstack((valid_pred, train_pred, test_pred))
+    fea_pred.set_value(indices, values)
+    return fea_pred
+
+
+
 
 def write_log(log_str):
     global PATH_MODEL_LOG
@@ -100,7 +109,42 @@ def train_rdforest(Xtrain, train_labels, Xtest, n_estimators=10, max_depth=None,
     make_submission(test_pred)
 
 
-def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, gblinear_lambda_bias=0, verbose_eval=True,
+def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, verbose_eval=True,
+                  early_stopping_rounds=50, dtest=None):
+    global BOOSTER, RANDOM_STATE
+    num_boost_round = 1000
+
+    params = {
+        'booster': BOOSTER,
+        'silent': 1,
+        'num_class': 12,
+        'lambda': gblinear_lambda,
+        'alpha': gblinear_alpha,
+        'objective': 'multi:softprob',
+        'seed': RANDOM_STATE,
+        'eval_metric': 'mlogloss',
+    }
+
+    watchlist = [(dtrain, 'train'), (dvalid, 'eval')]
+    bst = xgb.train(params, dtrain, num_boost_round, evals=watchlist, early_stopping_rounds=early_stopping_rounds,
+                    verbose_eval=verbose_eval)
+
+    train_pred = bst.predict(dtrain)
+    train_score = log_loss(dtrain.get_label(), train_pred)
+
+    valid_pred = bst.predict(dvalid)
+    valid_score = log_loss(dvalid.get_label(), valid_pred)
+
+    if dtest is not None:
+        train_pred = bst.predict(dtrain)
+        valid_pred = bst.predict(dvalid)
+        test_pred = bst.predict(dtest)
+        make_feature_model_output(train_pred, valid_pred, test_pred)
+
+    return train_score, valid_score
+
+
+def ensemble_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, gblinear_lambda_bias=0, verbose_eval=True,
                   early_stopping_rounds=50, dtest=None):
     global BOOSTER, RANDOM_STATE
     num_boost_round = 1000
@@ -131,9 +175,12 @@ def tune_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, gblinear_
         train_pred = bst.predict(dtrain)
         valid_pred = bst.predict(dvalid)
         test_pred = bst.predict(dtest)
-        make_feature_model_output(train_pred, valid_pred, test_pred)
+        fea_out = get_feature_model_output(train_pred, valid_pred, test_pred)
 
-    return train_score, valid_score
+    return fea_out
+
+
+
 
 
 def train_gblinear(dtrain, dtest, gblinear_alpha, gblinear_lambda, gblinear_lambda_bias, num_boost_round):
@@ -200,6 +247,44 @@ def tune_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, gbt
         make_feature_model_output(train_pred, valid_pred, test_pred)
 
     return train_score, valid_score
+
+
+
+def ensemble_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree, gbtree_lambda=1, gbtree_alpha=0, gamma=0,
+                min_child_weight=1, max_delta_step=0, verbose_eval=False, early_stopping_rounds=50, dtest=None):
+    global BOOSTER, RANDOM_STATE
+    num_boost_round = 2000
+
+    params = {
+        "booster": BOOSTER,
+        "silent": 1,
+        "num_class": 12,
+        "eta": eta,
+        "max_depth": max_depth,
+        "subsample": subsample,
+        "colsample_bytree": colsample_bytree,
+        "lambda": gbtree_lambda,
+        "alpha": gbtree_alpha,
+        "gamma": gamma,
+        "min_child_weight": min_child_weight,
+        "max_delta_step": max_delta_step,
+        "objective": "multi:softprob",
+        "seed": RANDOM_STATE,
+        "eval_metric": "mlogloss",
+    }
+
+    watchlist = [(dtrain, 'train'), (dvalid, 'eval')]
+    bst = xgb.train(params, dtrain, num_boost_round, evals=watchlist, early_stopping_rounds=early_stopping_rounds,
+                    verbose_eval=verbose_eval)
+
+    if dtest is not None:
+        train_pred = bst.predict(dtrain, ntree_limit=bst.best_iteration)
+        valid_pred = bst.predict(dvalid, ntree_limit=bst.best_iteration)
+        test_pred = bst.predict(dtest, ntree_limit=bst.best_iteration)
+        fea_out = get_feature_model_output(train_pred, valid_pred, test_pred)
+
+    return fea_out
+
 
 
 def train_gbtree(dtrain, dtest, eta, max_depth, subsample, colsample_bytree, gbtree_lambda, gbtree_alpha,
@@ -270,14 +355,27 @@ def read_feature(fin, batch_size, zero_pad=True):
     return indices, values, labels
 
 
-def libsvm_2_csr(indices, values, space):
+def label_2_group_id(labels, num_class=None):
+    global NUM_CLASS
+    if num_class is None:
+        num_class = NUM_CLASS
+    tmp = np.arange(12)
+    group_ids = labels.dot(tmp)
+    return group_ids
+
+
+def libsvm_2_csr(indices, values, space=None):
+    global SPACE
     csr_indices = []
     csr_values = []
     for i in range(len(indices)):
         csr_indices.extend(map(lambda x: [i, x], indices[i]))
         csr_values.extend(values[i])
-    return csr_indices, csr_values, [len(indices), space]
-    # return np.array(csr_indices), np.array(csr_values), [len(indices), SPACE]
+    if space is None:
+        csr_shape = [len(indices), SPACE]
+    else:
+        csr_shape = [len(indices), space]
+    return np.array(csr_indices), np.array(csr_values), csr_shape
 
 
 def csr_2_libsvm(csr_indices, csr_values, csr_shape, reorder=False):
@@ -442,6 +540,49 @@ def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activ
     if save_model:
         mlp_model.dump()
     return train_scores[-1], valid_scores[-1]
+
+def ensemble_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates, opt_prop, drops,
+                                num_round=200, batch_size=100, early_stopping_round=10, verbose=True, save_log=True, dtest=None):
+    train_indices, train_values, train_labels = train_data
+    valid_indices, valid_values, valid_labels = valid_data
+    mlp_model = multi_layer_perceptron(name=TAG, eval_metric='softmax_log_loss',
+                                       layer_sizes=layer_sizes,
+                                       layer_activates=layer_activates,
+                                       opt_prop=opt_prop)
+    train_scores = []
+    valid_scores = []
+    for j in range(num_round):
+        start_time = time.time()
+        train_loss, train_y, train_y_prob = train_with_batch_csr(mlp_model, train_indices, train_values,
+                                                                 train_labels, drops, batch_size, verbose=False)
+        valid_y, valid_y_prob = predict_with_batch_csr(mlp_model, valid_indices, valid_values, drops=[1] * len(drops),
+                                                       batch_size=batch_size)
+        train_score = log_loss(train_labels, train_y_prob)
+        valid_score = log_loss(valid_labels, valid_y_prob)
+        if verbose:
+            print '[%d]\tloss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % \
+                  (j, train_loss.mean(), train_score, valid_score, time.time() - start_time)
+        if save_log:
+            write_log('%d\t%f\t%f\t%f\n' % (j, train_loss.mean(), train_score, valid_score))
+        train_scores.append(train_score)
+        valid_scores.append(valid_score)
+        if check_early_stop(valid_scores, early_stopping_round=early_stopping_round, mode='no_decrease'):
+            if verbose:
+                best_iteration = j + 1 - early_stopping_round
+                print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
+                    best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
+            break
+    return train_scores[-1], valid_scores[-1]
+
+    if dtest is not None:
+        train_pred = bst.predict(dtrain, ntree_limit=bst.best_iteration)
+        valid_pred = bst.predict(dvalid, ntree_limit=bst.best_iteration)
+        test_pred = bst.predict(dtest, ntree_limit=bst.best_iteration)
+        fea_out = get_feature_model_output(train_pred, valid_pred, test_pred)
+
+    return fea_out
+
+
 
 
 def train_multi_layer_perceptron(train_data, test_data, layer_sizes, layer_activates, opt_algo, learning_rate, drops,

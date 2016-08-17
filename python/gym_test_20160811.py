@@ -2,7 +2,9 @@ import xgboost as xgb
 
 import train_impl as ti
 
-ti.init_constant(dataset='concat_10', booster='gbtree', version=1, random_state=0)
+import model_impl
+
+ti.init_constant(dataset='concat_10', booster='multi_layer_perceptron', version=1, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -12,19 +14,22 @@ if __name__ == '__main__':
         dtest = xgb.DMatrix(ti.PATH_TEST)
 
         # train_score, valid_score = tune_gblinear(dtrain, dvalid, 0.1, 66, True)
-        train_score, valid_score = ti.tune_gblinear(dtrain_train, dtrain_valid, 0.1, 13, True, dtest)
+        # train_score, valid_score = ti.tune_gblinear(dtrain_train, dtrain_valid, 0.1, 13, True, dtest)
         # print train_score, valid_score
         # train_gblinear(dtrain_complete, dtest, 100, 1, 10)
 
         # print train_score, valid_score
-        # fout = open(path_argument_file, 'a')
-        #
-        # for gblinear_alpha in [0.1]:
-        #     for gblinear_lambda in [13]:
-        #         train_score, valid_score = tune_gblinear(dtrain, dvalid, gblinear_alpha, gblinear_lambda, True)
-        #         print 'alpha', gblinear_alpha, 'lambda', gblinear_lambda, train_score, valid_score
-        #         fout.write('alpha ' + str(gblinear_alpha) + ' lambda ' + str(gblinear_lambda) + ' '
-        #                    + str(train_score) + ' ' + str(valid_score) + '\n')
+        fout = open('../model/concat_10_gblinear.log', 'a')
+        early_stopping_round = 10
+
+        for gblinear_alpha in [0, 0.01, 0.05, 0.2]:
+            for gblinear_lambda in [45]:
+                train_score, valid_score = ti.tune_gblinear(dtrain_train, dtrain_valid, gblinear_alpha,
+                                                            gblinear_lambda, True,
+                                                            early_stopping_rounds=early_stopping_round)
+                print 'alpha', gblinear_alpha, 'lambda', gblinear_lambda, train_score, valid_score
+                fout.write('alpha ' + str(gblinear_alpha) + ' lambda ' + str(gblinear_lambda) + ' '
+                           + str(train_score) + ' ' + str(valid_score) + '\n')
 
         # elif ti.BOOSTER == 'gbtree':
         #     dtrain_train = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
@@ -56,9 +61,9 @@ if __name__ == '__main__':
         fout = open(ti.PATH_MODEL_LOG, 'a')
         print 'Training begin!'
 
-        for max_depth in [3]:
+        for max_depth in [2]:
             for eta in [0.1]:
-                for subsample in [0.5, 0.6, 0.9, 1]:
+                for subsample in [0.3, 0.5, 0.7, 0.9]:
                     for colsample_bytree in [0.8]:
                         for gbtree_lambda in [1]:
                             for gbtree_alpha in [0.1]:
@@ -75,6 +80,25 @@ if __name__ == '__main__':
 
     elif ti.BOOSTER == 'logistic_regression':
         pass
+
+    elif ti.BOOSTER == 'multi_layer_perceptron':
+        train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)
+        valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1, False)
+        learning_rate = 0.2
+        layer_activates = ['relu', None]
+        drops = [0.5, 0.5]
+        # for n in [500, 400, 300, 200, 100]:
+        for learning_rate in [0.2, 0.15]:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            opt_prop = model_impl.opt_property('gd', learning_rate)
+            # mlp_model.run(None, {mlp_model.dropouts: dropouts})
+            # y, y_prob = mlp_model.run([mlp_model.y, mlp_model.y_prob],
+            #                           {mlp_model.index_holder: indices, mlp_model.value_holder: values,
+            #                            mlp_model.shape_holder: shape})#, mlp_model.dropouts: dropouts})
+            ti.tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates, opt_prop,
+                                           learning_rate,
+                                           drops, num_round=500, batch_size=10000, early_stopping_round=10,
+                                           verbose=True, save_log=True)
 
     elif ti.BOOSTER == 'factorization_machine':
         train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, False)

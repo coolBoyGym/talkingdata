@@ -304,9 +304,9 @@ def device_hour_event_num_proc(device_id, dict_device_event):
             indices.append([])
             values.append([])
         else:
-            days = map(lambda x: get_time(x[1], ['hour'])[0], dict_device_event[did])
+            hours = map(lambda x: get_time(x[1], ['hour'])[0], dict_device_event[did])
             tmp = {}
-            for d in days:
+            for d in hours:
                 if d in tmp:
                     tmp[d] += 1
                 else:
@@ -327,9 +327,9 @@ def device_hour_event_num_freq_proc(device_id, dict_device_event):
             indices.append([])
             values.append([])
         else:
-            days = map(lambda x: get_time(x[1], ['hour'])[0], dict_device_event[did])
+            hours = map(lambda x: get_time(x[1], ['hour'])[0], dict_device_event[did])
             tmp = {}
-            for d in days:
+            for d in hours:
                 if d in tmp:
                     tmp[d] += 1.0
                 else:
@@ -566,3 +566,4 @@ def event_installed_app_norm_proc(indices, values):
     for v in values:
         norm_values.append(np.float64(v) / len(v))
     return indices, np.array(norm_values)
+
