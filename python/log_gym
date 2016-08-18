@@ -116,3 +116,17 @@ dict_device_event中数据的格式为： [(3164698, '2016-05-06 23:47:05', 0.0,
 
 在面临一个新的问题时 不要还没接触就把它想得很复杂 按照过程一步一步来 遇到问题就解决问题 必须坚定地相信：办法总比困难多
 
+
+2016.8.16
+
+使用已有的pkl文件生成新的pkl文件：在stat.py文件中编写对应的函数：
+    def aggregate_label_category()
+
+2016.8.17 Wen
+
+生成了两个新的pkl文件:
+    dict_label_category_group_name.pkl: key是处理过后的label id, value是该label对应的分组的序号
+    dict_label_category_group_number.pkl: key是处理过后的label id,  value是该label对应的分组的名字
+
+注意:所有pkl文件中的device id 和app id 都是经过重新映射处理的 去除了没有在app_events中出现的app id 和没有在app_label中出现的label id
+

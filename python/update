@@ -276,7 +276,7 @@ submission:
             num_round = 500
             [498]	loss: 2.197575 	train_score: 2.197590	valid_score: 2.258964	time: 5
 
-        concat_11_mlp_1:
+        concat_11_freq_mlp_1:
             layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
             layer_activates = ['relu', None]
             drops = [0.5, 1]
@@ -286,4 +286,39 @@ submission:
 
         concat_11, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample=0.5, early_stop_round=20,
                                 round=2000, lambda=1, alpha=0.1, rate=0.2}
-                             valid_score=2.27878280383, real_score=not yet, concat_10_gbtree
+                             valid_score=2.27878280383, real_score=not yet, concat_11_gbtree
+
+        concat_12, gbtree, {max_depth=3, eta=0.1, subsample=0.7, colsample=0.7, early_stop_round=20,
+                                round=2000, lambda=1, alpha=0.1, rate=0.2}
+                             valid_score=2.27939683794, real_score=not yet, concat_12_gbtree
+
+        concat_12_wrong_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 600
+            best iteration:
+            [462]	train_score: 2.199512	valid_score: 2.259978
+            score:2.24657
+
+
+        concat_12_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 600
+            best iteration:
+            [464]	train_score: 2.201910	valid_score: 2.259253
+
+
+        concat_11_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 600
+            best iteration:
+            [477]	train_score: 2.202244	valid_score: 2.258862
+

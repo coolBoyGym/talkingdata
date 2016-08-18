@@ -702,6 +702,12 @@ if __name__ == '__main__':
     #                              fea_installed_app,
     #                              fea_installed_app_label,
     #                              fea_active_app_label_diff_hour_category])
+
+    # concat_feature('concat_13', [fea_phone_brand,
+    #                              fea_device_model,
+    #                              fea_installed_app,
+    #                              fea_installed_app_label,
+    #                              fea_active_app_label_each_hour_category])
     #
     # concat_feature('concat_6_ensemble',[fea_concat_6, fea_ensemble_test])
 
@@ -735,8 +741,8 @@ if __name__ == '__main__':
     #                               fea_concat_6])
     #
     # split_dataset('ensemble_4', 0.2, zero_pad=True)
-    # split_dataset('concat_11', 0.2, zero_pad=True)
-    make_feature()
+    split_dataset('concat_13', 0.2, zero_pad=True)
+    # make_feature()
 
     # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
     # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])

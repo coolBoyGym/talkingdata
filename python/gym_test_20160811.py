@@ -4,7 +4,7 @@ import train_impl as ti
 
 import model_impl
 
-ti.init_constant(dataset='concat_10', booster='multi_layer_perceptron', version=1, random_state=0)
+ti.init_constant(dataset='concat_13', booster='gbtree', version=1, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -61,17 +61,17 @@ if __name__ == '__main__':
         fout = open(ti.PATH_MODEL_LOG, 'a')
         print 'Training begin!'
 
-        for max_depth in [2]:
+        for max_depth in [3]:
             for eta in [0.1]:
-                for subsample in [0.3, 0.5, 0.7, 0.9]:
-                    for colsample_bytree in [0.8]:
+                for subsample in [0.6, 0.7]:
+                    for colsample_bytree in [0.5, 0.6, 0.7, 0.9]:
                         for gbtree_lambda in [1]:
                             for gbtree_alpha in [0.1]:
                                 train_score, valid_score = ti.tune_gbtree(dtrain_train, dtrain_valid, eta,
                                                                           max_depth, subsample,
                                                                           colsample_bytree,
                                                                           gbtree_lambda, gbtree_alpha,
-                                                                          early_stopping_rounds=30,
+                                                                          early_stopping_rounds=20,
                                                                           verbose_eval=True)
                                 fout.write('max_depth ' + str(max_depth) + ' eta ' + str(eta) + ' subsample ' +
                                            str(subsample) + ' colsample ' + str(colsample_bytree) + ' lambda ' +
@@ -84,21 +84,23 @@ if __name__ == '__main__':
     elif ti.BOOSTER == 'multi_layer_perceptron':
         train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
         valid_data = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
+        # train_data = ti.read_feature(open(ti.PATH_TRAIN), -1)
+        # test_data = ti.read_feature(open(ti.PATH_TEST), -1)
+        opt_algo = 'gd'
         learning_rate = 0.2
         layer_activates = ['relu', None]
-        drops = [0.5, 0.5]
-        # for n in [500, 400, 300, 200, 100]:
-        for learning_rate in [0.2, 0.15]:
-            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+        layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+        drops = [0.5, 1]
+
+        # ti.train_multi_layer_perceptron(train_data, test_data, layer_sizes, layer_activates, opt_algo, learning_rate,
+        #                                 drops, num_round=469, batch_size=10000)
+        #
+        for learning_rate in [0.2]:
             opt_prop = model_impl.opt_property('gd', learning_rate)
-            # mlp_model.run(None, {mlp_model.dropouts: dropouts})
-            # y, y_prob = mlp_model.run([mlp_model.y, mlp_model.y_prob],
-            #                           {mlp_model.index_holder: indices, mlp_model.value_holder: values,
-            #                            mlp_model.shape_holder: shape})#, mlp_model.dropouts: dropouts})
-            ti.tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates, opt_prop,
-                                           learning_rate,
-                                           drops, num_round=500, batch_size=10000, early_stopping_round=10,
-                                           verbose=True, save_log=True)
+            ti.tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates,
+                                           opt_algo=opt_algo, learning_rate=learning_rate,
+                                           drops=drops, num_round=600, batch_size=10000, early_stopping_round=20,
+                                           verbose=True, save_log=True, save_model=True)
 
     elif ti.BOOSTER == 'factorization_machine':
         train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
