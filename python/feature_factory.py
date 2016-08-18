@@ -2,8 +2,10 @@ import cPickle as pkl
 import time
 
 import numpy as np
-from scipy.sparse import csr_matrix, vstack
+from scipy.sparse import csr_matrix
+
 import feature
+from train_impl import csr_matrix_2_libsvm
 
 data_app_events = '../data/raw/app_events.csv'
 data_app_labels = '../data/raw/app_labels.csv'
@@ -546,10 +548,46 @@ def split_dataset(name, cv_rate, zero_pad=False):
 
 def load_sparse_csr(filename):
     loader = np.load(filename)
-    return csr_matrix((  loader['data'], loader['indices'], loader['indptr']),
-                         shape = loader['shape'])
+    return csr_matrix((loader['data'], loader['indices'], loader['indptr']),
+                      shape=loader['shape'])
+
+
+def process_keras_data(keras_data_name):
+    train_data_csr = load_sparse_csr('../data/' + keras_data_name + '_train_csr.npz')
+    test_data_csr = load_sparse_csr('../data/' + keras_data_name + '_test_csr.npz')
+    train_indices, train_values = csr_matrix_2_libsvm(train_data_csr)
+    test_indices, test_values = csr_matrix_2_libsvm(test_data_csr)
+    train_device_id = np.loadtxt(data_gender_age_train, delimiter=',', skiprows=1, usecols=[0], dtype=np.int64)
+    dict_device_id = pkl.load(open('../data/dict_id_device.pkl'))
+    dict_device_train = {}
+    for i in range(len(train_device_id)):
+        device_id = train_device_id[i]
+        did = dict_device_id[device_id]
+        dict_device_train[did] = (train_indices[i], train_values[i])
+    device_id = np.loadtxt('../feature/device_id', delimiter=',', skiprows=1, usecols=[0])
+    fea_indices = []
+    fea_values = []
+    for i in range(len(train_device_id)):
+        did = device_id[i]
+        fea_indices.append(dict_device_train[did][0])
+        fea_values.append(np.int64(dict_device_train[did][1]))
+    for i in range(len(train_device_id), len(device_id)):
+        fea_indices.append(test_indices[i - len(train_device_id)])
+        fea_values.append(np.int64(test_values[i - len(train_device_id)]))
+    fea_indices = np.array(fea_indices)
+    fea_values = np.array(fea_values)
+    fea_tmp = feature.multi_feature(name=keras_data_name, dtype='d')
+    fea_tmp.set_value(indices=fea_indices, values=fea_values)
+    max_indices = map(feature.get_max, fea_indices)
+    len_indices = map(lambda x: len(x), fea_values)
+    fea_tmp.set_space(max(max_indices) + 1)
+    fea_tmp.set_rank(max(len_indices))
+    fea_tmp.set_size(len(fea_indices))
+    fea_tmp.dump()
+
 
 if __name__ == '__main__':
+    print 'processing features...'
     # gather_device_id()
     # gather_event_id()
 
@@ -695,7 +733,7 @@ if __name__ == '__main__':
     #                              fea_device_model,
     #                              fea_installed_app,
     #                              fea_installed_app_label,
-    #                              fea_active_app_label_category])
+    #                              fea_active_app_label_group_freq])
     #
     # concat_feature('concat_12', [fea_phone_brand,
     #                              fea_device_model,
@@ -735,8 +773,8 @@ if __name__ == '__main__':
     #                               fea_concat_6])
     #
     # split_dataset('ensemble_4', 0.2, zero_pad=True)
-    # split_dataset('concat_11', 0.2, zero_pad=True)
-    make_feature()
+    # split_dataset('concat_12', 0.2, zero_pad=True)
+    # make_feature()
 
     # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
     # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
@@ -746,8 +784,8 @@ if __name__ == '__main__':
     # print res
     # print num
 
-    # train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
-    # test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
-    # train_label = np.load('../input/bagofapps_train_label.npy')
+    train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
+    test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
+    train_label = np.load('../input/bagofapps_train_label.npy')
 
 
