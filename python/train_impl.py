@@ -480,6 +480,21 @@ def csr_2_libsvm(csr_indices, csr_values, csr_shape, reorder=False):
     return np.array(indices), np.array(values)
 
 
+def csr_matrix_2_csr(csr_mat):
+    indices = csr_mat.indices
+    indptr = csr_mat.indptr
+    values = csr_mat.data
+    csr_indices = []
+    csr_values = []
+    for i in range(csr_mat.shape[0]):
+        for j in range(indptr[i], indptr[i + 1]):
+            csr_indices.append([i, indices[j]])
+            csr_values.append(values[j])
+    csr_indices = np.array(csr_indices)
+    csr_values = np.array(csr_values)
+    return csr_indices, csr_values, csr_mat.shape
+
+
 def train_with_batch_csr(model, indices, values, labels, spaces=None, drops=1, multiplex=False, batch_size=None,
                          verbose=False):
     global SPACE, SUB_SPACES
@@ -512,6 +527,26 @@ def train_with_batch_csr(model, indices, values, labels, spaces=None, drops=1, m
     return np.array(loss), np.array(y), np.array(y_prob)
 
 
+def train_with_csr_matrix(model, csr_mat, labels, drops=1, batch_size=None):
+    loss = []
+    y = []
+    y_prob = []
+    if batch_size == -1:
+        indices, values, shape = csr_matrix_2_csr(csr_mat)
+        loss, y, y_prob = model.train(indices, values, shape, labels)
+    else:
+        for i in range(csr_mat.shape[0] / batch_size + 1):
+            batch_mat = csr_mat[i * batch_size: (i + 1) * batch_size]
+            batch_labels = labels[i * batch_size: (i + 1) * batch_size]
+            batch_indices, batch_values, batch_shape = csr_matrix_2_csr(batch_mat)
+            batch_loss, batch_y, batch_y_prob = model.train(batch_indices, batch_values, batch_shape, batch_labels,
+                                                            drops=drops)
+            loss.append(batch_loss)
+            y.extend(batch_y)
+            y_prob.extend(batch_y_prob)
+    return np.array(loss), np.array(loss), np.array(y_prob)
+
+
 def predict_with_batch_csr(model, indices, values, spaces=None, drops=1, multiplex=False, batch_size=None):
     global SPACE, SUB_SPACES
     if not multiplex and spaces is None:
@@ -529,6 +564,22 @@ def predict_with_batch_csr(model, indices, values, spaces=None, drops=1, multipl
             batch_values = values[i * batch_size: (i + 1) * batch_size]
             batch_indices, batch_values, batch_shape = libsvm_2_csr(batch_indices, batch_values, spaces=spaces,
                                                                     multiplex=multiplex)
+            batch_y, batch_y_prob = model.predict(batch_indices, batch_values, batch_shape, drops=drops)
+            y.extend(batch_y)
+            y_prob.extend(batch_y_prob)
+    return np.array(y), np.array(y_prob)
+
+
+def predict_with_csr_matrix(model, csr_mat, drops=1, batch_size=None):
+    if batch_size == -1:
+        indices, values, shape = csr_matrix_2_csr(csr_mat)
+        y, y_prob = model.predict(indices, values, shape)
+    else:
+        y = []
+        y_prob = []
+        for i in range(csr_mat.shape[0] / batch_size + 1):
+            batch_mat = csr_mat[i * batch_size: (i + 1) * batch_size]
+            batch_indices, batch_values, batch_shape = csr_matrix_2_csr(batch_mat)
             batch_y, batch_y_prob = model.predict(batch_indices, batch_values, batch_shape, drops=drops)
             y.extend(batch_y)
             y_prob.extend(batch_y_prob)
@@ -611,7 +662,7 @@ def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activ
                                        learning_rate=learning_rate)
     train_scores = []
     valid_scores = []
-    for j in range(num_round):
+    for i in range(num_round):
         start_time = time.time()
         train_loss, train_y, train_y_prob = train_with_batch_csr(mlp_model, train_indices, train_values,
                                                                  train_labels, drops=drops, batch_size=batch_size,
@@ -622,14 +673,14 @@ def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activ
         valid_score = log_loss(valid_labels, valid_y_prob)
         if verbose:
             print '[%d]\tloss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % \
-                  (j, train_loss.mean(), train_score, valid_score, time.time() - start_time)
+                  (i, train_loss.mean(), train_score, valid_score, time.time() - start_time)
         if save_log:
-            write_log('%d\t%f\t%f\t%f\n' % (j, train_loss.mean(), train_score, valid_score))
+            write_log('%d\t%f\t%f\t%f\n' % (i, train_loss.mean(), train_score, valid_score))
         train_scores.append(train_score)
         valid_scores.append(valid_score)
         if check_early_stop(valid_scores, early_stopping_round=early_stopping_round, mode='no_decrease'):
             if verbose:
-                best_iteration = j + 1 - early_stopping_round
+                best_iteration = i + 1 - early_stopping_round
                 print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
                     best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
             break
@@ -644,6 +695,42 @@ def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activ
         test_y, test_y_prob = predict_with_batch_csr(mlp_model, test_indices, test_values, drops=[1] * len(drops),
                                                      batch_size=batch_size)
         make_feature_model_output(train_y_prob, valid_y_prob, test_y_prob)
+    return train_scores[-1], valid_scores[-1]
+
+
+def tune_mlp_csr(train_data, valid_data, layer_sizes, layer_activates, opt_algo, learning_rate, drops, num_round=200,
+                 batch_size=100, early_stopping_round=10, verbose=True, save_log=True):
+    train_csr, train_labels = train_data
+    valid_csr, valid_labels = valid_data
+    mlp_model = multi_layer_perceptron(name=TAG,
+                                       eval_metric='softmax_log_loss',
+                                       layer_sizes=layer_sizes,
+                                       layer_activates=layer_activates,
+                                       opt_algo=opt_algo,
+                                       learning_rate=learning_rate)
+    train_scores = []
+    valid_scores = []
+    for i in range(num_round):
+        start_time = time.time()
+        train_loss, train_y, train_y_prob = train_with_csr_matrix(mlp_model, train_csr, train_labels, drops=drops,
+                                                                  batch_size=batch_size)
+        valid_y, valid_y_prob = predict_with_csr_matrix(mlp_model, valid_csr, drops=[1] * len(drops),
+                                                        batch_size=batch_size)
+        tscore = log_loss(train_labels, train_y_prob)
+        vscore = log_loss(valid_labels, valid_y_prob)
+        if verbose:
+            print '[%d]\tloss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % \
+                  (i, train_loss.mean(), tscore, vscore, time.time() - start_time)
+        if save_log:
+            write_log('%d\t%f\t%f\t%f\n' % (i, train_loss.mean(), tscore, vscore))
+        train_scores.append(tscore)
+        valid_scores.append(vscore)
+        if check_early_stop(valid_scores, early_stopping_round=early_stopping_round, mode='no_decrease'):
+            if verbose:
+                best_iteration = i + 1 - early_stopping_round
+                print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
+                    best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
+            break
     return train_scores[-1], valid_scores[-1]
 
 
