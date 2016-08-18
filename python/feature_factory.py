@@ -772,7 +772,7 @@ if __name__ == '__main__':
     #                               fea_concat_6_gbtree_1,
     #                               fea_concat_6])
     #
-    # split_dataset('ensemble_4', 0.2, zero_pad=True)
+    split_dataset('bagofapps', 0.2, zero_pad=True)
     # split_dataset('concat_12', 0.2, zero_pad=True)
     # make_feature()
 
@@ -784,8 +784,6 @@ if __name__ == '__main__':
     # print res
     # print num
 
-    train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
-    test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
-    train_label = np.load('../input/bagofapps_train_label.npy')
-
-
+    # train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
+    # test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
+    # train_label = np.load('../input/bagofapps_train_label.npy')

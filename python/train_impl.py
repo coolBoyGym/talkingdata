@@ -7,7 +7,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import log_loss
 
 import feature
-import feature_factory as ff
 from model_impl import factorization_machine, multi_layer_perceptron, multiplex_neural_network
 
 VERSION = None
@@ -781,7 +780,7 @@ def random_sample(train_data, number):
     return sample_indices, sample_values, sample_labels
 
 
-def ensemble_model(train_data, valid_data, test_data, name, model_list):
+def ensemble_model(train_data, valid_data, test_data, model_list):
     train_indices, train_values, train_labels = train_data
     valid_indices, valid_values, valid_labels = valid_data
     test_indices, test_values, test_labels = test_data
@@ -840,9 +839,7 @@ def ensemble_model(train_data, valid_data, test_data, name, model_list):
                 feature_model = ensemble_rdforest(d_train, train_labels, d_valid, valid_labels, n_estimators,
                                                   max_depth, max_features, d_test)
                 features_for_ensemble.append(feature_model)
-
-    feature_ensembled = ff.ensemble_concat_feature(name, features_for_ensemble)
-    return feature_ensembled
+    return features_for_ensemble
 
 
 if __name__ == '__main__':
