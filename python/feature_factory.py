@@ -101,9 +101,15 @@ fea_device_day_hour_event_num_norm = feature.multi_feature(name='device_day_hour
 fea_device_weekday_event_num_norm = feature.multi_feature(name='device_weekday_event_num_norm', dtype='f')
 fea_device_weekday_event_num_freq = feature.multi_feature(name='device_weekday_event_num_freq', dtype='f')
 
-# two new features
+# new features about app label category
 fea_active_app_label_category = feature.multi_feature(name='active_app_label_category', dtype='d')
-fea_active_app_label_diff_hour_category = feature.multi_feature(name='active_app_label_diff_hour_category', dtype='f')
+fea_active_app_label_category_num = feature.multi_feature(name='active_app_label_category_num', dtype='d')
+fea_active_app_label_diff_hour_category = feature.multi_feature(name='active_app_label_diff_hour_category', dtype='d')
+fea_active_app_label_diff_hour_category_num = feature.multi_feature(name='active_app_label_diff_hour_category_num',
+                                                                    dtype='d')
+fea_active_app_label_each_hour_category = feature.multi_feature(name='active_app_label_each_hour_category', dtype='d')
+fea_active_app_label_each_hour_category_num = feature.multi_feature(name='active_app_label_each_hour_category_num',
+                                                                    dtype='d')
 
 """
 event features
@@ -321,11 +327,29 @@ def make_feature():
     #                                       dict_app_event=dict_app_event, dict_app_label=dict_app_label,
     #                                       dict_label_category_group=dict_label_category_group)
     # fea_active_app_label_category.dump()
+    # fea_active_app_label_category_num.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                           dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+    #                                           dict_label_category_group=dict_label_category_group)
+    # fea_active_app_label_category_num.dump()
+    #
+    # fea_active_app_label_diff_hour_category.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                                 dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+    #                                                 dict_label_category_group=dict_label_category_group)
+    # fea_active_app_label_diff_hour_category.dump()
+    #
+    # fea_active_app_label_diff_hour_category_num.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                                     dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+    #                                                     dict_label_category_group=dict_label_category_group)
+    # fea_active_app_label_diff_hour_category_num.dump()
 
-    fea_active_app_label_diff_hour_category.process(device_id=device_id, dict_device_event=dict_device_event,
-                                                    dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-                                                    dict_label_category_group=dict_label_category_group)
-    fea_active_app_label_diff_hour_category.dump()
+    # fea_active_app_label_each_hour_category.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                                 dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+    #                                                 dict_label_category_group=dict_label_category_group)
+    # fea_active_app_label_each_hour_category.dump()
+    fea_active_app_label_each_hour_category_num.process(device_id=device_id, dict_device_event=dict_device_event,
+                                                        dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+                                                        dict_label_category_group=dict_label_category_group)
+    fea_active_app_label_each_hour_category_num.dump()
 
 
 def ensemble_concat_feature(name, fea_list):
@@ -671,7 +695,7 @@ if __name__ == '__main__':
     #                              fea_device_model,
     #                              fea_installed_app,
     #                              fea_installed_app_label,
-    #                              fea_active_app_label_group_freq])
+    #                              fea_active_app_label_category])
     #
     # concat_feature('concat_12', [fea_phone_brand,
     #                              fea_device_model,
@@ -711,8 +735,8 @@ if __name__ == '__main__':
     #                               fea_concat_6])
     #
     # split_dataset('ensemble_4', 0.2, zero_pad=True)
-    # split_dataset('concat_12', 0.2, zero_pad=True)
-    # make_feature()
+    # split_dataset('concat_11', 0.2, zero_pad=True)
+    make_feature()
 
     # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
     # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
@@ -722,9 +746,8 @@ if __name__ == '__main__':
     # print res
     # print num
 
-
-    train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
-    test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
-    train_label = np.load('../input/bagofapps_train_label.npy')
+    # train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
+    # test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
+    # train_label = np.load('../input/bagofapps_train_label.npy')
 
 
