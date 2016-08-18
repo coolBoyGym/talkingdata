@@ -264,9 +264,9 @@ class multiplex_neural_network(tf_classifier_multi):
     def __init__(self, name, eval_metric, layer_sizes, layer_activates, opt_algo, learning_rate, init_path=None):
         init_actions = []
         for i in range(len(layer_sizes[0])):
-            init_actions.append(('w0_%d' % i, [layer_sizes[0][i], layer_sizes[1]], 'normal', tf.float32))
-            init_actions.append(('b0_%d' % i, [layer_sizes[1]], 'zero', tf.float32))
-        init_actions.append(('w1', [layer_sizes[1] * len(layer_sizes[0]), layer_sizes[2]], 'normal', tf.float32))
+            init_actions.append(('w0_%d' % i, [layer_sizes[0][i], layer_sizes[1][i]], 'normal', tf.float32))
+            init_actions.append(('b0_%d' % i, [layer_sizes[1][i]], 'zero', tf.float32))
+        init_actions.append(('w1', [sum(layer_sizes[1]), layer_sizes[2]], 'normal', tf.float32))
         init_actions.append(('b1', [layer_sizes[2]], 'zero', tf.float32))
         for i in range(2, len(layer_sizes) - 1):
             init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], 'normal', tf.float32))
@@ -292,3 +292,29 @@ class multiplex_neural_network(tf_classifier_multi):
         y_prob, loss = get_loss(self.get_eval_metric(), l, self.y_true)
         optimizer = get_optimizer(opt_algo, learning_rate, loss)
         return l, y_prob, loss, optimizer
+
+
+class convolutional_neural_network(tf_classifier_multi):
+    def __init__(self, name, eval_metric, layer_sizes, layer_activates, opt_algo, learning_rate):
+        self.layer_sizes = layer_sizes
+        init_actions = []
+        for i in range(len(layer_sizes[0])):
+            init_actions.append(('w0_%d' % i, [layer_sizes[0][i], layer_sizes[1]], 'normal', tf.float32))
+            init_actions.append(('b0_%d' % i, [layer_sizes[1]], 'zero', tf.float32))
+        init_actions.append(('w1', [layer_sizes[1] * len(layer_sizes[0]), layer_sizes[2]], 'normal', tf.float32))
+        init_actions.append(('b1', [layer_sizes[2]], 'zero', tf.float32))
+        for i in range(2, len(layer_sizes) - 1):
+            init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], 'normal', tf.float32))
+            init_actions.append(('b%d' % i, [layer_sizes[i + 1]], 'zero', tf.float32))
+        tf_classifier_multi.__init__(self, name, eval_metric, layer_sizes[-1], len(layer_sizes[0]),
+                                     init_actions=init_actions, )
+
+    def build_graph(self, layer_activates, opt_algo, learning_rate):
+        num_input = self.get_num_input()
+        w0 = [self.vars['w0_%d' % i] for i in range(num_input)]
+        b0 = [self.vars['b0_%d' % i] for i in range(num_input)]
+        self.l = tf.nn.dropout(
+            activate(tf.concat(2, [
+                tf.reshape(tf.sparse_tensor_dense_matmul(self.x[i], w0[i]) + b0[i], [-1, self.layer_sizes[1], 1]) for i
+                in range(num_input)]), layer_activates[0]), self.drops[0])
+        return None, None, None
