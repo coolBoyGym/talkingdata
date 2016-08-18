@@ -118,7 +118,7 @@ def train_rdforest(Xtrain, train_labels, Xtest, n_estimators=10, max_depth=None,
     pass
 
 
-def ensemble_rdforest(Xtrain, train_labels, Xvalid, valid_labels, n_estimators=10, max_depth=None, max_features='auto',
+def ensemble_rdforest(Xtrain, train_labels, Xvalid, valid_labels, n_estimators, max_depth, max_features,
                       dtest=None):
     clf = RandomForestClassifier(n_estimators=n_estimators, n_jobs=4, max_depth=max_depth,
                                  max_features=max_features)
@@ -868,6 +868,7 @@ def random_sample(train_data, number):
 
 
 def ensemble_model(train_data, valid_data, test_data, model_list):
+    global BOOSTER
     train_indices, train_values, train_labels = train_data
     valid_indices, valid_values, valid_labels = valid_data
     test_indices, test_values, test_labels = test_data
@@ -878,21 +879,21 @@ def ensemble_model(train_data, valid_data, test_data, model_list):
     valid_csr = libsvm_2_csr_matrix(valid_indices, valid_values)
     d_valid = xgb.DMatrix(valid_csr, label=label_2_group_id(valid_labels))
 
-    test_csr_indices, test_csr_values, test_csr_shape = libsvm_2_csr(test_indices, test_values)
-    test_csr = csr_matrix((test_csr_values, (test_csr_indices[:, 0], test_csr_indices[:, 1])), shape=test_csr_shape)
-    test_labels = label_2_group_id(test_labels)
-    d_test = xgb.DMatrix(test_csr, label=test_labels)
+    test_csr = libsvm_2_csr_matrix(test_indices, test_values)
+    d_test = xgb.DMatrix(test_csr, label=label_2_group_id(test_labels))
 
     features_for_ensemble = []
     for model in model_list:
         for i in range(model_list[model]):
             if model == 'gblinear':
+                BOOSTER = 'gblinear'
                 # sample_data = random_sample(train_data, len(train_indices))
                 # sample_indices, sample_values, sample_labels = sample_data
                 feature_model = ensemble_gblinear(d_train, d_valid, gblinear_alpha=0, gblinear_lambda=10,
                                                   verbose_eval=True, early_stopping_rounds=8, dtest=d_test)
                 features_for_ensemble.append(feature_model)
             elif model == 'gbtree':
+                BOOSTER = 'gbtree'
                 # sample_data = random_sample(train_data, len(train_indices))
                 # sample_indices, sample_values, sample_labels = sample_data
                 # train_csr_indices, train_csr_values, train_csr_shape = ti.libsvm_2_csr(sample_indices, sample_values)
@@ -905,8 +906,8 @@ def ensemble_model(train_data, valid_data, test_data, model_list):
                 features_for_ensemble.append(feature_model)
             elif model == 'mlp':
                 layer_sizes = [SPACE, 100, NUM_CLASS]
-                layer_activates = ['relu', 'relu', None]
-                drops = [0.5, 0.5]
+                layer_activates = ['relu', None]
+                drops = [0.5, 1]
                 num_round = 1000
                 opt_algo = 'gd'
                 learning_rate = 0.2
@@ -916,10 +917,15 @@ def ensemble_model(train_data, valid_data, test_data, model_list):
                                                                 opt_algo=opt_algo, learning_rate=learning_rate,
                                                                 drops=drops, num_round=num_round, batch_size=10000,
                                                                 early_stopping_round=10, verbose=True, save_log=False,
-                                                                test_data=None)
+                                                                test_data=test_data)
                 features_for_ensemble.append(feature_model)
 
             elif model == 'randomforest':
+                d_train = libsvm_2_csr_matrix(train_indices, train_values)
+                d_valid = libsvm_2_csr_matrix(valid_indices, valid_values)
+                d_test = libsvm_2_csr_matrix(test_indices, test_values)
+                train_labels = label_2_group_id(train_labels)
+                valid_labels = label_2_group_id(valid_labels)
                 n_estimators = 1000
                 max_depth = 40
                 max_features = 0.1
@@ -944,9 +950,9 @@ if __name__ == '__main__':
     wtrain_indices, wtrain_values, wtrain_shape, wtrain_labels = read_csr_feature(fin, -1)
     wXtrain = csr_matrix((wtrain_values, (wtrain_indices[:, 0], wtrain_indices[:, 1])), shape=wtrain_shape)
 
-    n_estimators = 1000
-    max_depth = 40
-    max_features = 0.1
+    # n_estimators = 1000
+    # max_depth = 40
+    # max_features = 0.1
 
     # for n_estimators in [1000, 2000, 3000]:
     #     for max_depth in [40, 50 ,60 ,70]:

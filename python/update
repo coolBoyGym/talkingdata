@@ -214,6 +214,11 @@ model:
 
 submission:
     rocky:
+        bagofapps:
+            mlp: valid logloss=2.259028
+                 score = 2.24359
+
+
         concat_7_norm:
             gblinear:
             gbtree:

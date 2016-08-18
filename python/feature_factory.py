@@ -5,7 +5,8 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 import feature
-from train_impl import csr_matrix_2_libsvm
+from train_impl import csr_matrix_2_libsvm,libsvm_2_csr_matrix
+import tf_idf
 
 data_app_events = '../data/raw/app_events.csv'
 data_app_labels = '../data/raw/app_labels.csv'
@@ -450,7 +451,7 @@ def concat_feature(name, fea_list):
     fea_concat.dump(extra=extra)
 
 
-def csr_2_feature(name, csr_mat):
+def csr_2_feature(name, csr_mat, reorder=False):
     indices = csr_mat.indices
     indptr = csr_mat.indptr
     values = csr_mat.data
@@ -467,6 +468,8 @@ def csr_2_feature(name, csr_mat):
     fea_csr.set_space(max(max_indices) + 1)
     fea_csr.set_rank(max(len_indices))
     fea_csr.set_size(len(libsvm_indices))
+    if reorder:
+        fea_csr.reorder()
     fea_csr.dump()
 
 
@@ -584,6 +587,16 @@ def process_keras_data(keras_data_name):
     fea_tmp.set_rank(max(len_indices))
     fea_tmp.set_size(len(fea_indices))
     fea_tmp.dump()
+
+def feature_tfidf(name):
+    fea_tmp = feature.multi_feature(name=name, dtype='f')
+    fea_tmp.load()
+    feature_indices, feature_values = fea_tmp.get_value()
+    feature_space = fea_tmp.get_space()
+    csr_fea = libsvm_2_csr_matrix(feature_indices, feature_values, feature_space)
+    csr_tfidf = tf_idf.tf_idf(csr_fea)
+    name_out = name + '_tfidf'
+    csr_2_feature(name_out, csr_tfidf, reorder=True)
 
 
 if __name__ == '__main__':
@@ -778,11 +791,14 @@ if __name__ == '__main__':
     #                               fea_concat_6_gbtree_1,
     #                               fea_concat_6])
     #
-    split_dataset('bagofapps', 0.2, zero_pad=True)
+    # split_dataset('bagofapps', 0.2, zero_pad=True)
     # split_dataset('concat_12', 0.2, zero_pad=True)
     # make_feature()
-    split_dataset('concat_13', 0.2, zero_pad=True)
+    # split_dataset('concat_13', 0.2, zero_pad=True)
     # make_feature()
+
+    feature_tfidf('active_app_label_diff_hour_category_num')
+
 
     # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
     # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
@@ -795,3 +811,10 @@ if __name__ == '__main__':
     # train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
     # test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
     # train_label = np.load('../input/bagofapps_train_label.npy')
+    # fea_tmp = feature.multi_feature('active_app_label_diff_hour_category_num', dtype='d')
+    # fea_tmp.load()
+    # fea_tmp.reorder()
+    # indices, values = fea_tmp.get_value()
+    # print indices
+    # print values
+    # fea_tmp.dump()

@@ -12,6 +12,7 @@ def normalized_by_row_sum(mat):
     if isinstance(mat, csr_matrix):
         normalized_mat = csr_matrix(mat.shape)
         row_sum = csr_matrix.sum(mat, axis=1).ravel()
+        mat.data = np.array(mat.data, dtype='float64')
         normalized_mat.data = mat.data / np.array(row_sum.repeat(np.diff(mat.indptr)))[0]
         normalized_mat.indptr = mat.indptr
         normalized_mat.indices = mat.indices

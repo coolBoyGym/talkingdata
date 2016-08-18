@@ -260,6 +260,16 @@ class multi_feature(feature):
         self.set_rank(max(len_indices))
         self.set_size(len(indices))
 
+    def reorder(self):
+        indices, values = self.get_value()
+        for i in range(len(indices)):
+            row_indices = np.array(indices[i])
+            row_values = np.array(values[i])
+            sorted_indices = sorted(range(len(row_indices)), key=lambda x: row_indices[x])
+            indices[i] = row_indices[sorted_indices]
+            values[i] = row_values[sorted_indices]
+        self.set_value(indices=indices, values=values)
+
 
 class seq_feature(feature):
     def __init__(self, name=None, ftype='seq', dtype=None, space=None, rank=None, size=None):
