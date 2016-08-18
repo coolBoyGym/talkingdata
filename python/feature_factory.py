@@ -2,7 +2,7 @@ import cPickle as pkl
 import time
 
 import numpy as np
-
+from scipy.sparse import csr_matrix, vstack
 import feature
 
 data_app_events = '../data/raw/app_events.csv'
@@ -424,6 +424,26 @@ def concat_feature(name, fea_list):
     fea_concat.dump(extra=extra)
 
 
+def csr_2_feature(name, csr_mat):
+    indices = csr_mat.indices
+    indptr = csr_mat.indptr
+    values = csr_mat.data
+    libsvm_indices = []
+    libsvm_values = []
+    for i in range(csr_mat.shape[0]):
+        libsvm_indices.append(indices[indptr[i]:indptr[i + 1]])
+        libsvm_values.append(values[indptr[i]:indptr[i + 1]])
+    libsvm_indices, libsvm_values = np.array(libsvm_indices), np.array(libsvm_values)
+    fea_csr = feature.multi_feature(name=name, dtype='f')
+    fea_csr.set_value(indices=libsvm_indices, values=libsvm_values)
+    max_indices = map(feature.get_max, libsvm_indices)
+    len_indices = map(lambda x: len(x), libsvm_values)
+    fea_csr.set_space(max(max_indices) + 1)
+    fea_csr.set_rank(max(len_indices))
+    fea_csr.set_size(len(libsvm_indices))
+    fea_csr.dump()
+
+
 def padding_zero(line, space):
     line_space = int(line.strip().split()[-1].split(':')[0]) + 1
     if line_space < space:
@@ -500,6 +520,10 @@ def split_dataset(name, cv_rate, zero_pad=False):
 #     values = map(lambda x: res[x], sorted_tmp)
 #     return indices, tmp, values
 
+def load_sparse_csr(filename):
+    loader = np.load(filename)
+    return csr_matrix((  loader['data'], loader['indices'], loader['indptr']),
+                         shape = loader['shape'])
 
 if __name__ == '__main__':
     # gather_device_id()
@@ -687,7 +711,7 @@ if __name__ == '__main__':
     #                               fea_concat_6])
     #
     # split_dataset('ensemble_4', 0.2, zero_pad=True)
-    split_dataset('concat_12', 0.2, zero_pad=True)
+    # split_dataset('concat_12', 0.2, zero_pad=True)
     # make_feature()
 
     # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
@@ -697,3 +721,10 @@ if __name__ == '__main__':
     # print indices
     # print res
     # print num
+
+
+    train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
+    test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
+    train_label = np.load('../input/bagofapps_train_label.npy')
+
+

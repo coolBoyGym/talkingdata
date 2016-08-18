@@ -219,6 +219,7 @@ submission:
             gbtree:
                 max_depth=7, eta=0.05, subsample=0.8, colsample_bytree=0.5
                 train_logloss=1.89917527015, valid_losloss=2.27997448448
+                numofround=750
                 score=2.26694
             mlp:
                 layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]

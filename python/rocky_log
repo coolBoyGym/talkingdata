@@ -55,3 +55,9 @@ max_depth 7 eta 0.05 subsample 0.8 colsample_bytree 0.5 1.89917527015 2.27997448
 500, lr=0.2
 [364]	train_score: 2.195357	valid_score: 2.261290
 
+
+
+feature from leaderboard
+gbtree with experienced parameter
+score=2.626
+

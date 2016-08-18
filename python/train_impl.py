@@ -406,6 +406,16 @@ def label_2_group_id(labels, num_class=None):
     group_ids = labels.dot(tmp)
     return group_ids
 
+def group_id_2_label(group_ids, num_class=None):
+    global NUM_CLASS
+    if num_class is None:
+        num_class = NUM_CLASS
+    labels = np.zeros([len(group_ids),num_class])
+    for i in range(len(group_ids)):
+        labels[i,group_ids[i]]
+    return labels
+
+
 
 def libsvm_2_csr(indices, values, spaces=None, multiplex=False):
     global SPACE, SUB_SPACES
@@ -448,6 +458,18 @@ def libsvm_2_csr(indices, values, spaces=None, multiplex=False):
 #         csr_shape_list.append(csr_shape)
 #     return csr_index_list, csr_value_list, csr_shape_list
 
+def csr_matrix_2_libsvm(csr_mat):
+    indices = csr_mat.indices
+    indptr = csr_mat.indptr
+    values = csr_mat.data
+    libsvm_indices = []
+    libsvm_values = []
+    for i in range(csr_mat.shape[0]):
+        libsvm_indices.append(indices[indptr[i]:indptr[i+1]])
+        libsvm_values.append(values[indptr[i]:indptr[i+1]])
+    return np.array(libsvm_indices), np.array(libsvm_values)
+
+
 
 def csr_2_libsvm(csr_indices, csr_values, csr_shape, reorder=False):
     data = np.hstack((csr_indices, np.reshape(csr_values, [-1, 1])))
@@ -470,7 +492,7 @@ def csr_2_libsvm(csr_indices, csr_values, csr_shape, reorder=False):
     while len(indices) < csr_shape[0]:
         indices.append([])
         values.append([])
-    return indices, values
+    return np.array(indices), np.array(values)
 
 
 def read_csr_feature(fin, batch_size):
