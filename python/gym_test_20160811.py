@@ -96,7 +96,6 @@ if __name__ == '__main__':
         #                                 drops, num_round=469, batch_size=10000)
         #
         for learning_rate in [0.2]:
-            opt_prop = model_impl.opt_property('gd', learning_rate)
             ti.tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates,
                                            opt_algo=opt_algo, learning_rate=learning_rate,
                                            drops=drops, num_round=600, batch_size=10000, early_stopping_round=20,

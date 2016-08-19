@@ -5,8 +5,8 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 import feature
-from train_impl import csr_matrix_2_libsvm,libsvm_2_csr_matrix
 import tf_idf
+from train_impl import csr_matrix_2_libsvm, libsvm_2_csr_matrix
 
 data_app_events = '../data/raw/app_events.csv'
 data_app_labels = '../data/raw/app_labels.csv'
@@ -103,6 +103,9 @@ fea_device_hour_event_num_freq = feature.multi_feature(name='device_hour_event_n
 fea_device_day_hour_event_num_norm = feature.multi_feature(name='device_day_hour_event_num_norm', dtype='f')
 fea_device_weekday_event_num_norm = feature.multi_feature(name='device_weekday_event_num_norm', dtype='f')
 fea_device_weekday_event_num_freq = feature.multi_feature(name='device_weekday_event_num_freq', dtype='f')
+
+fea_installed_app_tfidf = feature.multi_feature(name='installed_app_tfidf', dtype='f')
+fea_installed_app_label_tfidf = feature.multi_feature(name='installed_app_label_tfidf', dtype='f')
 
 # new features about app label category
 fea_active_app_label_category = feature.multi_feature(name='active_app_label_category', dtype='d')
@@ -588,6 +591,7 @@ def process_keras_data(keras_data_name):
     fea_tmp.set_size(len(fea_indices))
     fea_tmp.dump()
 
+
 def feature_tfidf(name):
     fea_tmp = feature.multi_feature(name=name, dtype='f')
     fea_tmp.load()
@@ -791,13 +795,22 @@ if __name__ == '__main__':
     #                               fea_concat_6_gbtree_1,
     #                               fea_concat_6])
     #
+
+    # concat_feature('concat_6_tfidf', [fea_phone_brand,
+    #                                   fea_device_model,
+    #                                   fea_installed_app_tfidf,
+    #                                   fea_installed_app_label_tfidf])
+
+    # split_dataset('concat_6_tfidf', 0.2, zero_pad=True)
     # split_dataset('bagofapps', 0.2, zero_pad=True)
     # split_dataset('concat_12', 0.2, zero_pad=True)
     # make_feature()
     # split_dataset('concat_13', 0.2, zero_pad=True)
     # make_feature()
 
-    feature_tfidf('active_app_label_diff_hour_category_num')
+    # feature_tfidf('active_app_label_diff_hour_category_num')
+    # feature_tfidf('installed_app')
+    # feature_tfidf('installed_app_label')
 
 
     # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))

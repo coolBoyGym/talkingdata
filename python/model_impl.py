@@ -6,12 +6,6 @@ import tensorflow as tf
 from model import *
 
 
-class opt_property:
-    def __init__(self, name, learning_rate):
-        self.name = name
-        self.learning_rate = learning_rate
-
-
 def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval=0.01):
     if init_path is not None:
         load_var_map = pkl.load(open(init_path, 'rb'))
@@ -46,17 +40,6 @@ def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval
                 # print var_extend
                 var_map[var_name] = tf.Variable(var_extend, dtype=dtype)
             elif res_method == 'pass':
-                # if dtype == tf.float32:
-                #     np_type = np.float32
-                # elif dtype == tf.float64:
-                #     np_type = np.float64
-                # elif dtype == tf.int32:
-                #     np_type = np.int32
-                # elif dtype == tf.int64:
-                #     np_type = np.int64
-                # else:
-                #     np_type = np.float64
-                # np.zeros([var_shape[0], var_shape[1] - var_shape[0]], dtype=np_type) + var_diag
                 if var_shape[0] <= var_shape[1]:
                     var_diag = np.diag(np.ones(var_shape[0], dtype=np.float32), var_shape[0] - var_shape[1])
                     var_diag = var_diag[-1 * var_shape[0]:, :]
@@ -128,6 +111,45 @@ def activate(weights, activation_function):
         return weights
 
 
+def gather_2d(params, indices):
+    shape = tf.shape(params)
+    flat = tf.reshape(params, [-1])
+    flat_idx = indices[:, 0] * shape[1] + indices[:, 1]
+    flat_idx = tf.reshape(flat_idx, [-1])
+    return tf.gather(flat, flat_idx)
+
+
+def gather_3d(params, indices):
+    shape = tf.shape(params)
+    flat = tf.reshape(params, [-1])
+    flat_idx = indices[:, 0] * shape[1] * shape[2] + indices[:, 1] * shape[2] + indices[:, 2]
+    flat_idx = tf.reshape(flat_idx, [-1])
+    return tf.gather(flat, flat_idx)
+
+
+def max_pool_2d(params, k):
+    _, indices = tf.nn.top_k(params, k, sorted=False)
+    shape = tf.shape(indices)
+    r1 = tf.reshape(tf.range(shape[0]), [-1, 1])
+    r1 = tf.tile(r1, [1, k])
+    r1 = tf.reshape(r1, [-1, 1])
+    indices = tf.concat(1, [r1, tf.reshape(indices, [-1, 1])])
+    return tf.reshape(gather_2d(params, indices), [-1, k])
+
+
+def max_pool_3d(params, k):
+    _, indices = tf.nn.top_k(params, k, sorted=False)
+    shape = tf.shape(indices)
+    r1 = tf.reshape(tf.range(shape[0]), [-1, 1])
+    r2 = tf.reshape(tf.range(shape[1]), [-1, 1])
+    r1 = tf.tile(r1, [1, k * shape[1]])
+    r2 = tf.tile(r2, [1, k])
+    r1 = tf.reshape(r1, [-1, 1])
+    r2 = tf.tile(tf.reshape(r2, [-1, 1]), [shape[0], 1])
+    indices = tf.concat(1, [r1, r2, tf.reshape(indices, [-1, 1])])
+    return tf.reshape(gather_3d(params, indices), [-1, shape[1], k])
+
+
 class tf_classifier(classifier):
     def __init__(self, name, eval_metric, num_class, init_actions, init_path=None, stddev=0.01, minval=-0.01,
                  maxval=0.01, **argv):
@@ -138,7 +160,9 @@ class tf_classifier(classifier):
             self.y_true = tf.placeholder(tf.float32)
             self.drops = tf.placeholder(tf.float32)
             self.vars = init_var_map(init_actions, init_path, stddev=stddev, minval=minval, maxval=maxval)
-            self.__sess = tf.Session()
+            config = tf.ConfigProto()
+            config.gpu_options.allow_growth = True
+            self.__sess = tf.Session(config=config)
             self.y, self.y_prob, self.loss, self.optimizer = self.build_graph(**argv)
             tf.initialize_all_variables().run(session=self.__sess)
 
@@ -147,12 +171,6 @@ class tf_classifier(classifier):
 
     def build_graph(self, **argv):
         pass
-
-    # def get_graph(self):
-    #     return self.__graph
-    #
-    # def get_sess(self):
-    #     return self.__sess
 
     def run(self, fetches, feed_dict=None):
         return self.__sess.run(fetches, feed_dict)
@@ -185,7 +203,9 @@ class tf_classifier_multi(classifier):
             self.y_true = tf.placeholder(tf.float32)
             self.drops = tf.placeholder(tf.float32)
             self.vars = init_var_map(init_actions, init_path, stddev=stddev, minval=minval, maxval=maxval)
-            self.__sess = tf.Session()
+            config = tf.ConfigProto()
+            config.gpu_options.allow_growth = True
+            self.__sess = tf.Session(config=config)
             self.y, self.y_prob, self.loss, self.optimizer = self.build_graph(**argv)
             tf.initialize_all_variables().run(session=self.__sess)
 
@@ -268,32 +288,42 @@ class factorization_machine(tf_classifier):
 
 class multi_layer_perceptron(tf_classifier):
     def __init__(self, name, eval_metric, layer_sizes, layer_activates, opt_algo, learning_rate,
-                 layer_inits=None, init_path=None):
-        init_actions = []
+                 layer_inits=None, init_path=None, layer_pool=None):
         if layer_inits is None:
             layer_inits = [('normal', 'zero')] * (len(layer_sizes) - 1)
+        if layer_pool is None:
+            layer_pool = [None] * (len(layer_sizes) - 1)
+        init_actions = []
         for i in range(len(layer_sizes) - 1):
-            init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], layer_inits[i][0], tf.float32))
+            if i == 0 or layer_pool[i - 1] is None:
+                layer_input_size = layer_sizes[i]
+            else:
+                layer_input_size = layer_pool[i - 1]
+            init_actions.append(('w%d' % i, [layer_input_size, layer_sizes[i + 1]], layer_inits[i][0], tf.float32))
             init_actions.append(('b%d' % i, [layer_sizes[i + 1]], layer_inits[i][1], tf.float32))
         print init_actions
         tf_classifier.__init__(self, name, eval_metric, layer_sizes[-1],
                                init_actions=init_actions,
                                init_path=init_path,
                                layer_activates=layer_activates,
+                               layer_pool=layer_pool,
                                opt_algo=opt_algo,
                                learning_rate=learning_rate)
 
-    def build_graph(self, layer_activates, opt_algo, learning_rate):
+    def build_graph(self, layer_activates, layer_pool, opt_algo, learning_rate):
         w0 = self.vars['w0']
         b0 = self.vars['b0']
-        l = tf.nn.dropout(activate(tf.sparse_tensor_dense_matmul(self.x, w0) + b0, layer_activates[0]),
-                          keep_prob=self.drops[0])
-        print 0, layer_activates[0]
+        l = activate(tf.sparse_tensor_dense_matmul(self.x, w0) + b0, layer_activates[0])
+        if layer_pool[0] is not None:
+            l = max_pool_2d(l, layer_pool[0])
+        l = tf.nn.dropout(l, keep_prob=self.drops[0])
         for i in range(1, len(self.vars) / 2):
-            print i, layer_activates[i]
             wi = self.vars['w%d' % i]
             bi = self.vars['b%d' % i]
-            l = tf.nn.dropout(activate(tf.matmul(l, wi) + bi, layer_activates[i]), keep_prob=self.drops[i])
+            l = activate(tf.matmul(l, wi) + bi, layer_activates[i])
+            if layer_pool[i] is not None:
+                l = max_pool_2d(l, layer_pool[i])
+            l = tf.nn.dropout(l, keep_prob=self.drops[i])
         y_prob, loss = get_loss(self.get_eval_metric(), l, self.y_true)
         optimizer = get_optimizer(opt_algo, learning_rate, loss)
         return l, y_prob, loss, optimizer

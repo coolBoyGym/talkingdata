@@ -211,6 +211,7 @@ feature:
 model:
     baba:
         fnn
+        add max pooling in mlp
 
 submission:
     rocky:

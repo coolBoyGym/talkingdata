@@ -5,7 +5,7 @@ import xgboost as xgb
 import train_impl as ti
 from model_impl import convolutional_neural_network
 
-ti.init_constant(dataset='concat_6', booster='multi_layer_perceptron', version=100, random_state=0)
+ti.init_constant(dataset='concat_6', booster='multi_layer_perceptron', version=200, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -43,9 +43,9 @@ if __name__ == '__main__':
         colsample_bytree = 0.7
         early_stopping_round = 50
 
-        train_score, valid_score = ti.tune_gbtree(dtrain, dvalid, eta=0.1, max_depth=3, subsample=0.7,
-                                                  colsample_bytree=0.7, verbose_eval=True,
-                                                  early_stopping_rounds=50, dtest=dtest)
+        train_score, valid_score = ti.tune_gbtree(dtrain, dvalid, eta=eta, max_depth=max_depth, subsample=subsample,
+                                                  colsample_bytree=colsample_bytree, verbose_eval=True,
+                                                  early_stopping_rounds=early_stopping_round, dtest=dtest)
         # train_score, valid_score = tune_gbtree(dtrain, dvalid, 0.1, 4, 0.7, 0.7, True, dtest)
         # print train_score, valid_score
         # train_gbtree(dtrain_complete, dtest, 0.1, 3, 0.7, 0.7, 300)
@@ -88,15 +88,17 @@ if __name__ == '__main__':
         dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
         # dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1, False)
         # dtest = ti.read_feature(open(ti.PATH_TEST), -1, False)
-        layer_sizes = [ti.SPACE, 100, 100, ti.NUM_CLASS]
+        layer_sizes = [ti.SPACE, 1024, 128, ti.NUM_CLASS]
         layer_activates = ['relu', 'relu', None]
-        layer_inits = [('res:w0', 'res:b0'), ('res:pass', 'zero'), ('res:w1', 'res:b1')]
+        layer_inits = [('normal', 'zero'), ('normal', 'zero'), ('normal', 'zero')]
+        layer_pool = [256, 64, None]
         drops = [0.5, 0.7, 1]
         opt_algo = 'gd'
-        learning_rate = 0.1
+        learning_rate = 0.5
         num_round = 500
         early_stopping_round = 10
         batch_size = 10000
+        init_path = '../model/concat_6_tfidf_multi_layer_perceptron_1.bin'
 
         # for n in [1000, 800, 600, 400]:
         # for learning_rate in [0.4, 0.3, 0.2, 0.1]:
@@ -114,8 +116,9 @@ if __name__ == '__main__':
                                        early_stopping_round=early_stopping_round,
                                        verbose=True,
                                        save_log=True,
-                                       save_model=False,
-                                       init_path='../model/concat_6_multi_layer_perceptron_100.bin')
+                                       save_model=True,
+                                       init_path=None,
+                                       layer_pool=layer_pool)
 
         # ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes=layer_sizes, layer_activates=layer_activates,
         #                                 layer_inits=layer_inits, opt_algo=opt_algo, learning_rate=learning_rate,
