@@ -17,7 +17,7 @@ test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
 train_label = np.load('../input/bagofapps_train_label.npy')
 X_train, X_valid, y_train, y_valid = train_test_split(train_data_csr, train_label, test_size=0.2, random_state=0)
 
-ti.init_constant(dataset='concat_1', booster='multi_layer_perceptron', version=15, random_state=0)
+ti.init_constant(dataset='concat_6', booster='multi_layer_perceptron', version=20, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -94,34 +94,32 @@ if __name__ == '__main__':
         # ti.train_rdforest(wXtrain, wtrain_labels, Xtest, n_estimators=100)
 
     elif ti.BOOSTER == 'multi_layer_perceptron':
-        # dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
-        # dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
-        # dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1)
-        # dtest = ti.read_feature(open(ti.PATH_TEST), -1)
-        y_train = ti.group_id_2_label(y_train)
+        dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
+        dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
+        dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1)
+        dtest = ti.read_feature(open(ti.PATH_TEST), -1)
+        # y_train = ti.group_id_2_label(y_train)
         # train_indices, train_values = ti.csr_matrix_2_libsvm(X_train)
-        dtrain_train = X_train, y_train
+        # dtrain_train = X_train, y_train
         # valid_indices, valid_values = ti.csr_matrix_2_libsvm(X_valid)
-        y_valid = ti.group_id_2_label(y_valid)
-        dtrain_valid = X_valid, y_valid
+        # y_valid = ti.group_id_2_label(y_valid)
+        # dtrain_valid = X_valid, y_valid
 
-        layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+        layer_sizes = [ti.SPACE, 128, ti.NUM_CLASS]
         layer_activates = ['relu', None]
         drops = [0.5, 1]
         learning_rate = 0.2
-        num_round = 470
+        num_round = 460
         opt_algo = 'gd'
 
-        # for n in [400, 300, 200, 100]:
+        # for n in [1024, 512, 256, 128, 64]:
         # for learning_rate in [0.5, 0.4, 0.3, 0.2, 0.1]:
         # for second_layer_num in [500, 800, 1500, 2000, 3000]:
         #     layer_sizes = [ti.SPACE, 800, second_layer_num, ti.NUM_CLASS]
         #     layer_sizes = [ti.SPACE, n, ti.NUM_CLASS]
+        # ti.tune_multi_layer_perceptron(dtrain_train, dtrain_valid, layer_sizes, layer_activates, opt_algo,
+        #                                learning_rate, drops, num_round=num_round, batch_size=10000,
+        #                                early_stopping_round=10, verbose=True, save_log=True, save_model=True)
 
-        ti.tune_mlp_csr(dtrain_train, dtrain_valid, layer_sizes, layer_activates, opt_algo,
-                                       learning_rate, drops, num_round=num_round, batch_size=10000,
-                                       early_stopping_round=10, verbose=True, save_log=True)
-
-        # opt_prop = opt_property('gd', learning_rate)
-        # ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
-        #                                     num_round=num_round, batch_size=10000)
+        ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
+                                            num_round=num_round, batch_size=10000)

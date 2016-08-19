@@ -61,3 +61,10 @@ feature from leaderboard
 gbtree with experienced parameter
 score=2.626
 
+
+
+concat_6
+hidden layer=128    [468]	train_score: 2.200564	valid_score: 2.258902
+hidden layer=64     [530]	train_score: 2.207147	valid_score: 2.258491  score=2.24418
+hidden layer=64     [470]   score=2.24484
+
