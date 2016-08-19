@@ -652,14 +652,17 @@ def tune_factorization_machine(train_data, valid_data, factor_order, opt_algo, l
 
 def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
                                 num_round=200, batch_size=100, early_stopping_round=10, verbose=True, save_log=True,
-                                save_model=False, test_data=None):
+                                save_model=False, test_data=None, layer_inits=None, init_path=None):
     train_indices, train_values, train_labels = train_data
     valid_indices, valid_values, valid_labels = valid_data
-    mlp_model = multi_layer_perceptron(name=TAG, eval_metric='softmax_log_loss',
+    mlp_model = multi_layer_perceptron(name=TAG,
+                                       eval_metric='softmax_log_loss',
                                        layer_sizes=layer_sizes,
                                        layer_activates=layer_activates,
                                        opt_algo=opt_algo,
-                                       learning_rate=learning_rate)
+                                       learning_rate=learning_rate,
+                                       layer_inits=layer_inits,
+                                       init_path=init_path)
     train_scores = []
     valid_scores = []
     for i in range(num_round):
@@ -835,14 +838,16 @@ def ensemble_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_a
 
 
 def train_multi_layer_perceptron(train_data, test_data, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
-                                 num_round, batch_size):
+                                 num_round, batch_size, layer_inits=None, init_path=None):
     train_indices, train_values, train_labels = train_data
     test_indices, test_values, test_labels = test_data
     mlp_model = multi_layer_perceptron(name=TAG, eval_metric='softmax_log_loss',
                                        layer_sizes=layer_sizes,
                                        layer_activates=layer_activates,
+                                       layer_inits=layer_inits,
                                        opt_algo=opt_algo,
-                                       learning_rate=learning_rate)
+                                       learning_rate=learning_rate,
+                                       init_path=init_path)
     for j in range(num_round):
         start_time = time.time()
         train_loss, train_y, train_y_prob = train_with_batch_csr(mlp_model, train_indices, train_values,

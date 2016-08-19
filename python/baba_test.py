@@ -1,10 +1,11 @@
+from math import log
+
 import xgboost as xgb
 
 import train_impl as ti
 from model_impl import convolutional_neural_network
-from math import sqrt, log
 
-ti.init_constant(dataset='concat_6', booster='multiplex_neural_network', version=1, random_state=0)
+ti.init_constant(dataset='concat_6', booster='multi_layer_perceptron', version=100, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -87,22 +88,38 @@ if __name__ == '__main__':
         dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
         # dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1, False)
         # dtest = ti.read_feature(open(ti.PATH_TEST), -1, False)
-        layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
-        layer_activates = ['relu', None]
-        drops = [0.5, 0.5]
+        layer_sizes = [ti.SPACE, 100, 100, ti.NUM_CLASS]
+        layer_activates = ['relu', 'relu', None]
+        layer_inits = [('res:w0', 'res:b0'), ('res:pass', 'zero'), ('res:w1', 'res:b1')]
+        drops = [0.5, 0.7, 1]
         opt_algo = 'gd'
-        learning_rate = 0.2
+        learning_rate = 0.1
         num_round = 500
+        early_stopping_round = 10
         batch_size = 10000
 
         # for n in [1000, 800, 600, 400]:
         # for learning_rate in [0.4, 0.3, 0.2, 0.1]:
         # for opt_algo in ['gd']:
-        ti.tune_multi_layer_perceptron(dtrain_train, dtrain_valid, layer_sizes, layer_activates, opt_algo,
-                                       learning_rate, drops, num_round=num_round, batch_size=batch_size,
-                                       early_stopping_round=10, verbose=True, save_log=False, save_model=True)
+        ti.tune_multi_layer_perceptron(train_data=dtrain_train,
+                                       valid_data=dtrain_valid,
+                                       layer_sizes=layer_sizes,
+                                       layer_activates=layer_activates,
+                                       layer_inits=layer_inits,
+                                       opt_algo=opt_algo,
+                                       learning_rate=learning_rate,
+                                       drops=drops,
+                                       num_round=num_round,
+                                       batch_size=batch_size,
+                                       early_stopping_round=early_stopping_round,
+                                       verbose=True,
+                                       save_log=True,
+                                       save_model=False,
+                                       init_path='../model/concat_6_multi_layer_perceptron_100.bin')
 
-        # ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
+        # ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes=layer_sizes, layer_activates=layer_activates,
+        #                                 layer_inits=layer_inits, opt_algo=opt_algo, learning_rate=learning_rate,
+        #                                 drops=drops,
         #                                 num_round=num_round, batch_size=10000)
     elif ti.BOOSTER == 'multiplex_neural_network':
         dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
@@ -119,8 +136,8 @@ if __name__ == '__main__':
             layer_sizes[1] = map(lambda x: int(alpha * log(x)), layer_sizes[0])
             print layer_sizes
             ti.tune_multiplex_neural_network(dtrain_train, dtrain_valid, layer_sizes, layer_activates, opt_algo,
-                                         learning_rate, drops, num_round=num_round, batch_size=batch_size,
-                                         early_stopping_round=10, verbose=True, save_log=True, save_model=True)
+                                             learning_rate, drops, num_round=num_round, batch_size=batch_size,
+                                             early_stopping_round=10, verbose=True, save_log=True, save_model=True)
     elif ti.BOOSTER == 'convolutional_neural_network':
         train_indices, train_values, train_labels = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
         layer_sizes = [ti.SUB_SPACES, 100, ti.NUM_CLASS]

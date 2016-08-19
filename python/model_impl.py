@@ -1,5 +1,6 @@
 import cPickle as pkl
 
+import numpy as np
 import tensorflow as tf
 
 from model import *
@@ -13,27 +14,62 @@ class opt_property:
 
 def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval=0.01):
     if init_path is not None:
-        var_map = pkl.load(open(init_path, 'rb'))
-        print 'init variable from', init_path
-    else:
-        var_map = {}
+        load_var_map = pkl.load(open(init_path, 'rb'))
+        print 'load variable map from', init_path, load_var_map.keys()
+    var_map = {}
     for var_name, var_shape, init_method, dtype in init_actions:
-        if var_name in var_map:
-            var_map[var_name] = tf.Variable(var_map[var_name])
-            print var_name, 'already exists'
-        else:
-            if init_method == 'zero':
-                var_map[var_name] = tf.Variable(tf.zeros(var_shape, dtype=dtype), dtype=dtype)
-            elif init_method == 'one':
-                var_map[var_name] = tf.Variable(tf.ones(var_shape, dtype=dtype), dtype=dtype)
-            elif init_method == 'normal':
-                var_map[var_name] = tf.Variable(tf.random_normal(var_shape, mean=0.0, stddev=stddev, dtype=dtype),
-                                                dtype=dtype)
-            elif init_method == 'uniform':
-                var_map[var_name] = tf.Variable(tf.random_uniform(var_shape, minval=minval, maxval=maxval, dtype=dtype),
-                                                dtype=dtype)
+        if init_method == 'zero':
+            var_map[var_name] = tf.Variable(tf.zeros(var_shape, dtype=dtype), dtype=dtype)
+        elif init_method == 'one':
+            var_map[var_name] = tf.Variable(tf.ones(var_shape, dtype=dtype), dtype=dtype)
+        elif init_method == 'normal':
+            var_map[var_name] = tf.Variable(tf.random_normal(var_shape, mean=0.0, stddev=stddev, dtype=dtype),
+                                            dtype=dtype)
+        elif init_method == 'uniform':
+            var_map[var_name] = tf.Variable(tf.random_uniform(var_shape, minval=minval, maxval=maxval, dtype=dtype),
+                                            dtype=dtype)
+        elif isinstance(init_method, int) or isinstance(init_method, float):
+            var_map[var_name] = tf.Variable(tf.ones(var_shape, dtype=dtype) * init_method)
+        elif init_method in load_var_map:
+            var_map[var_name] = tf.Variable(load_var_map[init_method])
+        elif 'res' in init_method:
+            res_method = init_method.split(':')[1]
+            if res_method in load_var_map:
+                var_load = load_var_map[res_method]
+                var_extend = np.zeros(var_shape, dtype=np.float32)
+                if len(var_load.shape) == 2:
+                    var_extend[:var_load.shape[0], :var_load.shape[1]] += var_load
+                else:
+                    var_extend[:var_load.shape[0]] += var_load
+                print 'extend', var_load.shape, 'to', var_extend.shape
+                # print var_load
+                # print var_extend
+                var_map[var_name] = tf.Variable(var_extend, dtype=dtype)
+            elif res_method == 'pass':
+                # if dtype == tf.float32:
+                #     np_type = np.float32
+                # elif dtype == tf.float64:
+                #     np_type = np.float64
+                # elif dtype == tf.int32:
+                #     np_type = np.int32
+                # elif dtype == tf.int64:
+                #     np_type = np.int64
+                # else:
+                #     np_type = np.float64
+                # np.zeros([var_shape[0], var_shape[1] - var_shape[0]], dtype=np_type) + var_diag
+                if var_shape[0] <= var_shape[1]:
+                    var_diag = np.diag(np.ones(var_shape[0], dtype=np.float32), var_shape[0] - var_shape[1])
+                    var_diag = var_diag[-1 * var_shape[0]:, :]
+                else:
+                    var_diag = np.diag(np.ones(var_shape[1], dtype=np.float32), var_shape[0] - var_shape[1])
+                    var_diag = var_diag[:, -1 * var_shape[1]:]
+                print 'by pass', var_diag.shape
+                # print var_diag
+                var_map[var_name] = tf.Variable(var_diag, dtype=dtype)
             else:
                 print 'BadParam: init method', init_method
+        else:
+            print 'BadParam: init method', init_method
     return var_map
 
 
@@ -231,14 +267,18 @@ class factorization_machine(tf_classifier):
 
 
 class multi_layer_perceptron(tf_classifier):
-    def __init__(self, name, eval_metric, layer_sizes, layer_activates, opt_algo, learning_rate):
+    def __init__(self, name, eval_metric, layer_sizes, layer_activates, opt_algo, learning_rate,
+                 layer_inits=None, init_path=None):
         init_actions = []
+        if layer_inits is None:
+            layer_inits = [('normal', 'zero')] * (len(layer_sizes) - 1)
         for i in range(len(layer_sizes) - 1):
-            init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], 'normal', tf.float32))
-            init_actions.append(('b%d' % i, [layer_sizes[i + 1]], 'zero', tf.float32))
+            init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], layer_inits[i][0], tf.float32))
+            init_actions.append(('b%d' % i, [layer_sizes[i + 1]], layer_inits[i][1], tf.float32))
         print init_actions
         tf_classifier.__init__(self, name, eval_metric, layer_sizes[-1],
                                init_actions=init_actions,
+                               init_path=init_path,
                                layer_activates=layer_activates,
                                opt_algo=opt_algo,
                                learning_rate=learning_rate)
@@ -246,7 +286,6 @@ class multi_layer_perceptron(tf_classifier):
     def build_graph(self, layer_activates, opt_algo, learning_rate):
         w0 = self.vars['w0']
         b0 = self.vars['b0']
-        # self.dropouts = tf.placeholder(dtype=tf.float32, shape=[None])
         l = tf.nn.dropout(activate(tf.sparse_tensor_dense_matmul(self.x, w0) + b0, layer_activates[0]),
                           keep_prob=self.drops[0])
         print 0, layer_activates[0]
