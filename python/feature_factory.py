@@ -5,8 +5,8 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 import feature
+from train_impl import csr_matrix_2_libsvm,libsvm_2_csr_matrix
 import tf_idf
-from train_impl import csr_matrix_2_libsvm, libsvm_2_csr_matrix
 
 data_app_events = '../data/raw/app_events.csv'
 data_app_labels = '../data/raw/app_labels.csv'
@@ -83,7 +83,9 @@ fea_device_model = feature.one_hot_feature(name='device_model', dtype='d')
 fea_installed_app = feature.multi_feature(name='installed_app', dtype='d')
 fea_active_app = feature.multi_feature(name='active_app', dtype='d')
 fea_installed_app_label = feature.multi_feature(name='installed_app_label', dtype='d')
+fea_installed_app_label_num = feature.multi_feature(name='installed_app_label_num', dtype='d')
 fea_active_app_label = feature.multi_feature(name='active_app_label', dtype='d')
+fea_active_app_label_num = feature.multi_feature(name='active_app_label_num', dtype='d')
 fea_device_long_lat = feature.multi_feature(name='device_long_lat', dtype='f')
 fea_device_event_num = feature.num_feature(name='device_event_num', dtype='d')
 fea_device_day_event_num = feature.multi_feature(name='device_day_event_num', dtype='d')
@@ -116,6 +118,18 @@ fea_active_app_label_diff_hour_category_num = feature.multi_feature(name='active
 fea_active_app_label_each_hour_category = feature.multi_feature(name='active_app_label_each_hour_category', dtype='d')
 fea_active_app_label_each_hour_category_num = feature.multi_feature(name='active_app_label_each_hour_category_num',
                                                                     dtype='d')
+
+# new features about app label cluster
+fea_active_app_label_cluster_40 = feature.multi_feature(name='active_app_label_cluster_40', dtype='d')
+fea_active_app_label_cluster_100 = feature.multi_feature(name='active_app_label_cluster_100', dtype='d')
+fea_active_app_label_cluster_270 = feature.multi_feature(name='active_app_label_cluster_270', dtype='d')
+fea_active_app_label_cluster_40_num = feature.multi_feature(name='active_app_label_cluster_40_num', dtype='d')
+
+# new feature about tf-idf
+fea_active_app_label_category_num_tfidf = feature.multi_feature(name='active_app_label_category_num_tfidf', dtype='f')
+fea_active_app_label_num_tfidf = feature.multi_feature(name='active_app_label_num_tfidf', dtype='f')
+fea_active_app_label_cluster_40_num_tfidf = feature.multi_feature(name='active_app_label_cluster_40_num_tfidf',
+                                                                  dtype='f')
 
 """
 event features
@@ -195,7 +209,10 @@ def make_feature():
     # dict_brand = pkl.load(open('../data/dict_id_brand.pkl', 'rb'))
     # dict_model = pkl.load(open('../data/dict_id_model.pkl', 'rb'))
     # dict_app = pkl.load(open('../data/dict_id_app.pkl', 'rb'))
-    dict_label_category_group = pkl.load(open('../data/dict_label_category_group_number.pkl', 'rb'))
+    # dict_label_category_group = pkl.load(open('../data/dict_label_category_group_number.pkl', 'rb'))
+    dict_label_cluster_40 = pkl.load(open('../data/dict_label_cluster_40.pkl', 'rb'))
+    # dict_label_cluster_100 = pkl.load(open('../data/dict_label_cluster_100.pkl', 'rb'))
+    # dict_label_cluster_270 = pkl.load(open('../data/dict_label_cluster_270.pkl', 'rb'))
 
     # for i in range(3):
     #     print dict_device_event[i]
@@ -305,10 +322,19 @@ def make_feature():
     # fea_installed_app_label_freq.process(device_id=device_id, dict_device_event=dict_device_event,
     #                                      dict_app_event=dict_app_event, dict_app_label=dict_app_label)
     # fea_installed_app_label_freq.dump()
-    #
+
+    # fea_installed_app_label_num.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                     dict_app_event=dict_app_event, dict_app_label=dict_app_label)
+    # fea_installed_app_label_num.dump()
+
     # fea_active_app_label_freq.process(device_id=device_id, dict_device_event=dict_device_event,
     #                                   dict_app_event=dict_app_event, dict_app_label=dict_app_label)
     # fea_active_app_label_freq.dump()
+
+    # fea_active_app_label_num.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                  dict_app_event=dict_app_event, dict_app_label=dict_app_label)
+    # fea_active_app_label_num.dump()
+
     # fea_device_hour_event_num.process(device_id=device_id, dict_device_event=dict_device_event)
     # fea_device_hour_event_num.dump()
     #
@@ -352,10 +378,29 @@ def make_feature():
     #                                                 dict_app_event=dict_app_event, dict_app_label=dict_app_label,
     #                                                 dict_label_category_group=dict_label_category_group)
     # fea_active_app_label_each_hour_category.dump()
-    fea_active_app_label_each_hour_category_num.process(device_id=device_id, dict_device_event=dict_device_event,
-                                                        dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-                                                        dict_label_category_group=dict_label_category_group)
-    fea_active_app_label_each_hour_category_num.dump()
+    # fea_active_app_label_each_hour_category_num.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                                     dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+    #                                                     dict_label_category_group=dict_label_category_group)
+    # fea_active_app_label_each_hour_category_num.dump()
+
+    # fea_active_app_label_cluster_40.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                         dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+    #                                         dict_label_cluster_40=dict_label_cluster_40)
+    # fea_active_app_label_cluster_40.dump()
+
+    # fea_active_app_label_cluster_100.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                          dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+    #                                          dict_label_cluster_100=dict_label_cluster_100)
+    # fea_active_app_label_cluster_100.dump()
+
+    # fea_active_app_label_cluster_270.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                          dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+    #                                          dict_label_cluster_270=dict_label_cluster_270)
+    # fea_active_app_label_cluster_270.dump()
+    fea_active_app_label_cluster_40_num.process(device_id=device_id, dict_device_event=dict_device_event,
+                                                dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+                                                dict_label_cluster_40=dict_label_cluster_40)
+    fea_active_app_label_cluster_40_num.dump()
 
 
 def ensemble_concat_feature(name, fea_list):
@@ -591,7 +636,6 @@ def process_keras_data(keras_data_name):
     fea_tmp.set_size(len(fea_indices))
     fea_tmp.dump()
 
-
 def feature_tfidf(name):
     fea_tmp = feature.multi_feature(name=name, dtype='f')
     fea_tmp.load()
@@ -750,7 +794,7 @@ if __name__ == '__main__':
     #                              fea_device_model,
     #                              fea_installed_app,
     #                              fea_installed_app_label,
-    #                              fea_active_app_label_group_freq])
+    #                              fea_active_app_label_category])
     #
     # concat_feature('concat_12', [fea_phone_brand,
     #                              fea_device_model,
@@ -763,16 +807,52 @@ if __name__ == '__main__':
     #                              fea_installed_app,
     #                              fea_installed_app_label,
     #                              fea_active_app_label_each_hour_category])
-    #
-    # concat_feature('concat_6_ensemble',[fea_concat_6, fea_ensemble_test])
 
-    # split_dataset('concat_8', 0.2, zero_pad=True)
-    # split_dataset('concat_8_norm', 0.2, zero_pad=True)
-    # split_dataset('concat_8', 0.2, zero_pad=True)
-    # split_dataset('concat_8_norm', 0.2, zero_pad=True)
-    # split_dataset('concat_9', 0.2, zero_pad=True)
-    # split_dataset('concat_9_norm', 0.2, zero_pad=True)
-    # pass
+    # concat_feature('concat_14', [fea_phone_brand,
+    #                              fea_device_model,
+    #                              fea_installed_app,
+    #                              fea_installed_app_label,
+    #                              fea_active_app_label,
+    #                              fea_device_hour_event_num_freq,
+    #                              fea_device_weekday_event_num_freq,
+    #                              fea_device_long_lat_norm,
+    #                              ])
+
+    # concat_feature('concat_15', [fea_phone_brand,
+    #                              fea_device_model,
+    #                              fea_installed_app,
+    #                              fea_installed_app_label,
+    #                              fea_active_app_label_category_num_tfidf])
+
+    # concat_feature('concat_16', [fea_phone_brand,
+    #                              fea_device_model,
+    #                              fea_installed_app,
+    #                              fea_installed_app_label,
+    #                              fea_active_app_label_cluster_40])
+
+    # concat_feature('concat_16_tfidf', [fea_phone_brand,
+    #                                    fea_device_model,
+    #                                    fea_installed_app,
+    #                                    fea_installed_app_label,
+    #                                    fea_active_app_label_cluster_40_num_tfidf])
+
+    # concat_feature('concat_16_2', [fea_phone_brand,
+    #                                fea_device_model,
+    #                                fea_installed_app,
+    #                                fea_installed_app_label,
+    #                                fea_active_app_label_cluster_100])
+
+    # concat_feature('concat_16_3', [fea_phone_brand,
+    #                                fea_device_model,
+    #                                fea_installed_app,
+    #                                fea_installed_app_label,
+    #                                fea_active_app_label_cluster_270])
+
+    # concat_feature('concat_17', [fea_phone_brand,
+    #                              fea_device_model,
+    #                              fea_installed_app,
+    #                              fea_installed_app_label,
+    #                              fea_active_app_label_num_tfidf])
 
     # concat_feature('ensemble_4', [fea_concat_1_gbtree_1,
     #                               fea_concat_1_gblinear_1,
@@ -806,12 +886,14 @@ if __name__ == '__main__':
     # split_dataset('concat_12', 0.2, zero_pad=True)
     # make_feature()
     # split_dataset('concat_13', 0.2, zero_pad=True)
+    split_dataset('concat_16_tfidf', 0.2, zero_pad=True)
     # make_feature()
 
     # feature_tfidf('active_app_label_diff_hour_category_num')
     # feature_tfidf('installed_app')
     # feature_tfidf('installed_app_label')
 
+    # feature_tfidf('active_app_label_cluster_40_num')
 
     # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
     # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
@@ -824,10 +906,3 @@ if __name__ == '__main__':
     # train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
     # test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
     # train_label = np.load('../input/bagofapps_train_label.npy')
-    # fea_tmp = feature.multi_feature('active_app_label_diff_hour_category_num', dtype='d')
-    # fea_tmp.load()
-    # fea_tmp.reorder()
-    # indices, values = fea_tmp.get_value()
-    # print indices
-    # print values
-    # fea_tmp.dump()

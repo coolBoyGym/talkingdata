@@ -192,6 +192,30 @@ def installed_app_label_freq_proc(device_id, dict_device_event, dict_app_event, 
         values.append(map(lambda x: tmp[x] * 1.0 / total_freq, sorted_tmp))
     return np.array(indices), np.array(values)
 
+def installed_app_label_num_proc(device_id, dict_device_event, dict_app_event, dict_app_label):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = {}
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][0]:
+                    for lid in dict_app_label[aid]:
+                        if lid in tmp:
+                            tmp[lid] += 1
+                        else:
+                            tmp[lid] = 1
+        sorted_tmp = sorted(tmp.keys())
+        # total_freq = sum(tmp.values())
+        indices.append(sorted_tmp)
+        values.append(map(lambda x: tmp[x], sorted_tmp))
+    return np.array(indices), np.array(values)
 
 def active_app_label_freq_proc(device_id, dict_device_event, dict_app_event, dict_app_label):
     indices = []
@@ -216,6 +240,148 @@ def active_app_label_freq_proc(device_id, dict_device_event, dict_app_event, dic
         total_freq = sum(tmp.values())
         indices.append(sorted_tmp)
         values.append(map(lambda x: tmp[x] * 1.0 / total_freq, sorted_tmp))
+    return np.array(indices), np.array(values)
+
+def active_app_label_num_proc(device_id, dict_device_event, dict_app_event, dict_app_label):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = {}
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][1]:
+                    for lid in dict_app_label[aid]:
+                        if lid in tmp:
+                            tmp[lid] += 1
+                        else:
+                            tmp[lid] = 1
+        sorted_tmp = sorted(tmp.keys())
+        # total_freq = sum(tmp.values())
+        indices.append(sorted_tmp)
+        values.append(map(lambda x: tmp[x], sorted_tmp))
+    return np.array(indices), np.array(values)
+
+def active_app_label_cluster_40_proc(device_id, dict_device_event, dict_app_event, dict_app_label,
+                                     dict_label_cluster_40):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = set()
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][1]:
+                    for lid in dict_app_label[aid]:
+                        lid_cluster = dict_label_cluster_40[lid]
+                        # if lid_group in tmp:
+                        #     tmp[lid_group] += 1
+                        # else:
+                        # tmp[lid_group] = 1
+                        tmp.add(lid_cluster)
+        # sorted_tmp = sorted(tmp.keys())
+        # total_num = sum(tmp.values())
+        # sorted_tmp = sorted(tmp.keys())
+        indices.append(sorted(tmp))
+        values.append([1] * len(tmp))
+    return np.array(indices), np.array(values)
+
+
+def active_app_label_cluster_40_num_proc(device_id, dict_device_event, dict_app_event, dict_app_label,
+                                         dict_label_cluster_40):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = {}
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][1]:
+                    for lid in dict_app_label[aid]:
+                        lid_cluster = dict_label_cluster_40[lid]
+                        if lid_cluster in tmp:
+                            tmp[lid_cluster] += 1
+                        else:
+                            tmp[lid_cluster] = 1
+                        # tmp.add(lid_cluster)
+        sorted_tmp = sorted(tmp.keys())
+        # total_num = sum(tmp.values())
+        indices.append(sorted_tmp)
+        values.append(map(lambda x: tmp[x], sorted_tmp))
+    return np.array(indices), np.array(values)
+
+def active_app_label_cluster_100_proc(device_id, dict_device_event, dict_app_event, dict_app_label,
+                                      dict_label_cluster_100):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = set()
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][1]:
+                    for lid in dict_app_label[aid]:
+                        lid_cluster = dict_label_cluster_100[lid]
+                        # if lid_group in tmp:
+                        #     tmp[lid_group] += 1
+                        # else:
+                        # tmp[lid_group] = 1
+                        tmp.add(lid_cluster)
+        # sorted_tmp = sorted(tmp.keys())
+        # total_num = sum(tmp.values())
+        # sorted_tmp = sorted(tmp.keys())
+        indices.append(sorted(tmp))
+        values.append([1] * len(tmp))
+    return np.array(indices), np.array(values)
+
+
+def active_app_label_cluster_270_proc(device_id, dict_device_event, dict_app_event, dict_app_label,
+                                      dict_label_cluster_270):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = set()
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][1]:
+                    for lid in dict_app_label[aid]:
+                        lid_cluster = dict_label_cluster_270[lid]
+                        # if lid_group in tmp:
+                        #     tmp[lid_group] += 1
+                        # else:
+                        # tmp[lid_group] = 1
+                        tmp.add(lid_cluster)
+        # sorted_tmp = sorted(tmp.keys())
+        # total_num = sum(tmp.values())
+        # sorted_tmp = sorted(tmp.keys())
+        indices.append(sorted(tmp))
+        values.append([1] * len(tmp))
     return np.array(indices), np.array(values)
 
 

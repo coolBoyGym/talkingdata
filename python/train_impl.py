@@ -698,7 +698,7 @@ def tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activ
     if save_model:
         mlp_model.dump()
     if test_data is not None:
-        test_indices, test_values = test_data
+        test_indices, test_values, _ = test_data
         train_y, train_y_prob = predict_with_batch_csr(mlp_model, train_indices, train_values, drops=[1] * len(drops),
                                                        batch_size=batch_size)
         valid_y, valid_y_prob = predict_with_batch_csr(mlp_model, valid_indices, valid_values, drops=[1] * len(drops),

@@ -298,26 +298,21 @@ submission:
                                 round=2000, lambda=1, alpha=0.1, rate=0.2}
                              valid_score=2.27939683794, real_score=not yet, concat_12_gbtree
 
+
+
+
+2016/8/18 Thu
+
+    gym:
         concat_12_wrong_mlp_1:
             layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
             layer_activates = ['relu', None]
             drops = [0.5, 1]
             learning_rate = 0.2
-            num_round = 600
+            num_round = 462
             best iteration:
             [462]	train_score: 2.199512	valid_score: 2.259978
             score:2.24657
-
-
-        concat_12_mlp_1:
-            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
-            layer_activates = ['relu', None]
-            drops = [0.5, 1]
-            learning_rate = 0.2
-            num_round = 600
-            best iteration:
-            [464]	train_score: 2.201910	valid_score: 2.259253
-
 
         concat_11_mlp_1:
             layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
@@ -327,4 +322,123 @@ submission:
             num_round = 600
             best iteration:
             [477]	train_score: 2.202244	valid_score: 2.258862
+            score:2.24497
+
+        concat_12_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 464
+            best iteration:
+            [464]	train_score: 2.201910	valid_score: 2.259253
+            score:2.24769
+
+        concat_13_gbtree_1:
+            {max_depth=3, eta=0.1, subsample=0.6, colsample=0.9, early_stop_round=20,
+                round=2000, lambda=1, alpha=0.1, rate=0.2}
+                valid_score=2.28013701981, real_score=not yet, concat_13_gbtree
+
+        concat_13_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 600
+            best iteration:
+            [398]	train_score: 2.203885	valid_score: 2.262226
+
+        concat_14_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 600
+            best iteration:
+            [450]	train_score: 2.198796	valid_score: 2.260234
+
+        concat_15_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 600
+            best iteration:
+            [500]	train_score: 2.199825	valid_score: 2.258154
+            score:2.24435
+
+
+2016/8/18 Fri
+        concat_15_mlp_2:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 530
+            score:2.24534
+
+        concat_15_mlp_3:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 470
+            score:2.24394
+
+        concat_16_mlp_1:
+            cluster = 40
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 600
+            best iteration:
+            [505]	train_score:2.197933    valid_score:2.258077
+
+        concat_16_2_mlp_1:
+            cluster = 100
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 600
+            best iteration:
+            [496]	train_score: 2.197773	valid_score: 2.258149
+
+        concat_16_3_mlp_1:
+            cluster = 270
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 600
+            best iteration:
+            [476]	train_score: 2.197187	valid_score: 2.260958
+
+        concat_17_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 600
+            best iteration:
+            [471]	train_score: 2.202748	valid_score: 2.258381
+
+        concat_17_mlp_2:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.1
+            num_round = 700
+            best iteration:
+            699	    2.231004	2.262013
+
+        concat_16_tfidf_mlp_1:
+            layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
+            layer_activates = ['relu', None]
+            drops = [0.5, 1]
+            learning_rate = 0.2
+            num_round = 700
+            best iteration:
+            [489]	train_score: 2.201669	valid_score: 2.259127
 
