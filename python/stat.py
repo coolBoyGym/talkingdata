@@ -1,11 +1,12 @@
 import cPickle as pkl
+import re
+import time
+from Queue import PriorityQueue
 
 import numpy as np
-import seaborn as sns
+from scipy.sparse import csr_matrix
 
-import re
-
-sns.set_style('darkgrid')
+from tf_idf import tf_idf
 
 data_app_events = '../data/raw/app_events.csv'
 data_app_labels = '../data/raw/app_labels.csv'
@@ -149,6 +150,7 @@ def aggregate_label_category():
 
     pkl.dump(dict_label_category, open('../data/dict_label_category_group_number.pkl', 'wb'))
 
+
 def change_group_name_2_number(x):
     if x == 'Games':
         return 0
@@ -191,77 +193,83 @@ def change_group_name_2_number(x):
     else:
         return 5
 
+
 def change_category_2_group(x):
     if re.search('([gG]am)|([pP]oker)|([cC]hess)|([pP]uzz)|([bB]all)|([pP]ursu)|([fF]ight)|([sS]imulat)|([sS]hoot)',
                  x) is not None:
-        return('Games')
+        return ('Games')
     # Then I went through existing abbreviations like RPG, MMO and so on
     elif re.search('(RPG)|(SLG)|(RAC)|(MMO)|(MOBA)', x) is not None:
-        return('Games')
+        return ('Games')
     # Still small list of items left which is not covered by regex
     elif x in ['billards', 'World of Warcraft', 'Tower Defense', 'Tomb', 'Ninja', 'Europe and Fantasy', 'Senki',
-             'Shushan', 'Lottery ticket', 'majiang', 'tennis', 'Martial arts']:
-        return('Games')
+               'Shushan', 'Lottery ticket', 'majiang', 'tennis', 'Martial arts']:
+        return ('Games')
     elif x in ['Property Industry 2.0', 'Property Industry new', 'Property Industry 1.0']:
-        return('Property')
+        return ('Property')
     elif re.search('([eE]state)', x) is not None:
-        return('Property')
-    elif re.search('([fF]amili)|([mM]othe)|([fF]athe)|(bab)|([rR]elative)|([pP]regnan)|([pP]arent)|([mM]arriag)|([lL]ove)',
-                 x) is not None:
-        return('Family')
+        return ('Property')
+    elif re.search(
+            '([fF]amili)|([mM]othe)|([fF]athe)|(bab)|([rR]elative)|([pP]regnan)|([pP]arent)|([mM]arriag)|([lL]ove)',
+            x) is not None:
+        return ('Family')
     elif re.search('([fF]un)|([cC]ool)|([tT]rend)|([cC]omic)|([aA]nima)|([pP]ainti)|\
                  ([fF]iction)|([pP]icture)|(joke)|([hH]oroscope)|([pP]assion)|([sS]tyle)|\
                  ([cC]ozy)|([bB]log)', x) is not None:
-        return('Fun')
+        return ('Fun')
     elif x in ['Parkour avoid class', 'community', 'Enthusiasm', 'cosplay', 'IM']:
-        return('Fun')
+        return ('Fun')
     elif x == 'Personal Effectiveness 1' or x == 'Personal Effectiveness':
-        return('Productivity')
-    elif re.search('([iI]ncome)|([pP]rofitabil)|([lL]iquid)|([rR]isk)|([bB]ank)|([fF]uture)|([fF]und)|([sS]tock)|([sS]hare)',
-                 x) is not None:
-        return('Finance')
+        return ('Productivity')
+    elif re.search(
+            '([iI]ncome)|([pP]rofitabil)|([lL]iquid)|([rR]isk)|([bB]ank)|([fF]uture)|([fF]und)|([sS]tock)|([sS]hare)',
+            x) is not None:
+        return ('Finance')
     elif re.search('([fF]inanc)|([pP]ay)|(P2P)|([iI]nsura)|([lL]oan)|([cC]ard)|([mM]etal)|\
                   ([cC]ost)|([wW]ealth)|([bB]roker)|([bB]usiness)|([eE]xchange)', x) is not None:
-        return('Finance')
-    elif x in ['High Flow', 'Housekeeping', 'Accounting', 'Debit and credit', 'Recipes', 'Heritage Foundation', 'IMF',]:
-        return('Finance')
+        return ('Finance')
+    elif x in ['High Flow', 'Housekeeping', 'Accounting', 'Debit and credit', 'Recipes', 'Heritage Foundation',
+               'IMF', ]:
+        return ('Finance')
     elif x == 'And the Church':
         return ('Religion')
     elif re.search('([sS]ervice)', x) is not None:
-        return('Services')
+        return ('Services')
     elif re.search('([aA]viation)|([aA]irlin)|([bB]ooki)|([tT]ravel)|\
                   ([hH]otel)|([tT]rain)|([tT]axi)|([rR]eservati)|([aA]ir)|([aA]irport)', x) is not None:
-        return('Travel')
-    elif re.search('([jJ]ourne)|([tT]ransport)|([aA]ccommodat)|([nN]avigat)|([tT]ouris)|([fF]light)|([bB]us)', x) is not None:
-        return('Travel')
+        return ('Travel')
+    elif re.search('([jJ]ourne)|([tT]ransport)|([aA]ccommodat)|([nN]avigat)|([tT]ouris)|([fF]light)|([bB]us)',
+                   x) is not None:
+        return ('Travel')
     elif x in ['High mobility', 'Destination Region', 'map', 'Weather', 'Rentals']:
-        return('Travel')
+        return ('Travel')
     elif re.search('([cC]ustom)', x) is not None:
-        return('Custom')
+        return ('Custom')
     elif x in ['video', 'round', 'the film', 'movie']:
-        return('Video')
+        return ('Video')
     elif x in ['Smart Shopping', 'online malls', 'online shopping by group, like groupon', 'takeaway ordering',
-             'online shopping, price comparing', 'Buy class', 'Buy', 'shopping sharing',
-             'Smart Shopping 1', 'online shopping navigation']:
-        return('Shopping')
+               'online shopping, price comparing', 'Buy class', 'Buy', 'shopping sharing',
+               'Smart Shopping 1', 'online shopping navigation']:
+        return ('Shopping')
     elif re.search('([eE]ducati)|([rR]ead)|([sS]cienc)|([bB]ooks)', x) is not None:
-        return('Education')
+        return ('Education')
     elif x in ['literature', 'Maternal and child population', 'psychology', 'exams', 'millitary and wars', 'news',
-             'foreign language', 'magazine and journal', 'dictionary', 'novels', 'art and culture', 'Entertainment News',
-             'College Students', 'math', 'Western Mythology', 'Technology Information', 'study abroad',
-             'Chinese Classical Mythology']:
-        return('Education')
+               'foreign language', 'magazine and journal', 'dictionary', 'novels', 'art and culture',
+               'Entertainment News',
+               'College Students', 'math', 'Western Mythology', 'Technology Information', 'study abroad',
+               'Chinese Classical Mythology']:
+        return ('Education')
     elif x in ['vitality', '1 vitality']:
-        return('Vitality')
-    elif x in [ 'sports and gym', 'Health Management', 'Integrated Living', 'Medical', 'Free exercise', 'A beauty care',
-             'fashion', 'fashion outfit', 'lose weight', 'health', 'Skin care applications', 'Wearable Health']:
-        return('Vitality')
+        return ('Vitality')
+    elif x in ['sports and gym', 'Health Management', 'Integrated Living', 'Medical', 'Free exercise', 'A beauty care',
+               'fashion', 'fashion outfit', 'lose weight', 'health', 'Skin care applications', 'Wearable Health']:
+        return ('Vitality')
     elif x in ['sports', 'Sports News']:
         return ('Sports')
     elif x == 'music':
         return ('Music')
     elif re.search('([hH]otel)', x) is not None:
-        return('Travel')
+        return ('Travel')
     elif x in ['1 free', 'The elimination of class', 'unknown', 'free', 'comfortable', 'Cozy 1', 'other',
                'Total Cost 1', 'Classical 1', 'Quality 1', 'classical', 'quality', 'Car Owners', 'Noble 1',
                'Pirated content', 'Securities', 'professional skills', 'Jobs', 'Reputation', 'Simple 1', '1 reputation',
@@ -280,9 +288,10 @@ def change_category_2_group(x):
                'Smart Appliances', 'reality show', 'Harem', 'trickery', 'Jin Yong', 'effort', 'Xian Xia', 'Romance',
                'tribe', 'email', 'mesasge', 'Editor', 'Clock', 'search', 'Intelligent hardware', 'Browser',
                'Furniture']:
-        return('Other')
+        return ('Other')
     else:
         return x
+
 
 # def stat_app_label():
 #     dict1 = pkl.load(open('../data/app_label_dict1.pkl', 'rb'))
@@ -553,6 +562,140 @@ def aggregate_app_event():
     pkl.dump(dict_app_event, open('../data/dict_app_event.pkl', 'wb'))
 
 
+def count_app_coocur():
+    dict_app = pkl.load(open('../data/dict_id_app.pkl', 'rb'))
+    dict_app_event = pkl.load(open('../data/dict_app_event.pkl', 'rb'))
+    app_coocur = np.zeros([len(dict_app), len(dict_app)], dtype=np.int32)
+    for _, aids in dict_app_event.values():
+        for ai in aids:
+            for aj in aids:
+                if ai != aj:
+                    app_coocur[ai, aj] += 1
+    rows = []
+    cols = []
+    data = []
+    for i in range(len(app_coocur)):
+        for j in range(len(app_coocur[i])):
+            if app_coocur[i, j] > 0:
+                rows.append(i)
+                cols.append(j)
+                data.append(app_coocur[i, j])
+    app_coocur_csr = csr_matrix((data, (rows, cols)))
+    pkl.dump(app_coocur_csr, open('../data/app_coocur.pkl', 'wb'))
+    app_coocur_tfidf = tf_idf(app_coocur)
+    pkl.dump(app_coocur_tfidf, open('../data/app_coocur_tfidf.pkl', 'wb'))
+
+
+def count_label_coocur():
+    dict_label = pkl.load(open('../data/dict_id_label.pkl', 'rb'))
+    dict_app_event = pkl.load(open('../data/dict_app_event.pkl', 'rb'))
+    dict_app_label = pkl.load(open('../data/dict_app_label.pkl', 'rb'))
+    label_coocur = np.zeros([len(dict_label), len(dict_label)], dtype=np.int32)
+    print len(dict_app_event)
+    cnt = 0
+    start_time = time.time()
+    for _, aids in dict_app_event.values():
+        cnt += 1
+        if cnt % 10000 == 0:
+            print cnt, time.time() - start_time
+            start_time = time.time()
+        tmp = set()
+        for ai in aids:
+            tmp |= dict_app_label[ai]
+        for li in tmp:
+            for lj in tmp:
+                if li != lj:
+                    label_coocur[li, lj] += 1
+    rows = []
+    cols = []
+    data = []
+    for i in range(len(label_coocur)):
+        for j in range(len(label_coocur[i])):
+            if label_coocur[i, j] > 0:
+                rows.append(i)
+                cols.append(j)
+                data.append(label_coocur[i, j])
+    label_coocur_csr = csr_matrix((data, (rows, cols)))
+    pkl.dump(label_coocur_csr, open('../data/label_coocur.pkl', 'wb'))
+    label_coocur_tfidf = tf_idf(label_coocur_csr)
+    pkl.dump(label_coocur_tfidf, open('../data/label_coocur_tfidf.pkl', 'wb'))
+
+
+class edge:
+    def __init__(self, cost, node1, node2):
+        self.cost = cost
+        self.node1 = node1
+        self.node2 = node2
+
+    def __cmp__(self, other):
+        return self.cost < other.cost
+
+
+def find_parent(parent, i):
+    if parent[i] == i:
+        return i
+    parent[i] = find_parent(parent, parent[i])
+    return parent[i]
+
+
+def join_parent(parent, i, j):
+    j_parent = find_parent(parent, j)
+    parent[j_parent] = find_parent(parent, i)
+
+
+def coocur_cluster(path, threshold=0.0):
+    coocur_tfidf = pkl.load(open(path, 'rb'))
+    coocur_tfidf += coocur_tfidf.transpose()
+    coocur_tfidf /= 2
+    csr_indices = coocur_tfidf.indices
+    csr_indptr = coocur_tfidf.indptr
+    csr_data = coocur_tfidf.data
+    q = PriorityQueue()
+    print 'make heap...'
+    parent = np.arange((coocur_tfidf.shape[0]))
+    for i in range(coocur_tfidf.shape[0]):
+        for ij in range(csr_indptr[i], csr_indptr[i + 1]):
+            j = csr_indices[ij]
+            d = csr_data[ij]
+            if i < j and d > threshold:
+                q.put(edge(d, i, j))
+    print 'find and join...'
+    while not q.empty():
+        next_edge = q.get()
+        node1 = next_edge.node1
+        node2 = next_edge.node2
+        n1_parent = find_parent(parent, node1)
+        n2_parent = find_parent(parent, node2)
+        if n1_parent == n2_parent:
+            continue
+        elif n2_parent == node2:
+            join_parent(parent, node1, node2)
+        elif n1_parent == node1:
+            join_parent(parent, node2, node1)
+        else:
+            join_parent(parent, node1, node2)
+    clusters = []
+    for i in range(coocur_tfidf.shape[0]):
+        son_i = np.where(parent == i)[0]
+        if len(son_i) > 0:
+            clusters.append(son_i)
+    clusters = np.array(clusters)
+    print len(clusters)
+    print clusters
+    dict_label_cluster = {}
+    cnt = 0
+    for c in clusters:
+        for l in c:
+            dict_label_cluster[l] = cnt
+        cnt += 1
+    pkl.dump(dict_label_cluster, open('../data/dict_label_cluster_500.pkl', 'wb'))
+
+
 if __name__ == '__main__':
     # build_event_dict()
-    aggregate_label_category()
+    # aggregate_label_category()
+    # count_app_coocur()
+    # count_label_coocur()
+    path = '../data/label_coocur_tfidf.pkl'
+    for t in [0.032]:
+        coocur_cluster(path, t)

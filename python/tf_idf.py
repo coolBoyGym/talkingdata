@@ -1,7 +1,11 @@
+import math
+
 import numpy as np
 from scipy.sparse import csr_matrix
-import math
+
 import train_impl as ti
+
+
 def normalized_by_row_sum(mat):
     major_axis = 1 if len(mat.shape) == 2 else 0
     row_sum = np.array(mat.sum(axis=major_axis).ravel())[0]
@@ -18,8 +22,10 @@ def normalized_by_row_sum(mat):
         normalized_mat.indices = mat.indices
         return normalized_mat
 
+
 def tf_idf(count_mat):
     return _tf(count_mat).dot(_idf(count_mat))
+
 
 def _counting_occurrence(arr):
     arr.sort()
@@ -34,8 +40,10 @@ def _counting_occurrence(arr):
     occurrence[-1] = arr.shape[0] - np.diff(idx).sum()
     return features, occurrence
 
+
 def _tf(count_mat):
     return normalized_by_row_sum(count_mat)
+
 
 def _idf(count_mat):
     total_doc_count = count_mat.shape[0]
@@ -43,7 +51,6 @@ def _idf(count_mat):
     feature, occurrence = _counting_occurrence(features)
     init_element = [math.log(float(total_doc_count) / occ) for occ in occurrence]
     return csr_matrix((init_element, (feature, feature)), shape=(count_mat.shape[1], count_mat.shape[1]))
-
 
 
 if __name__ == '__main__':
@@ -61,5 +68,3 @@ if __name__ == '__main__':
 # tf_mat = tf_idf(mat)
 # print
 # print tf_mat
-
-
