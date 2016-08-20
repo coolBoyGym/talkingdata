@@ -181,7 +181,7 @@ if __name__ == '__main__':
     # norm_argument_file_get_result('ensemble_2', 'gbtree')
     # norm_argument_file_get_result('concat_7', 'gbtree')
     # find_best_argument('concat_4')
-    path_log = '../model/concat_12_multi_layer_perceptron_1.log'
+    path_log = '../model/concat_6_text_convolutional_neural_network_0.log'
     # plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3)
     # path_log = '../model/concat_1_factorization_machine_1.log'
     # path_log = '../model/ensemble_1_gbtree_1.log'

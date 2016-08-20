@@ -330,16 +330,19 @@ class multi_layer_perceptron(tf_classifier):
 
 
 class multiplex_neural_network(tf_classifier_multi):
-    def __init__(self, name, eval_metric, layer_sizes, layer_activates, opt_algo, learning_rate, init_path=None):
+    def __init__(self, name, eval_metric, layer_sizes, layer_activates, opt_algo, learning_rate,
+                 layer_inits=None, init_path=None):
+        if layer_inits is None:
+            layer_inits = [('normal', 'zero')] * (len(layer_sizes) - 1)
         init_actions = []
         for i in range(len(layer_sizes[0])):
-            init_actions.append(('w0_%d' % i, [layer_sizes[0][i], layer_sizes[1][i]], 'normal', tf.float32))
-            init_actions.append(('b0_%d' % i, [layer_sizes[1][i]], 'zero', tf.float32))
-        init_actions.append(('w1', [sum(layer_sizes[1]), layer_sizes[2]], 'normal', tf.float32))
-        init_actions.append(('b1', [layer_sizes[2]], 'zero', tf.float32))
+            init_actions.append(('w0_%d' % i, [layer_sizes[0][i], layer_sizes[1][i]], layer_inits[0][0], tf.float32))
+            init_actions.append(('b0_%d' % i, [layer_sizes[1][i]], layer_inits[0][1], tf.float32))
+        init_actions.append(('w1', [sum(layer_sizes[1]), layer_sizes[2]], layer_inits[1][0], tf.float32))
+        init_actions.append(('b1', [layer_sizes[2]], layer_inits[1][1], tf.float32))
         for i in range(2, len(layer_sizes) - 1):
-            init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], 'normal', tf.float32))
-            init_actions.append(('b%d' % i, [layer_sizes[i + 1]], 'zero', tf.float32))
+            init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], layer_inits[i][0], tf.float32))
+            init_actions.append(('b%d' % i, [layer_sizes[i + 1]], layer_inits[i][1], tf.float32))
         tf_classifier_multi.__init__(self, name, eval_metric, layer_sizes[-1], len(layer_sizes[0]),
                                      init_actions=init_actions,
                                      init_path=init_path,
@@ -364,26 +367,114 @@ class multiplex_neural_network(tf_classifier_multi):
 
 
 class convolutional_neural_network(tf_classifier_multi):
-    def __init__(self, name, eval_metric, layer_sizes, layer_activates, opt_algo, learning_rate):
-        self.layer_sizes = layer_sizes
+    def __init__(self, name, eval_metric, layer_sizes, layer_activates, kernel_sizes, opt_algo, learning_rate,
+                 layer_inits=None, init_path=None, layer_pools=None, layer_pool_strides=None):
+        if layer_inits is None:
+            layer_inits = [('normal', 'zero')] * (len(layer_sizes) - 1)
         init_actions = []
         for i in range(len(layer_sizes[0])):
-            init_actions.append(('w0_%d' % i, [layer_sizes[0][i], layer_sizes[1]], 'normal', tf.float32))
-            init_actions.append(('b0_%d' % i, [layer_sizes[1]], 'zero', tf.float32))
-        init_actions.append(('w1', [layer_sizes[1] * len(layer_sizes[0]), layer_sizes[2]], 'normal', tf.float32))
-        init_actions.append(('b1', [layer_sizes[2]], 'zero', tf.float32))
+            init_actions.append(('w0_%d' % i, [layer_sizes[0][i], layer_sizes[1][i]], layer_inits[0][0], tf.float32))
+            init_actions.append(('b0_%d' % i, [layer_sizes[1][i]], layer_inits[0][1], tf.float32))
+        for i in range(len(kernel_sizes)):
+            init_actions.append(('k%d' % i, kernel_sizes[i], 'normal', tf.float32))
+        l1_input_w = len(layer_sizes[0])
+        l1_input_h = layer_sizes[1][0]
+        l1_input_c = 1
+        for i in range(len(kernel_sizes)):
+            w, h, ci, co = kernel_sizes[i]
+            l1_input_w -= (w - 1)
+            l1_input_h -= (h - 1)
+            l1_input_w /= layer_pool_strides[i][1]
+            l1_input_h /= layer_pool_strides[i][2]
+            l1_input_c = co
+        l1_input_size = l1_input_w * l1_input_h * l1_input_c
+        init_actions.append(('w1', [l1_input_size, layer_sizes[2]], layer_inits[1][0], tf.float32))
+        init_actions.append(('b1', [layer_sizes[2]], layer_inits[1][1], tf.float32))
         for i in range(2, len(layer_sizes) - 1):
-            init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], 'normal', tf.float32))
-            init_actions.append(('b%d' % i, [layer_sizes[i + 1]], 'zero', tf.float32))
+            init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], layer_inits[i][0], tf.float32))
+            init_actions.append(('b%d' % i, [layer_sizes[i + 1]], layer_inits[i][1], tf.float32))
+        print init_actions
         tf_classifier_multi.__init__(self, name, eval_metric, layer_sizes[-1], len(layer_sizes[0]),
-                                     init_actions=init_actions, )
+                                     init_actions=init_actions,
+                                     init_path=init_path,
+                                     layer_activates=layer_activates,
+                                     layer_pools=layer_pools,
+                                     layer_pool_strides=layer_pool_strides,
+                                     opt_algo=opt_algo,
+                                     learning_rate=learning_rate, )
 
-    def build_graph(self, layer_activates, opt_algo, learning_rate):
+    def build_graph(self, layer_activates, layer_pools, layer_pool_strides, opt_algo, learning_rate):
         num_input = self.get_num_input()
         w0 = [self.vars['w0_%d' % i] for i in range(num_input)]
         b0 = [self.vars['b0_%d' % i] for i in range(num_input)]
-        self.l = tf.nn.dropout(
-            activate(tf.concat(2, [
-                tf.reshape(tf.sparse_tensor_dense_matmul(self.x[i], w0[i]) + b0[i], [-1, self.layer_sizes[1], 1]) for i
-                in range(num_input)]), layer_activates[0]), self.drops[0])
-        return None, None, None
+        l = [tf.reshape(tf.sparse_tensor_dense_matmul(self.x[i], w0[i]) + b0[i], [tf.shape(self.x[i])[0], 1, -1, 1]) for
+             i in range(num_input)]
+        l = activate(tf.concat(1, l), layer_activates[0])
+        for i in range(len(layer_pools)):
+            l = tf.nn.conv2d(l, self.vars['k%d' % i], strides=[1, 1, 1, 1], padding='VALID')
+            if layer_pools is not None:
+                l = tf.nn.max_pool(l, layer_pools[i], strides=layer_pool_strides[i], padding='VALID')
+        l = tf.nn.dropout(l, self.drops[0])
+        l = tf.reshape(l, [tf.shape(self.x[0])[0], -1])
+        for i in range(1, (len(self.vars) - len(layer_pools)) / 2 - num_input + 1):
+            wi = self.vars['w%d' % i]
+            bi = self.vars['b%d' % i]
+            l = tf.nn.dropout(activate(tf.matmul(l, wi) + bi, layer_activates[i]), keep_prob=self.drops[i])
+        y_prob, loss = get_loss(self.get_eval_metric(), l, self.y_true)
+        optimizer = get_optimizer(opt_algo, learning_rate, loss)
+        return l, y_prob, loss, optimizer
+
+
+class text_convolutional_neural_network(tf_classifier_multi):
+    def __init__(self, name, eval_metric, layer_sizes, layer_activates, kernel_depth, opt_algo, learning_rate,
+                 layer_inits=None, kernel_inits=None, init_path=None):
+        if layer_inits is None:
+            layer_inits = [('normal', 'zero')] * (len(layer_sizes) - 1)
+        init_actions = []
+        for i in range(len(layer_sizes[0])):
+            init_actions.append(('w0_%d' % i, [layer_sizes[0][i], layer_sizes[1][i]], layer_inits[0][0], tf.float32))
+            init_actions.append(('b0_%d' % i, [layer_sizes[1][i]], layer_inits[0][1], tf.float32))
+        for i in range(len(layer_sizes[0])):
+            init_actions.append(
+                ('k%d' % i, [i + 1, layer_sizes[1][0], 1, kernel_depth], kernel_inits[i][0], tf.float32))
+            init_actions.append(('kb%d' % i, [kernel_depth], kernel_inits[i][1], tf.float32))
+        init_actions.append(('w1', [len(layer_sizes[0]) * kernel_depth, layer_sizes[2]], layer_inits[1][0], tf.float32))
+        init_actions.append(('b1', [layer_sizes[2]], layer_inits[1][1], tf.float32))
+        for i in range(2, len(layer_sizes) - 1):
+            init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], layer_inits[i][0], tf.float32))
+            init_actions.append(('b%d' % i, [layer_sizes[i + 1]], layer_inits[i][1], tf.float32))
+        print init_actions
+        tf_classifier_multi.__init__(self, name, eval_metric, layer_sizes[-1], len(layer_sizes[0]),
+                                     init_actions=init_actions,
+                                     init_path=init_path,
+                                     layer_activates=layer_activates,
+                                     kernel_depth=kernel_depth,
+                                     opt_algo=opt_algo,
+                                     learning_rate=learning_rate, )
+
+    def build_graph(self, layer_activates, kernel_depth, opt_algo, learning_rate):
+        num_input = self.get_num_input()
+        w0 = [self.vars['w0_%d' % i] for i in range(num_input)]
+        b0 = [self.vars['b0_%d' % i] for i in range(num_input)]
+        l = [tf.reshape(tf.sparse_tensor_dense_matmul(self.x[i], w0[i]) + b0[i], [tf.shape(self.x[i])[0], 1, -1, 1]) for
+             i in range(num_input)]
+        l = activate(tf.concat(1, l), layer_activates[0])
+        print 0, layer_activates[0]
+        l_arr = []
+        for i in range(len(self.x)):
+            li = tf.nn.conv2d(l, self.vars['k%d' % i], strides=[1, 1, 1, 1], padding='VALID')
+            li = tf.nn.bias_add(li, self.vars['kb%d' % i])
+            li = tf.nn.max_pool(li, [1, len(self.x) - i, 1, 1], strides=[1, 1, 1, 1], padding='VALID')
+            l_arr.append(li)
+        l = tf.concat(1, l_arr)
+        l = tf.reshape(l, [-1, len(self.x) * kernel_depth])
+        l = tf.nn.dropout(l, self.drops[0])
+        for i in range(1, len(self.vars) / 2 - len(self.x) - num_input + 1):
+            wi = self.vars['w%d' % i]
+            bi = self.vars['b%d' % i]
+            print i, layer_activates[i]
+            l = tf.nn.dropout(activate(tf.matmul(l, wi) + bi, layer_activates[i]), keep_prob=self.drops[i])
+        y_prob, loss = get_loss(self.get_eval_metric(), l, self.y_true)
+        optimizer = get_optimizer(opt_algo, learning_rate, loss)
+        return l, y_prob, loss, optimizer
+        # return None, None, None, None

@@ -7,7 +7,8 @@ from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from sklearn.metrics import log_loss
 
 import feature
-from model_impl import factorization_machine, multi_layer_perceptron, multiplex_neural_network
+from model_impl import factorization_machine, multi_layer_perceptron, multiplex_neural_network, \
+    convolutional_neural_network, text_convolutional_neural_network
 
 VERSION = None
 BOOSTER = None
@@ -128,6 +129,7 @@ def ensemble_rdforest(Xtrain, train_labels, Xvalid, valid_labels, n_estimators, 
     test_pred = clf.predict_proba(dtest)
     fea_out = get_feature_model_output(train_pred, valid_pred, test_pred)
     return fea_out
+
 
 def tune_extratree(Xtrain, train_labels, Xvalid, valid_labels, n_estimators=10, max_depth=None, max_features='auto'):
     clf = ExtraTreesClassifier(n_estimators=n_estimators, n_jobs=4, criterion='gini', max_depth=max_depth,
@@ -747,15 +749,17 @@ def tune_mlp_csr(train_data, valid_data, layer_sizes, layer_activates, opt_algo,
 
 def tune_multiplex_neural_network(train_data, valid_data, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
                                   num_round=200, batch_size=100, early_stopping_round=10, verbose=True, save_log=True,
-                                  save_model=False, init_path=None, test_data=None):
+                                  save_model=False, init_path=None, test_data=None, layer_inits=None):
     train_indices, train_values, train_labels = train_data
     valid_indices, valid_values, valid_labels = valid_data
-    mnn_model = multiplex_neural_network(name=TAG, eval_metric='softmax_log_loss',
+    mnn_model = multiplex_neural_network(name=TAG,
+                                         eval_metric='softmax_log_loss',
                                          layer_sizes=layer_sizes,
                                          layer_activates=layer_activates,
                                          opt_algo=opt_algo,
                                          learning_rate=learning_rate,
-                                         init_path=init_path)
+                                         init_path=init_path,
+                                         layer_inits=layer_inits)
     train_scores = []
     valid_scores = []
     for j in range(num_round):
@@ -794,8 +798,94 @@ def tune_multiplex_neural_network(train_data, valid_data, layer_sizes, layer_act
     return train_scores[-1], valid_scores[-1]
 
 
-def tune_convolutional_neural_network():
-    pass
+def tune_convolutional_neural_network(train_data, valid_data, layer_sizes, layer_activates, opt_algo, learning_rate,
+                                      drops, num_round=200, batch_size=100, early_stopping_round=10, verbose=True,
+                                      save_log=True, save_model=False, layer_inits=None, kernel_size=None,
+                                      layer_pools=None):
+    train_indices, train_values, train_labels = train_data
+    valid_indices, valid_values, valid_labels = valid_data
+    cnn_model = convolutional_neural_network(name=TAG,
+                                             eval_metric='softmax_log_loss',
+                                             layer_sizes=layer_sizes,
+                                             layer_activates=layer_activates,
+                                             kernel_sizes=kernel_size,
+                                             opt_algo=opt_algo,
+                                             learning_rate=learning_rate,
+                                             init_path=None,
+                                             layer_inits=layer_inits,
+                                             layer_pools=layer_pools)
+    train_scores = []
+    valid_scores = []
+    for j in range(num_round):
+        start_time = time.time()
+        train_loss, train_y, train_y_prob = train_with_batch_csr(cnn_model, train_indices, train_values,
+                                                                 train_labels, drops=drops, multiplex=True,
+                                                                 batch_size=batch_size, verbose=False)
+        valid_y, valid_y_prob = predict_with_batch_csr(cnn_model, valid_indices, valid_values, drops=[1] * len(drops),
+                                                       multiplex=True, batch_size=batch_size)
+        train_score = log_loss(train_labels, train_y_prob)
+        valid_score = log_loss(valid_labels, valid_y_prob)
+        if verbose:
+            print '[%d]\tloss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % \
+                  (j, train_loss.mean(), train_score, valid_score, time.time() - start_time)
+        if save_log:
+            write_log('%d\t%f\t%f\t%f\n' % (j, train_loss.mean(), train_score, valid_score))
+        train_scores.append(train_score)
+        valid_scores.append(valid_score)
+        if check_early_stop(valid_scores, early_stopping_round=early_stopping_round, mode='no_decrease'):
+            if verbose:
+                best_iteration = j + 1 - early_stopping_round
+                print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
+                    best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
+            break
+    if save_model:
+        cnn_model.dump()
+    return train_scores[-1], valid_scores[-1]
+
+
+def tune_convolutional_neural_network_text(train_data, valid_data, layer_sizes, layer_activates, kernel_depth, opt_algo,
+                                           learning_rate, layer_inits, kernel_inits, drops=1, verbose=True,
+                                           save_log=True, save_model=False, num_round=200, batch_size=100,
+                                           early_stopping_round=10, init_path=None):
+    train_indices, train_values, train_labels = train_data
+    valid_indices, valid_values, valid_labels = valid_data
+    tcnn_model = text_convolutional_neural_network(name=TAG,
+                                                   eval_metric='softmax_log_loss',
+                                                   layer_sizes=layer_sizes,
+                                                   layer_activates=layer_activates,
+                                                   kernel_depth=kernel_depth,
+                                                   opt_algo=opt_algo,
+                                                   learning_rate=learning_rate,
+                                                   init_path=None,
+                                                   layer_inits=layer_inits,
+                                                   kernel_inits=kernel_inits)
+    train_scores = []
+    valid_scores = []
+    for j in range(num_round):
+        start_time = time.time()
+        train_loss, train_y, train_y_prob = train_with_batch_csr(tcnn_model, train_indices, train_values,
+                                                                 train_labels, drops=drops, multiplex=True,
+                                                                 batch_size=batch_size, verbose=False)
+        valid_y, valid_y_prob = predict_with_batch_csr(tcnn_model, valid_indices, valid_values, drops=[1] * len(drops),
+                                                       multiplex=True, batch_size=batch_size)
+        train_score = log_loss(train_labels, train_y_prob)
+        valid_score = log_loss(valid_labels, valid_y_prob)
+        if verbose:
+            print '[%d]\tloss: %f \ttrain_score: %f\tvalid_score: %f\ttime: %d' % \
+                  (j, train_loss.mean(), train_score, valid_score, time.time() - start_time)
+        if save_log:
+            write_log('%d\t%f\t%f\t%f\n' % (j, train_loss.mean(), train_score, valid_score))
+        train_scores.append(train_score)
+        valid_scores.append(valid_score)
+        if check_early_stop(valid_scores, early_stopping_round=early_stopping_round, mode='no_decrease'):
+            if verbose:
+                best_iteration = j + 1 - early_stopping_round
+                print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
+                    best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
+            break
+    if save_model:
+        tcnn_model.dump()
+    return train_scores[-1], valid_scores[-1]
 
 
 def ensemble_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates, opt_algo, learning_rate,
@@ -965,7 +1055,7 @@ if __name__ == '__main__':
     #     for max_depth in [40, 50 ,60 ,70]:
     #         for max_features in [0.05, 0.1, 0.2]:
     clf = ExtraTreesClassifier(n_estimators=n_estimators, criterion='gini', n_jobs=4)
-                                 # max_depth=max_depth, max_features=max_features)
+    # max_depth=max_depth, max_features=max_features)
 
     clf.fit(train_csr, train_labels_groupid)
     train_pred = clf.predict_proba(train_csr)
