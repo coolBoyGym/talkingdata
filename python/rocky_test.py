@@ -1,11 +1,7 @@
-import numpy as np
 import xgboost as xgb
 from scipy.sparse import csr_matrix
-from sklearn.cross_validation import train_test_split
 
 import train_impl as ti
-import utils
-
 
 # def save_sparse_csr(filename, array):
 #     np.savez(filename, data=array.data, indices=array.indices,
@@ -127,7 +123,6 @@ if __name__ == '__main__':
         early_stopping_round = 20
         batch_size = 10000
 
-
         # for n in [1024, 512, 256, 128, 64]:
         # for learning_rate in [0.5, 0.4, 0.3, 0.2, 0.1]:
         # for second_layer_num in [500, 800, 1500, 2000, 3000]:
@@ -154,5 +149,5 @@ if __name__ == '__main__':
                                        early_stopping_round=early_stopping_round,
                                        verbose=True,
                                        save_log=True,
-                                       save_model=False,)
-                                       # init_path='../model/concat_6_multi_layer_perceptron_64.bin')
+                                       save_model=False, )
+        # init_path='../model/concat_6_multi_layer_perceptron_64.bin')
