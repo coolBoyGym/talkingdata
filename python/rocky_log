@@ -64,7 +64,24 @@ score=2.626
 
 
 concat_6
-hidden layer=128    [468]	train_score: 2.200564	valid_score: 2.258902
+hidden layer=128    [468]	train_score: 2.200564	valid_score: 2.258902  score=2.24487
 hidden layer=64     [530]	train_score: 2.207147	valid_score: 2.258491  score=2.24418
 hidden layer=64     [470]   score=2.24484
+
+
+8.20
+concat_20
+    gblinear
+        experienced parameter (0,10)            {train_logloss=2.0307, valid_logloss=2.3094}
+    gbtree
+        experienced parameter (0.1,3,0.8,0.6)   {train_logloss=2.0519, valid_logloss=2.2807}
+    mlp
+        experienced parameter (0.2, 64)         {[441]	train_score: 2.205067	valid_score: 2.261022}
+concat_21
+    gblinear
+        experienced parameter (0,10)            {[2]	train-mlogloss:2.072748	eval-mlogloss:2.300467}
+    gbtree
+        experienced parameter (0.1,3,0.8,0.6)   {[625]	train-mlogloss:2.070436	eval-mlogloss:2.285588}
+    mlp
+        experienced parameter (0.2, 64)         {[491]	train_score: 2.211974	valid_score: 2.259662}
 
