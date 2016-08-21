@@ -97,7 +97,7 @@ def ensemble_rdforest(Xtrain, train_labels, Xvalid, valid_labels, n_estimators, 
     valid_score = log_loss(valid_labels, valid_pred)
     print 'n_estimators', n_estimators, 'max_depth', max_depth, 'max_features', max_features, train_score, valid_score
     test_pred = clf.predict_proba(dtest)
-    fea_out = utils.make_feature_model_output(TAG, train_pred, valid_pred, test_pred, dump=False)
+    fea_out = utils.make_feature_model_output(TAG, [train_pred, valid_pred, test_pred], NUM_CLASS, dump=False)
     return fea_out
 
 
@@ -137,7 +137,7 @@ def ensemble_gblinear(dtrain, dvalid, gblinear_alpha=0, gblinear_lambda=0, gblin
     valid_pred = bst.predict(dvalid)
     valid_score = log_loss(dvalid.get_label(), valid_pred)
     test_pred = bst.predict(dtest)
-    fea_out = utils.make_feature_model_output(TAG, train_pred, valid_pred, test_pred, dump=False)
+    fea_out = utils.make_feature_model_output(TAG, [train_pred, valid_pred, test_pred], NUM_CLASS, dump=False)
     return fea_out
 
 
@@ -172,7 +172,7 @@ def ensemble_gbtree(dtrain, dvalid, eta, max_depth, subsample, colsample_bytree,
     train_pred = bst.predict(dtrain, ntree_limit=bst.best_iteration)
     valid_pred = bst.predict(dvalid, ntree_limit=bst.best_iteration)
     test_pred = bst.predict(dtest, ntree_limit=bst.best_iteration)
-    fea_out = utils.make_feature_model_output(TAG, train_pred, valid_pred, test_pred, dump=False)
+    fea_out = utils.make_feature_model_output(TAG, [train_pred, valid_pred, test_pred], NUM_CLASS, dump=False)
     return fea_out
 
 

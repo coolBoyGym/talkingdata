@@ -1,9 +1,8 @@
 import time
-
 import xgboost as xgb
-
 import feature
 import utils
+import numpy as np
 from model_impl import GBLinear, GBTree, MultiLayerPerceptron, MultiplexNeuralNetwork
 
 
@@ -109,7 +108,7 @@ class Task:
             train_pred = model.predict(dtrain)
             valid_pred = model.predict(dtest)
             test_pred = model.predict(dtest)
-            utils.make_feature_model_output(self.tag, train_pred, valid_pred, test_pred)
+            utils.make_feature_model_output(self.tag, [train_pred, valid_pred, test_pred], self.num_class)
 
     def train(self, dtrain=None, dtest=None, params=None, batch_size=None, num_round=None, verbose=True,
               save_model=False, save_submission=True):
@@ -152,3 +151,17 @@ class Task:
         if save_submission:
             test_pred = model.predict(dtest)
             utils.make_submission(self.path_submission, test_pred)
+
+    def predict_mlpmodel(self, data=None, params=None, batch_size=None):
+        model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.num_class,
+                                     batch_size=batch_size,
+                                     **params)
+        model.compile()
+        data_pred = model.predict(data)
+        # values = data_pred
+        # indices = np.zeros_like(values, dtype=np.int64) + range(self.num_class)
+        # fea_pred = feature.multi_feature(name=self.tag, dtype='f', space=self.num_class, rank=self.num_class,
+        #                                  size=len(indices))
+        # fea_pred.set_value(indices, values)
+        # fea_pred.dump()
+        utils.make_feature_model_output(self.tag, [data_pred], self.num_class, dump=True)

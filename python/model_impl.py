@@ -206,7 +206,7 @@ class TFClassifier(Classifier):
             train_loss, train_y, train_y_prob = self.__train_round(dtrain)
             train_score = log_loss(train_labels, train_y_prob)
             if dvalid is not None:
-                valid_y, valid_y_prob = self.predict(dvalid[:2])
+                valid_y_prob = self.predict(dvalid[:2])
                 valid_score = log_loss(valid_labels, valid_y_prob)
             if self.verbose:
                 if dvalid is not None:
@@ -260,7 +260,7 @@ class TFClassifier(Classifier):
                 indices_i = indices[i * batch_size: (i + 1) * batch_size]
                 values_i = values[i * batch_size: (i + 1) * batch_size]
                 indices_i, values_i, shape_i = utils.libsvm_2_csr(indices_i, values_i, input_spaces)
-                y_i, y_prob_i = self.__predict_batch(indices_i, values_i, shape_i)
+                y_prob_i = self.__predict_batch(indices_i, values_i, shape_i)
                 y_prob.extend(y_prob_i)
         return np.array(y_prob)
 

@@ -16,10 +16,10 @@ def make_submission(path_submission, test_pred):
     print path_submission
 
 
-def make_feature_model_output(name, train_pred, valid_pred, test_pred, dump=True):
-    values = np.vstack((valid_pred, train_pred, test_pred))
-    indices = np.zeros_like(values, dtype=np.int64) + range(12)
-    fea_pred = feature.multi_feature(name=name, dtype='f', space=12, rank=12, size=len(indices))
+def make_feature_model_output(name, pred_list, num_class, dump=True):
+    values = np.vstack(pred_list)
+    indices = np.zeros_like(values, dtype=np.int64) + range(num_class)
+    fea_pred = feature.multi_feature(name=name, dtype='f', space=num_class, rank=num_class, size=len(indices))
     fea_pred.set_value(indices, values)
     if dump:
         fea_pred.dump()
@@ -257,7 +257,10 @@ def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval
         elif isinstance(init_method, int) or isinstance(init_method, float):
             var_map[var_name] = tf.Variable(tf.ones(var_shape, dtype=dtype) * init_method)
         elif init_method in load_var_map:
-            var_map[var_name] = tf.Variable(load_var_map[init_method])
+            if load_var_map[init_method].shape == tuple(var_shape):
+                var_map[var_name] = tf.Variable(load_var_map[init_method])
+            else:
+                print 'BadParam: init method', init_method, 'shape', var_shape, load_var_map[init_method].shape
         elif 'res' in init_method:
             res_method = init_method.split(':')[1]
             if res_method in load_var_map:
@@ -295,6 +298,12 @@ def get_loss(loss_func, y, y_true):
     elif loss_func == 'softmax_log_loss':
         y_prob = tf.nn.softmax(y)
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y, y_true))
+    elif loss_func == 'relu_mse':
+        y_prob = tf.nn.relu(y)
+        loss = tf.nn.l2_loss(y - y_true)
+    elif loss_func == 'mse':
+        y_prob = y
+        loss = tf.nn.l2_loss(y - y_true)
     else:
         y_prob = tf.nn.sigmoid(y)
         loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(y, y_true))

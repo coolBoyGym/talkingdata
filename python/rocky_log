@@ -85,3 +85,31 @@ concat_21
     mlp
         experienced parameter (0.2, 64)         {[491]	train_score: 2.211974	valid_score: 2.259662}
 
+concat_1:
+    mlp
+        experienced parameter (0.2,64)          {[2367]	train_score: 2.370186	valid_score: 2.387985}   concat_1_multi_layer_perceptron_1.bin
+        (0.2, 128)                              {[2046]	train_score: 2.368369	valid_score: 2.388239}
+        (0.2, 32)                               {[2338]	train_score: 2.377771	valid_score: 2.388956}
+        (0.1, 64 ,64)                           {[24]	train_score: 2.378819	valid_score: 2.388655}
+        (0.1, 64, 128)                          {[20]	train_score: 2.377966	valid_score: 2.388651}
+
+embedding:
+    phone_brand:
+        (0.2, 64)       {[2121]	train_score: 2.402465	valid_score: 2.402623}      phone_brand_multi_layer_perceptron_1.bin
+        (0.2, 128)      {[1825]	train_score: 2.401376	valid_score: 2.402689}      phone_brand_mlp_3.bin
+        (0.2, 32)       {[1846]	train_score: 2.403960	valid_score: 2.403217}      phone_brand_multi_layer_perceptron_2
+
+    device_model:
+        (0.2, 64)       {[2652]	train_score: 2.369331	valid_score: 2.389789}      device_model_multi_layer_perceptron_1.bin
+        (0.2, 32)       {[2891]	train_score: 2.374589	valid_score: 2.389791}
+        (0.2, 128)      {[2288]	train_score: 2.368377	valid_score: 2.390303}
+
+
+    phone_brand:
+        gbtree      [113]	train-mlogloss:2.396648	eval-mlogloss:2.402918
+    phone_brand_embedding_32
+        gbtree      [51]	train-mlogloss:2.394280	eval-mlogloss:2.402758
+    phone_brand_embedding_64
+        gbtree      [49]	train-mlogloss:2.393891	eval-mlogloss:2.4027
+    phone_brand_embedding_128
+        gbtree      [52]	train-mlogloss:2.393246	eval-mlogloss:2.403260
