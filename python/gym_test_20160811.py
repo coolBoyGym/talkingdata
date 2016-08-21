@@ -4,7 +4,7 @@ import train_impl as ti
 
 import model_impl
 
-ti.init_constant(dataset='concat_16', booster='multi_layer_perceptron', version=1, random_state=0)
+ti.init_constant(dataset='concat_16_2', booster='multi_layer_perceptron', version=2, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -92,15 +92,15 @@ if __name__ == '__main__':
         layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
         drops = [0.5, 1]
 
-        ti.train_multi_layer_perceptron(train_data, test_data, layer_sizes, layer_activates, opt_algo, learning_rate,
-                                        drops, num_round=480, batch_size=10000)
-
-        # for learning_rate in [0.2]:
-        #     opt_prop = model_impl.opt_property('gd', learning_rate)
-        #     ti.tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates,
-        #                                    opt_algo=opt_algo, learning_rate=learning_rate,
-        #                                    drops=drops, num_round=700, batch_size=10000, early_stopping_round=30,
-        #                                    verbose=True, save_log=True, save_model=True)
+        # ti.train_multi_layer_perceptron(train_data, test_data, layer_sizes, layer_activates, opt_algo, learning_rate,
+        #                                 drops, num_round=480, batch_size=10000)
+        #
+        for learning_rate in [0.1]:
+            # opt_prop = model_impl.opt_property('gd', learning_rate)
+            ti.tune_multi_layer_perceptron(train_data, valid_data, layer_sizes, layer_activates,
+                                           opt_algo=opt_algo, learning_rate=learning_rate,
+                                           drops=drops, num_round=2000, batch_size=10000, early_stopping_round=40,
+                                           verbose=True, save_log=True, save_model=True)
 
     elif ti.BOOSTER == 'factorization_machine':
         train_data = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)

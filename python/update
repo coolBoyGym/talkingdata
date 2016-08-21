@@ -395,6 +395,8 @@ submission:
                 num_round = 600
                 best iteration:
                 [505]	train_score:2.197933    valid_score:2.258077
+                true_round = 480
+                score:2.24449
 
             concat_16_2_mlp_1:
                 cluster = 100
@@ -442,4 +444,5 @@ submission:
                 num_round = 700
                 best iteration:
                 [489]	train_score: 2.201669	valid_score: 2.259127
+
 

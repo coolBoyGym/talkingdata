@@ -632,6 +632,30 @@ def device_day_event_num_proc(device_id, dict_device_event):
     return indices, values
 
 
+def device_day_event_num_freq_proc(device_id, dict_device_event):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+        else:
+            days = map(lambda x: get_time(x[1], ['day'])[0], dict_device_event[did])
+            tmp = {}
+            for d in days:
+                if d in tmp:
+                    tmp[d] += 1.0
+                else:
+                    tmp[d] = 1.0
+            sum_tmp = sum(tmp.values())
+            sorted_tmp = sorted(tmp.keys())
+            indices.append(sorted_tmp)
+            values.append(map(lambda x: tmp[x] / sum_tmp, sorted_tmp))
+    indices = np.array(indices)
+    values = np.array(values)
+    return indices, values
+
+
 def device_weekday_event_num_proc(device_id, dict_device_event):
     indices = []
     values = []
