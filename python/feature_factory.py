@@ -5,8 +5,8 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 import feature
-from train_impl import csr_matrix_2_libsvm,libsvm_2_csr_matrix
 import tf_idf
+import utils
 
 data_app_events = '../data/raw/app_events.csv'
 data_app_labels = '../data/raw/app_labels.csv'
@@ -167,13 +167,6 @@ fea_concat_9 = feature.multi_feature(name='concat_9', dtype='d')
 fea_concat_9_norm = feature.multi_feature(name='concat_9_norm', dtype='f')
 fea_ensemble_test = feature.multi_feature(name='ensmeble_test', dtype='f')
 
-# fea_concat_1 = feature.multi_feature(name='concat_1', dtype='f')
-# fea_concat_2 = feature.multi_feature(name='concat_2', dtype='f')
-# fea_concat_3 = feature.multi_feature(name='concat_3', dtype='f')
-# fea_concat_4 = feature.multi_feature(name='concat_4', dtype='f')
-# fea_concat_5 = feature.multi_feature(name='concat_5', dtype='f')
-# fea_concat_6 = feature.multi_feature(name='concat_6', dtype='f')
-
 """
 model outputs, for ensemble use
 """
@@ -225,105 +218,12 @@ def make_feature():
 
     print 'finish in %d sec' % (time.time() - start_time)
 
-    # fea_phone_brand.process(device_id=device_id, dict_device_brand_model=dict_device_brand_model)
-    # fea_phone_brand.dump()
-    #
-    # fea_device_model.process(device_id=device_id, dict_device_brand_model=dict_device_brand_model)
-    # fea_device_model.dump()
-    #
-    # fea_installed_app.process(device_id=device_id, dict_device_event=dict_device_event, dict_app_event=dict_app_event)
-    # fea_installed_app.dump()
-    #
-    # # indices, values = fea_installed_app.get_value()
-    # # fea_installed_app_norm.process(indices=indices, values=values)
-    # # fea_installed_app_norm.dump()
-    #
-    # fea_active_app.process(device_id=device_id, dict_device_event=dict_device_event, dict_app_event=dict_app_event)
-    # fea_active_app.dump()
-    #
-    # # indices, values = fea_active_app.get_value()
-    # # fea_active_app_norm.process(indices=indices, values=values)
-    # # fea_active_app_norm.dump()
-    #
-    # fea_device_long_lat.process(device_id=device_id, dict_device_event=dict_device_event)
-    # fea_device_long_lat.dump()
-    #
-    # fea_device_long_lat_norm.process(device_id=device_id, dict_device_event=dict_device_event)
-    # fea_device_long_lat_norm.dump()
-    #
-    # fea_installed_app_freq.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                dict_app_event=dict_app_event)
-    # fea_installed_app_freq.dump()
-    #
-    # fea_active_app_freq.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                             dict_app_event=dict_app_event)
-    # fea_active_app_freq.dump()
-    #
-    # fea_device_event_num.process(device_id=device_id, dict_device_event=dict_device_event)
-    # fea_device_event_num.dump()
-    #
-    # indices, values = fea_device_event_num.get_value()
-    # fea_device_event_num_norm.process(indices=indices, values=values)
-    # fea_device_event_num_norm.dump()
-    #
-    # fea_device_day_event_num.process(device_id=device_id, dict_device_event=dict_device_event)
-    # fea_device_day_event_num.dump()
-    #
-    # indices, values = fea_device_day_event_num.get_value()
-    # fea_device_day_event_num_norm.process(indices=indices, values=values)
-    # fea_device_day_event_num_norm.dump()
-    #
-    # fea_weekday_event_num.process(device_id=device_id, dict_device_event=dict_device_event)
-    # fea_weekday_event_num.dump()
-    #
-    # indices, values = fea_weekday_event_num.get_value()
-    # fea_weekday_event_num_norm.process(indices=indices, values=values)
-    # fea_weekday_event_num_norm.dump()
-    #
     # event_id = np.loadtxt('../feature/event_id', dtype=np.int64, skiprows=1, usecols=[1], delimiter=',')
-    #
-    # fea_event_time.process(event_id=event_id, dict_event=dict_event)
-    # fea_event_time.dump()
-    #
-    # fea_event_longitude.process(event_id=event_id, dict_event=dict_event)
-    # fea_event_longitude.dump()
-    #
-    # indices, values = fea_event_longitude.get_value()
-    # print np.max(values), np.min(values)
-    #
-    # fea_event_longitude_norm.process(indices=indices, values=values)
-    # fea_event_longitude_norm.dump()
-    #
-    # fea_event_latitude.process(event_id=event_id, dict_event=dict_event)
-    # fea_event_latitude.dump()
-    #
-    # indices, values = fea_event_latitude.get_value()
-    # print np.max(values), np.min(values)
-    #
-    # fea_event_latitude_norm.process(indices=indices, values=values)
-    # fea_event_latitude_norm.dump()
-    # fea_event_phone_brand.process(event_id=event_id, dict_event=dict_event,
-    #                               dict_device_brand_model=dict_device_brand_model)
-    # fea_event_phone_brand.dump()
-    #
-    # fea_event_installed_app.process(event_id=event_id, dict_app_event=dict_app_event)
-    # fea_event_installed_app.dump()
-    #
-    # indices, values = fea_event_installed_app.get_value()
-    # fea_event_installed_app_norm.process(indices=indices, values=values)
-    # fea_event_installed_app_norm.dump()
-    # fea_installed_app_label.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                 dict_app_event=dict_app_event, dict_app_label=dict_app_label)
-    # fea_installed_app_label.dump()
-    #
-    # fea_active_app_label.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                              dict_app_event=dict_app_event, dict_app_label=dict_app_label)
-    # fea_active_app_label.dump()
-    #
-    # fea_installed_app_label_freq.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                      dict_app_event=dict_app_event, dict_app_label=dict_app_label)
-    # fea_installed_app_label_freq.dump()
 
+    fea_active_app_label_cluster_40_num.process(device_id=device_id, dict_device_event=dict_device_event,
+                                                dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+                                                dict_label_cluster_40=dict_label_cluster_40)
+    fea_active_app_label_cluster_40_num.dump()
     # fea_installed_app_label_num.process(device_id=device_id, dict_device_event=dict_device_event,
     #                                     dict_app_event=dict_app_event, dict_app_label=dict_app_label)
     # fea_installed_app_label_num.dump()
@@ -609,8 +509,8 @@ def load_sparse_csr(filename):
 def process_keras_data(keras_data_name):
     train_data_csr = load_sparse_csr('../data/' + keras_data_name + '_train_csr.npz')
     test_data_csr = load_sparse_csr('../data/' + keras_data_name + '_test_csr.npz')
-    train_indices, train_values = csr_matrix_2_libsvm(train_data_csr)
-    test_indices, test_values = csr_matrix_2_libsvm(test_data_csr)
+    train_indices, train_values = utils.csr_matrix_2_libsvm(train_data_csr)
+    test_indices, test_values = utils.csr_matrix_2_libsvm(test_data_csr)
     train_device_id = np.loadtxt(data_gender_age_train, delimiter=',', skiprows=1, usecols=[0], dtype=np.int64)
     dict_device_id = pkl.load(open('../data/dict_id_device.pkl'))
     dict_device_train = {}
@@ -644,7 +544,7 @@ def feature_tfidf(name):
     fea_tmp.load()
     feature_indices, feature_values = fea_tmp.get_value()
     feature_space = fea_tmp.get_space()
-    csr_fea = libsvm_2_csr_matrix(feature_indices, feature_values, feature_space)
+    csr_fea = utils.libsvm_2_csr_matrix(feature_indices, feature_values, feature_space)
     csr_tfidf = tf_idf.tf_idf(csr_fea)
     name_out = name + '_tfidf'
     csr_2_feature(name_out, csr_tfidf, reorder=True)
@@ -652,9 +552,8 @@ def feature_tfidf(name):
 
 if __name__ == '__main__':
     print 'processing features...'
-    # gather_device_id()
-    # gather_event_id()
 
+    # make_feature()
     make_feature()
     # fea_concat_6.load()
     # fea_concat_6.set_data_type('d')
@@ -897,15 +796,3 @@ if __name__ == '__main__':
     # feature_tfidf('installed_app_label')
 
     # feature_tfidf('active_app_label_cluster_40_num')
-
-    # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
-    # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
-    #
-    # indices, res, num = get_hour_event_num_distribution(device_id=device_id, dict_device_event=dict_device_event)
-    # print indices
-    # print res
-    # print num
-
-    # train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
-    # test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
-    # train_label = np.load('../input/bagofapps_train_label.npy')

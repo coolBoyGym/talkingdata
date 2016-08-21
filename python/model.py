@@ -5,7 +5,7 @@ class model:
         self.__eval_metric = eval_metric
         self.__log_path = '../model/%s.log' % name
         self.__bin_path = '../model/%s.bin' % name
-        self.__dump_path = '../model/%s.dump' % name
+        self.__file_path = '../model/%s.dump' % name
 
     def get_name(self):
         return self.__name
@@ -22,8 +22,8 @@ class model:
     def get_bin_path(self):
         return self.__bin_path
 
-    def get_dump_path(self):
-        return self.__dump_path
+    def get_file_path(self):
+        return self.__file_path
 
     def write_log_header(self):
         with open(self.__log_path, 'w') as fout:
@@ -46,13 +46,17 @@ class model:
         pass
 
 
-class classifier(model):
-    def __init__(self, name, eval_metric, num_class):
+class Classifier(model):
+    def __init__(self, name, eval_metric, input_spaces, num_class):
         model.__init__(self, name, 'classifier', eval_metric)
+        self.__input_spaces = input_spaces
         self.__num_class = num_class
 
     def get_num_class(self):
         return self.__num_class
+
+    def get_input_spaces(self):
+        return self.__input_spaces
 
     def write_log_header(self):
         with open(self.__log_path, 'w') as fout:

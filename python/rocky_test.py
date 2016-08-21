@@ -1,23 +1,21 @@
-import numpy as np
 import xgboost as xgb
 from scipy.sparse import csr_matrix
-from sklearn.cross_validation import train_test_split
 
 import train_impl as ti
 
 # def save_sparse_csr(filename, array):
 #     np.savez(filename, data=array.data, indices=array.indices,
 #              indptr=array.indptr, shape=array.shape)
-def load_sparse_csr(filename):
-    loader = np.load(filename)
-    return csr_matrix((loader['data'], loader['indices'], loader['indptr']),
-                      shape=loader['shape'])
-train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
-test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
-train_label = np.load('../input/bagofapps_train_label.npy')
-X_train, X_valid, y_train, y_valid = train_test_split(train_data_csr, train_label, test_size=0.2, random_state=0)
+# def load_sparse_csr(filename):
+#     loader = np.load(filename)
+#     return csr_matrix((loader['data'], loader['indices'], loader['indptr']),
+#                       shape=loader['shape'])
+# train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
+# test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
+# train_label = np.load('../input/bagofapps_train_label.npy')
+# X_train, X_valid, y_train, y_valid = train_test_split(train_data_csr, train_label, test_size=0.2, random_state=0)
 
-ti.init_constant(dataset='concat_6', booster='multi_layer_perceptron', version=20, random_state=0)
+ti.init_constant(dataset='concat_21', booster='multi_layer_perceptron', version=21, random_state=0)
 
 if __name__ == '__main__':
     if ti.BOOSTER == 'gblinear':
@@ -26,7 +24,7 @@ if __name__ == '__main__':
         dtrain = xgb.DMatrix(ti.PATH_TRAIN)
         dtest = xgb.DMatrix(ti.PATH_TEST)
 
-        # train_score, valid_score = ti.tune_gblinear(dtrain_train, dtrain_valid, 0, 10, verbose_eval=True)
+        train_score, valid_score = ti.tune_gblinear(dtrain_train, dtrain_valid, 0, 10, verbose_eval=True)
         # train_score, valid_score = ti.tune_gblinear(dtrain_train, dtrain_valid,
         # gblinear_alpha=0, gblinear_lambda=10, verbose_eval=True,early_stopping_rounds=50, dtest=dtest)
         # print train_score, valid_score
@@ -38,23 +36,23 @@ if __name__ == '__main__':
         #                                                     gblinear_lambda=gblinear_lambda, verbose_eval=False)
         #         print 'alpha', gblinear_alpha, 'lambda', gblinear_lambda, train_score, valid_score
     elif ti.BOOSTER == 'gbtree':
-        # dtrain_train = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
-        # dtrain_valid = xgb.DMatrix(ti.PATH_TRAIN_VALID)
-        # dtrain = xgb.DMatrix(ti.PATH_TRAIN)
-        # dtest = xgb.DMatrix(ti.PATH_TEST)
+        dtrain_train = xgb.DMatrix(ti.PATH_TRAIN_TRAIN)
+        dtrain_valid = xgb.DMatrix(ti.PATH_TRAIN_VALID)
+        dtrain = xgb.DMatrix(ti.PATH_TRAIN)
+        dtest = xgb.DMatrix(ti.PATH_TEST)
         #
-        train_indices, train_values, train_labels = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
-        valid_indices, valid_values, valid_labels = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
+        # train_indices, train_values, train_labels = utils.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, ti.NUM_CLASS)
+        # valid_indices, valid_values, valid_labels = utils.read_feature(open(ti.PATH_TRAIN_VALID), -1, ti.NUM_CLASS)
+        #
+        # X_train = utils.libsvm_2_csr_matrix(train_indices, train_values)
+        # X_valid = utils.libsvm_2_csr_matrix(valid_indices, valid_values)
+        # y_train = utils.label_2_group_id(train_labels, ti.NUM_CLASS)
+        # y_valid = utils.label_2_group_id(valid_labels, ti.NUM_CLASS)
+        # dtrain_train = xgb.DMatrix(X_train, label=y_train)
+        # dtrain_valid = xgb.DMatrix(X_valid, label=y_valid)
+        # # dtrain = xgb.DMatrix(train_data_csr, label=train_label)
 
-        X_train = ti.libsvm_2_csr_matrix(train_indices, train_values)
-        X_valid = ti.libsvm_2_csr_matrix(valid_indices, valid_values)
-        y_train = ti.label_2_group_id(train_labels)
-        y_valid = ti.label_2_group_id(valid_labels)
-        dtrain_train = xgb.DMatrix(X_train, label=y_train)
-        dtrain_valid = xgb.DMatrix(X_valid, label=y_valid)
-        # dtrain = xgb.DMatrix(train_data_csr, label=train_label)
-
-        train_score, valid_score = ti.tune_gbtree(dtrain_train, dtrain_valid, 0.1, 3, 0.7, 0.8, verbose_eval=True)
+        train_score, valid_score = ti.tune_gbtree(dtrain_train, dtrain_valid, 0.1, 3, 0.8, 0.6, verbose_eval=True)
         # train_score, valid_score = ti.tune_gbtree(dtrain_train, dtrain_valid, 0.05, 4, 0.7, 0.6,verbose_eval= True, dtest=dtest)
         # print train_score, valid_score
 
@@ -96,8 +94,9 @@ if __name__ == '__main__':
     elif ti.BOOSTER == 'multi_layer_perceptron':
         dtrain_train = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
         dtrain_valid = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
-        dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1)
-        dtest = ti.read_feature(open(ti.PATH_TEST), -1)
+        # dtrain = ti.read_feature(open(ti.PATH_TRAIN), -1)
+        # dtest = ti.read_feature(open(ti.PATH_TEST), -1)
+
         # y_train = ti.group_id_2_label(y_train)
         # train_indices, train_values = ti.csr_matrix_2_libsvm(X_train)
         # dtrain_train = X_train, y_train
@@ -105,12 +104,24 @@ if __name__ == '__main__':
         # y_valid = ti.group_id_2_label(y_valid)
         # dtrain_valid = X_valid, y_valid
 
-        layer_sizes = [ti.SPACE, 128, ti.NUM_CLASS]
+        # layer_sizes = [ti.SPACE, 64, 64, ti.NUM_CLASS]
+        # layer_activates = ['relu', 'relu', None]
+        # layer_inits = [('res:w0', 'res:b0'), ('res:pass', 'zero'), ('res:w1', 'res:b1')]
+        # drops = [0.5, 0.75, 1]
+        # opt_algo = 'gd'
+        # learning_rate = 0.1
+        # num_round = 600
+        # early_stopping_round = 20
+        # batch_size = 10000
+
+        layer_sizes = [ti.SPACE, 64, ti.NUM_CLASS]
         layer_activates = ['relu', None]
         drops = [0.5, 1]
-        learning_rate = 0.2
-        num_round = 460
         opt_algo = 'gd'
+        learning_rate = 0.2
+        num_round = 600
+        early_stopping_round = 20
+        batch_size = 10000
 
         # for n in [1024, 512, 256, 128, 64]:
         # for learning_rate in [0.5, 0.4, 0.3, 0.2, 0.1]:
@@ -121,5 +132,22 @@ if __name__ == '__main__':
         #                                learning_rate, drops, num_round=num_round, batch_size=10000,
         #                                early_stopping_round=10, verbose=True, save_log=True, save_model=True)
 
-        ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
-                                            num_round=num_round, batch_size=10000)
+        # ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
+        #                                     num_round=num_round, batch_size=10000)
+
+
+        ti.tune_multi_layer_perceptron(train_data=dtrain_train,
+                                       valid_data=dtrain_valid,
+                                       layer_sizes=layer_sizes,
+                                       layer_activates=layer_activates,
+                                       # layer_inits=layer_inits,
+                                       opt_algo=opt_algo,
+                                       learning_rate=learning_rate,
+                                       drops=drops,
+                                       num_round=num_round,
+                                       batch_size=batch_size,
+                                       early_stopping_round=early_stopping_round,
+                                       verbose=True,
+                                       save_log=True,
+                                       save_model=False, )
+        # init_path='../model/concat_6_multi_layer_perceptron_64.bin')

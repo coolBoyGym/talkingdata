@@ -1,12 +1,13 @@
-16/8/12 Fri.
-feature
-    # name, feature_type, space, rank
+# Features
+
+### feature_name, feature_type, spaces, rank
+
     phone_brand, one_hot, 131, 1
     device_model, one_hot, 1666, 1
-
-    device_long_lat, multi, 10, 10              # mean, max, min, std, median ...
-    _norm, multi, 10, 10         # scale long/lat to [0, 1]
-
+    device_long_lat, multi, 10, 10
+        mean, max, min, std, median ...
+    _norm, multi, 10, 10
+        scale long/lat to [0, 1]
     device_event_num, num, 1, 1
     _norm, ...
     device_day_event_num, multi, 31, 8
@@ -26,24 +27,111 @@ feature
     active_app_label, multi, 507, 357
     _freq, ...
 
+    time_label_group:
+
+
+### concat features
+
+    concat_1, [fea_phone_brand, fea_device_model, ]
+
+    concat_2, [fea_phone_brand, fea_device_model,fea_device_long_lat, ]
+
+    concat_3, [fea_phone_brand,fea_device_model,fea_device_long_lat,fea_device_event_num,fea_device_day_event_num,fea_device_hour_event_num,fea_device_day_hour_event_num, ]
+
+    concat_4, [fea_phone_brand,fea_device_model,fea_device_long_lat,fea_device_event_num,fea_device_day_event_num,fea_device_hour_event_num,fea_device_day_hour_event_num,fea_installed_app,fea_active_app, ]
+
+    concat_5, [fea_phone_brand,fea_device_model,fea_device_long_lat,fea_device_event_num,fea_device_day_event_num,fea_device_hour_event_num,fea_device_day_hour_event_num,fea_installed_app,fea_active_app,fea_installed_app_label,fea_active_app_label, ]
+
+    concat_2_norm, [fea_phone_brand,fea_device_model,fea_device_long_lat_norm, ]
+
+    concat_3_norm, [fea_phone_brand,fea_device_model,fea_device_long_lat_norm,fea_device_event_num_norm,fea_device_day_event_num_norm,fea_device_hour_event_num_norm,fea_device_day_hour_event_num_norm])
+
+    concat_4_norm, [fea_phone_brand,fea_device_model,fea_device_long_lat_norm,fea_device_event_num_norm,fea_device_day_event_num_norm,fea_device_hour_event_num_norm,fea_device_day_hour_event_num_norm,fea_installed_app_freq,fea_active_app_freq, ]
+
+    concat_5_norm, [fea_phone_brand,fea_device_model,fea_device_long_lat_norm,fea_device_event_num_norm,fea_device_day_event_num_norm,fea_device_hour_event_num_norm,fea_device_day_hour_event_num_norm,fea_installed_app_freq,fea_active_app_freq,fea_installed_app_label_freq,fea_active_app_label_freq, ]
+
+    concat_6, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label]
+
+    concat_7, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat]
+
+    concat_7_norm, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm]
+
+    concat_8, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_event_num,fea_device_weekday_event_num,fea_device_day_event_num,fea_device_hour_event_num, ])
+
+    concat_8_norm, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_event_num_norm,fea_device_weekday_event_num_norm,fea_device_day_event_num_norm,fea_device_hour_event_num_norm, ]
+
+    concat_9, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat,fea_device_event_num,fea_device_weekday_event_num,fea_device_day_event_num,fea_device_hour_event_num, ]
+
+    concat_9_norm, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_device_event_num_norm,fea_device_weekday_event_num_norm,fea_device_day_event_num_norm,fea_device_hour_event_num_norm, ])
+
+    concat_10, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_hour_event_num_freq,fea_device_weekday_event_num_freq])
+
+    concat_11, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app_label_category])
+
+    concat_12, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app_label_diff_hour_category])
+
+    concat_13, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app_label_each_hour_category])
+
+    concat_14, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app_label,fea_device_hour_event_num_freq,fea_device_weekday_event_num_freq,fea_device_long_lat_norm,])
+
+    concat_15, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app_label_category_num_tfidf])
+
+    concat_16, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app_label_cluster_40])
+
+    concat_16_tfidf, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app_label_cluster_40_num_tfidf])
+
+    concat_16_2, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app_label_cluster_100])
+
+    concat_16_3, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app_label_cluster_270])
+
+    concat_17, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app_label_num_tfidf])
+
+    concat_6_tfidf, [fea_phone_brand,fea_device_model,fea_installed_app_tfidf,fea_installed_app_label_tfidf])
+
+    concat_20, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app,fea_active_app_label])
+
+    concat_21, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_day_event_num_freq,fea_device_hour_event_num_freq,fea_device_weekday_event_num_freq,fea_device_long_lat_norm,fea_active_app_label_category,fea_active_app_label_cluster_40]
+
+
+### ensemble features
+
     emsemble_1, multi, 42215, 5890
 
-model
-    gblinear
-        alpha, lambda
+    ensemble_2
 
-    gbtree
-        max_depth, eta, subsample, colsample_bytree
+    ensemble_3: [concat_1_gbtree_1, concat_1_gblinear_1, concat_6]
 
-    baba
-        lr: finish
-        fm: part
-        nn (as proposed on forum)
+    ensemble_4, [fea_concat_1_gbtree_1,fea_concat_1_gblinear_1,fea_concat_2_gbtree_1,fea_concat_2_gblinear_1,fea_concat_2_norm_gbtree_1,fea_concat_2_norm_gblinear_1,fea_concat_3_gbtree_1,fea_concat_3_gblinear_1,fea_concat_3_norm_gbtree_1,fea_concat_3_norm_gblinear_1,fea_concat_4_gbtree_1,fea_concat_4_gblinear_1,fea_concat_4_norm_gbtree_1,fea_concat_4_norm_gblinear_1,fea_concat_5_gbtree_1,fea_concat_5_gblinear_1,# fea_concat_5_norm_gbtree_1,# fea_concat_5_norm_gblinear_1,fea_concat_6_gbtree_1,fea_concat_6])
 
+# Models
 
-submission
-    # data, model, best_param, valid_score, submission_score, dumped_file
-    gym
+### GBLinear
+
+### GBTree
+
+### LR
+
+### FM
+
+### MLP
+
+### MNN
+
+### CNN
+
+### textCNN
+
+# Ensemble Models
+
+### Blending
+
+### Bagging
+
+# Submissions
+
+## 16/8/12 Fri.
+
+### gym
         concat_5, gbtree, {max_depth=3, eta=0.1, subsample=0.8, colsample=0.5, round=860, rate=0.2},
                                 2.2824732, 2.27017, concat_5_gbtree_1
         concat_5, gblinear, {alpha=0.1, lambda=66, early_stop_round=1, round=3, rate=0.2},
@@ -57,7 +145,7 @@ submission
         concat_4_norm, gblinear, {alpha=0.1, lambda=13, early_stop_round=1, rate=0.2},
                                 2.32331138572, not yet, concat_4_norm_gblinear_1
 
-    rocky
+### rocky
         concat_1, gbtree            max_depth 7 eta 0.07 subsample 0.8 colsample_bytree 0.5 2.35875357389 2.39043890146
         concat_1, gblinear          alpha 0 lambda 7.5  2.3499658672 2.38944255486
         concat_2, gbtree            max_depth 3 eta 0.07 subsample 0.8 colsample_bytree 0.6 2.33399659152 2.38934798614
@@ -65,29 +153,18 @@ submission
         concat_2_norm, gbtree       max_depth 3 eta 0.07 subsample 0.8 colsample_bytree 0.6 2.33028431943 2.38669627018
         concat_2_norm, gblinear     alpha 0.001 lambda 7.5 2.34475563006 2.38551132474
 
-    baba
+### xepa
         concat_5_norm, gbtree, {max_depth=4, eta=0.1, subsample=0.7, colsample=0.7}, [556]   train-mlogloss:1.89167	eval-mlogloss:2.28766, concat_5_norm_gbtree_1
         concat_5_norm, gblinear, {0.001, 10}, [2]	train-mlogloss:2.15605	eval-mlogloss:2.32268, concat_5_norm_gblinear_1
         concat_5_norm, lr, {0, 0}
 
+## 2016/8/13 Sat.
 
-2016/8/13 Sat.
-
-feature:
-    ensemble_1
-    ensemble_2
-
-model:
-    baba:
-        fm: finish
-        mlp: finish
-
-submission:
-    baba:
+### xepa:
         ensemble, average, {[ 0.01968983,  0.0391137 ,  0.01906632,  0.00886792,  0.0204471 ,
                                 0.02016268,  0.25404595,  0.2369304 ,  0.22133675,  0.16033936,]}, 2.03700311,  2.28009707, average_1.log
 
-    gym:
+### gym:
         ensemble_2, gbtree, {max_depth=2, eta=0.01, subsample=0.01, colsample=0.01, early_stop_round=50,
                                 round=3980, lambda=19, alpha=0.1, rate=0.2}
                             valid_score=2.27704846522,  real_score=2.27079, ensemble_2_gbtree
@@ -107,21 +184,11 @@ submission:
                                 round=512, lambda=1, alpha=0.1, rate=0.2}
                              valid_score=2.28447753216, real_score=not yet, concat_10_gbtree
 
-2016/8/14 Sun.
+## 2016/8/14 Sun.
 
-2016/8/15 Mon.
+## 2016/8/15 Mon.
 
-feature:
-
-model:
-    baba:
-        blending
-        bagging
-
-submission:
-
-submission:
-    baba:
+### xepa:
         concat_6_mlp_1:
             layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
             layer_activates = ['relu', None]
@@ -131,7 +198,7 @@ submission:
             471	2.205019	2.205045	2.258668
             score: 2.24483
 
-    rocky:
+### rocky:
         concat_6_mlp:
             opt_algo:
             drops:
@@ -157,20 +224,9 @@ submission:
             [475]	train_score: 2.202560	valid_score: 2.258602
             score:not yet
 
+## 2016/8/16:
 
-
-
-2016/8/16:
-
-feature:
-    baba:
-        ensemble_3: [concat_1_gbtree_1, concat_1_gblinear_1, concat_6]
-        ensemble_4: [concat_(1-5)_(norm)_gb(tree/linear)_1, concat_6]
-
-model:
-
-submission:
-    rocky:
+### rocky:
         concat_6
         (100,10) lr=0.5
         [137]	train_score: 2.369727	valid_score: 2.365398
@@ -191,7 +247,8 @@ submission:
         second layer 500, 800, 1500, 2000, 3000
         lr=0.5
         差别不大 均在2.275附近，曲线也近似
-    baba:
+
+### xepa:
         ensemble_3_mlp_1:
             layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
             layer_activates = ['relu', None]
@@ -200,21 +257,9 @@ submission:
             345	2.184544	2.184539	2.257029
         ensemble_4_mlp_1
 
-2016/8/17:
-19 days left
-feature:
-    gym:
-        time_label_group:
-        concat_11:
-        concat_12:
+## 2016/8/17, 19 days left
 
-model:
-    baba:
-        fnn
-        add max pooling in mlp
-
-submission:
-    rocky:
+### rocky:
         bagofapps:
             mlp: valid logloss=2.259028
                  score = 2.24359
@@ -243,7 +288,7 @@ submission:
 
         blending:
 
-    baba:
+### xepa:
         concat_6:
             fm:
 
@@ -253,7 +298,7 @@ submission:
         concat_10_norm:
             fm:
 
-    gym:
+### gym:
         ensemble_3_mlp_1:
             layer_sizes = [ti.SPACE, 90, ti.NUM_CLASS]
             layer_activates = ['relu', None]
@@ -298,12 +343,9 @@ submission:
                                 round=2000, lambda=1, alpha=0.1, rate=0.2}
                              valid_score=2.27939683794, real_score=not yet, concat_12_gbtree
 
+## 2016/8/18 Thu
 
-
-
-2016/8/18 Thu
-
-    gym:
+### gym:
         concat_12_wrong_mlp_1:
             layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
             layer_activates = ['relu', None]
@@ -367,9 +409,9 @@ submission:
             [500]	train_score: 2.199825	valid_score: 2.258154
             score:2.24435
 
+## 2016/8/18 Fri
 
-2016/8/18 Fri
-        gym
+### gym
             concat_15_mlp_2:
                 layer_sizes = [ti.SPACE, 100, ti.NUM_CLASS]
                 layer_activates = ['relu', None]
