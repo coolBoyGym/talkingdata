@@ -1,7 +1,7 @@
 from task import Task
 
-dataset = 'concat_1'
-booster = 'mnn'
+dataset = 'concat_22_128'
+booster = 'gbtree'
 version = 0
 
 task = Task(dataset, booster, version)
@@ -13,22 +13,22 @@ if booster is 'gblinear':
     }
     num_round = 200
     early_stop_round = 10
-    task.tune(params=params, num_round=num_round, early_stop_round=early_stop_round, save_log=True, save_model=False,
+    task.tune(params=params, num_round=num_round, early_stop_round=early_stop_round, save_model=False,
               dtest=None, save_feature=False)
     # task.train(params=params, num_round=num_round, verbose=True, save_model=False, save_submission=False)
 elif booster == 'gbtree':
     params = {
         'eta': 0.1,
-        'max_depth': 3,
+        'max_depth': 4,
         'subsample': 0.7,
         'colsample_bytree': 0.7,
         'gbtree_alpha': 0,
-        'gbtree_lambda': 0,
+        'gbtree_lambda': 1024,
         'random_state': 0
     }
-    num_round = 500
+    num_round = 2000
     early_stop_round = 50
-    task.tune(params=params, num_round=num_round, early_stop_round=early_stop_round, save_log=True, save_model=False,
+    task.tune(params=params, num_round=num_round, early_stop_round=early_stop_round, save_model=False,
               dtest=None, save_feature=False)
     # task.train(params=params, num_round=num_round, verbose=True, save_model=False, save_submission=False)
 elif booster == 'mlp':

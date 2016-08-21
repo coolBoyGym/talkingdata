@@ -133,6 +133,21 @@ fea_active_app_label_cluster_40_num_tfidf = feature.multi_feature(name='active_a
                                                                   dtype='f')
 
 """
+embedding features
+"""
+
+fea_installed_app_w2v_8 = feature.multi_feature(name='installed_app_w2v_8', dtype='f')
+fea_installed_app_label_w2v_8 = feature.multi_feature(name='installed_app_label_w2v_8', dtype='f')
+fea_installed_app_w2v_16 = feature.multi_feature(name='installed_app_w2v_16', dtype='f')
+fea_installed_app_label_w2v_16 = feature.multi_feature(name='installed_app_label_w2v_16', dtype='f')
+fea_installed_app_w2v_32 = feature.multi_feature(name='installed_app_w2v_32', dtype='f')
+fea_installed_app_label_w2v_32 = feature.multi_feature(name='installed_app_label_w2v_32', dtype='f')
+fea_installed_app_w2v_64 = feature.multi_feature(name='installed_app_w2v_64', dtype='f')
+fea_installed_app_label_w2v_64 = feature.multi_feature(name='installed_app_label_w2v_64', dtype='f')
+fea_installed_app_w2v_128 = feature.multi_feature(name='installed_app_w2v_128', dtype='f')
+fea_installed_app_label_w2v_128 = feature.multi_feature(name='installed_app_label_w2v_128', dtype='f')
+
+"""
 event features
 """
 fea_event_time = feature.multi_feature(name='event_time', dtype='d')
@@ -196,7 +211,7 @@ def make_feature():
     start_time = time.time()
 
     # dict_device_brand_model = pkl.load(open('../data/dict_device_brand_model.pkl', 'rb'))
-    dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
+    # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
     # dict_app_event = pkl.load(open('../data/dict_app_event.pkl', 'rb'))
     # dict_app_label = pkl.load(open('../data/dict_app_label.pkl', 'rb'))
     # dict_event = pkl.load(open('../data/dict_event.pkl', 'rb'))
@@ -214,96 +229,16 @@ def make_feature():
     #
     # exit(0)
 
-    device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
+    # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
 
     print 'finish in %d sec' % (time.time() - start_time)
 
     # event_id = np.loadtxt('../feature/event_id', dtype=np.int64, skiprows=1, usecols=[1], delimiter=',')
 
-    fea_active_app_label_cluster_40_num.process(device_id=device_id, dict_device_event=dict_device_event,
-                                                dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-                                                dict_label_cluster_40=dict_label_cluster_40)
-    fea_active_app_label_cluster_40_num.dump()
-    # fea_installed_app_label_num.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                     dict_app_event=dict_app_event, dict_app_label=dict_app_label)
-    # fea_installed_app_label_num.dump()
-
-    # fea_active_app_label_freq.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                   dict_app_event=dict_app_event, dict_app_label=dict_app_label)
-    # fea_active_app_label_freq.dump()
-
-    # fea_active_app_label_num.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                  dict_app_event=dict_app_event, dict_app_label=dict_app_label)
-    # fea_active_app_label_num.dump()
-
-    # fea_device_hour_event_num.process(device_id=device_id, dict_device_event=dict_device_event)
-    # fea_device_hour_event_num.dump()
-    #
-    # indices, values = fea_device_hour_event_num.get_value()
-    # fea_device_hour_event_num_norm.process(indices=indices, values=values)
-    # fea_device_hour_event_num_norm.dump()
-
-    # fea_device_day_hour_event_num.process(device_id=device_id, dict_device_event=dict_device_event)
-    # fea_device_day_hour_event_num.dump()
-    #
-    # indices, values = fea_device_day_hour_event_num.get_value()
-    # fea_device_day_hour_event_num_norm.process(indices=indices, values=values)
-    # fea_device_day_hour_event_num_norm.dump()
-
-    # fea_device_weekday_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
-    # fea_device_weekday_event_num_freq.dump()
-
-    # fea_device_hour_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
-    # fea_device_hour_event_num_freq.dump()
-
-    # fea_active_app_label_category.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                       dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-    #                                       dict_label_category_group=dict_label_category_group)
-    # fea_active_app_label_category.dump()
-    # fea_active_app_label_category_num.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                           dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-    #                                           dict_label_category_group=dict_label_category_group)
-    # fea_active_app_label_category_num.dump()
-    #
-    # fea_active_app_label_diff_hour_category.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                                 dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-    #                                                 dict_label_category_group=dict_label_category_group)
-    # fea_active_app_label_diff_hour_category.dump()
-    #
-    # fea_active_app_label_diff_hour_category_num.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                                     dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-    #                                                     dict_label_category_group=dict_label_category_group)
-    # fea_active_app_label_diff_hour_category_num.dump()
-
-    # fea_active_app_label_each_hour_category.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                                 dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-    #                                                 dict_label_category_group=dict_label_category_group)
-    # fea_active_app_label_each_hour_category.dump()
-    # fea_active_app_label_each_hour_category_num.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                                     dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-    #                                                     dict_label_category_group=dict_label_category_group)
-    # fea_active_app_label_each_hour_category_num.dump()
-
-    # fea_active_app_label_cluster_40.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                         dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-    #                                         dict_label_cluster_40=dict_label_cluster_40)
-    # fea_active_app_label_cluster_40.dump()
-
-    # fea_active_app_label_cluster_100.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                          dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-    #                                          dict_label_cluster_100=dict_label_cluster_100)
-    # fea_active_app_label_cluster_100.dump()
-
-    # fea_active_app_label_cluster_270.process(device_id=device_id, dict_device_event=dict_device_event,
-    #                                          dict_app_event=dict_app_event, dict_app_label=dict_app_label,
-    #                                          dict_label_cluster_270=dict_label_cluster_270)
-    # fea_active_app_label_cluster_270.dump()
     # fea_active_app_label_cluster_40_num.process(device_id=device_id, dict_device_event=dict_device_event,
     #                                             dict_app_event=dict_app_event, dict_app_label=dict_app_label,
     #                                             dict_label_cluster_40=dict_label_cluster_40)
     # fea_active_app_label_cluster_40_num.dump()
-    fea_device_day_event_num_freq.process(device_id=device_id, dict_device_event=dict_device_event)
-    fea_device_day_event_num_freq.dump()
 
 
 def ensemble_concat_feature(name, fea_list):
@@ -432,7 +367,7 @@ def padding_zero(line, space):
         return line.strip() + '\n'
 
 
-def split_dataset(name, cv_rate, zero_pad=False):
+def split_dataset(name, cv_rate=0.2, zero_pad=True):
     train_label = np.loadtxt('../feature/device_id', delimiter=',', dtype=np.int64, skiprows=1, usecols=[1])
 
     with open('../feature/' + name, 'r') as data_in:
@@ -477,29 +412,6 @@ def split_dataset(name, cv_rate, zero_pad=False):
     print 'train_size', train_size, 'valid_size', valid_size, 'test_size', test_size
 
 
-# def get_hour_event_num_distribution(device_id, dict_device_event):
-#     tmp = {}
-#     for did in device_id:
-#         if did in dict_device_event:
-#             hours = map(lambda x: get_time(x[1], ['hour'])[0], dict_device_event[did])
-#             for d in hours:
-#                 if d in tmp:
-#                     tmp[d] += 1
-#                 else:
-#                     tmp[d] = 1
-#
-#     sum_tmp = 0.0
-#     for k in tmp.keys():
-#         sum_tmp += tmp[k]
-#     res = {}
-#     for i in range(len(tmp)):
-#         res[i] = tmp[i] / sum_tmp
-#
-#     sorted_tmp = sorted(res.keys())
-#     indices = sorted_tmp
-#     values = map(lambda x: res[x], sorted_tmp)
-#     return indices, tmp, values
-
 def load_sparse_csr(filename):
     loader = np.load(filename)
     return csr_matrix((loader['data'], loader['indices'], loader['indptr']),
@@ -539,6 +451,7 @@ def process_keras_data(keras_data_name):
     fea_tmp.set_size(len(fea_indices))
     fea_tmp.dump()
 
+
 def feature_tfidf(name):
     fea_tmp = feature.multi_feature(name=name, dtype='f')
     fea_tmp.load()
@@ -550,249 +463,94 @@ def feature_tfidf(name):
     csr_2_feature(name_out, csr_tfidf, reorder=True)
 
 
+def feature_w2v_embedding(fea_raw, model_w2v, order, name):
+    raw_indices, raw_values = fea_raw.get_value()
+    indices = []
+    values = []
+    for i in range(len(raw_indices)):
+        w2v = np.zeros([order])
+        cnt = 0
+        for j in range(len(raw_indices[i])):
+            try:
+                w2v += model_w2v[str(raw_indices[i][j])]
+                cnt += 1
+            except Exception:
+                continue
+        if cnt > 0:
+            w2v /= cnt
+            indices.append(range(order))
+            values.append(w2v)
+        else:
+            indices.append([])
+            values.append([])
+    indices = np.array(indices)
+    values = np.array(values)
+    fea_out = feature.multi_feature(name=name, dtype='f')
+    fea_out.set_value(indices=indices, values=values)
+    max_indices = map(feature.get_max, indices)
+    len_indices = map(lambda x: len(x), values)
+    fea_out.set_space(max(max_indices) + 1)
+    fea_out.set_rank(max(len_indices))
+    fea_out.set_size(len(indices))
+    fea_out.dump()
+
+
 if __name__ == '__main__':
     print 'processing features...'
 
     # make_feature()
-    make_feature()
-    # fea_concat_6.load()
-    # fea_concat_6.set_data_type('d')
-    # fea_concat_6.dump()
-
-    # concat_feature('concat_1', [fea_phone_brand,
-    #                             fea_device_model, ])
-    #
-    # concat_feature('concat_2', [fea_phone_brand,
-    #                             fea_device_model,
-    #                             fea_device_long_lat, ])
-    #
-    # concat_feature('concat_3', [fea_phone_brand,
-    #                             fea_device_model,
-    #                             fea_device_long_lat,
-    #                             fea_device_event_num,
-    #                             fea_device_day_event_num,
-    #                             fea_device_hour_event_num,
-    #                             fea_device_day_hour_event_num, ])
-    #
-    # concat_feature('concat_4', [fea_phone_brand,
-    #                             fea_device_model,
-    #                             fea_device_long_lat,
-    #                             fea_device_event_num,
-    #                             fea_device_day_event_num,
-    #                             fea_device_hour_event_num,
-    #                             fea_device_day_hour_event_num,
-    #                             fea_installed_app,
-    #                             fea_active_app, ])
-    #
-    # concat_feature('concat_5', [fea_phone_brand,
-    #                             fea_device_model,
-    #                             fea_device_long_lat,
-    #                             fea_device_event_num,
-    #                             fea_device_day_event_num,
-    #                             fea_device_hour_event_num,
-    #                             fea_device_day_hour_event_num,
-    #                             fea_installed_app,
-    #                             fea_active_app,
-    #                             fea_installed_app_label,
-    #                             fea_active_app_label, ])
-    #
-    # concat_feature('concat_2_norm', [fea_phone_brand,
-    #                                  fea_device_model,
-    #                                  fea_device_long_lat_norm, ])
-    #
-    # concat_feature('concat_3_norm', [fea_phone_brand,
-    #                                  fea_device_model,
-    #                                  fea_device_long_lat_norm,
-    #                                  fea_device_event_num_norm,
-    #                                  fea_device_day_event_num_norm,
-    #                                  fea_device_hour_event_num_norm,
-    #                                  fea_device_day_hour_event_num_norm])
-    #
-    # concat_feature('concat_4_norm', [fea_phone_brand,
-    #                                  fea_device_model,
-    #                                  fea_device_long_lat_norm,
-    #                                  fea_device_event_num_norm,
-    #                                  fea_device_day_event_num_norm,
-    #                                  fea_device_hour_event_num_norm,
-    #                                  fea_device_day_hour_event_num_norm,
-    #                                  fea_installed_app_freq,
-    #                                  fea_active_app_freq, ])
-    #
-    # concat_feature('concat_5_norm', [fea_phone_brand,
-    #                                  fea_device_model,
-    #                                  fea_device_long_lat_norm,
-    #                                  fea_device_event_num_norm,
-    #                                  fea_device_day_event_num_norm,
-    #                                  fea_device_hour_event_num_norm,
-    #                                  fea_device_day_hour_event_num_norm,
-    #                                  fea_installed_app_freq,
-    #                                  fea_active_app_freq,
-    #                                  fea_installed_app_label_freq,
-    #                                  fea_active_app_label_freq, ])
-
-    # concat_feature('concat_6', [fea_phone_brand,
-    #                             fea_device_model,
-    #                             fea_installed_app,
-    #                             fea_installed_app_label])
-
-    # concat_feature('concat_7', [fea_phone_brand,
-    #                             fea_device_model,
-    #                             fea_installed_app,
-    #                             fea_installed_app_label,
-    #                             fea_device_long_lat])
-
-    # concat_feature('concat_7_norm', [fea_phone_brand,
-    #                                  fea_device_model,
-    #                                  fea_installed_app,
-    #                                  fea_installed_app_label,
-    #                                  fea_device_long_lat_norm])
-
-    # concat_feature('concat_8', [fea_phone_brand,
-    #                             fea_device_model,
-    #                             fea_installed_app,
-    #                             fea_installed_app_label,
-    #                             fea_device_event_num,
-    #                             fea_device_weekday_event_num,
-    #                             fea_device_day_event_num,
-    #                             fea_device_hour_event_num, ])
-    #
-    # concat_feature('concat_8_norm', [fea_phone_brand,
-    #                                  fea_device_model,
-    #                                  fea_installed_app,
-    #                                  fea_installed_app_label,
-    #                                  fea_device_event_num_norm,
-    #                                  fea_device_weekday_event_num_norm,
-    #                                  fea_device_day_event_num_norm,
-    #                                  fea_device_hour_event_num_norm, ])
-
-    # concat_feature('concat_9', [fea_phone_brand,
-    #                             fea_device_model,
-    #                             fea_installed_app,
-    #                             fea_installed_app_label,
-    #                             fea_device_long_lat,
-    #                             fea_device_event_num,
-    #                             fea_device_weekday_event_num,
-    #                             fea_device_day_event_num,
-    #                             fea_device_hour_event_num, ])
-
-    # concat_feature('concat_9_norm', [fea_phone_brand,
-    #                                  fea_device_model,
-    #                                  fea_installed_app,
-    #                                  fea_installed_app_label,
-    #                                  fea_device_long_lat_norm,
-    #                                  fea_device_event_num_norm,
-    #                                  fea_device_weekday_event_num_norm,
-    #                                  fea_device_day_event_num_norm,
-    #                                  fea_device_hour_event_num_norm, ])
-
-    # concat_feature('concat_10', [fea_phone_brand,
-    #                              fea_device_model,
-    #                              fea_installed_app,
-    #                              fea_installed_app_label,
-    #                              fea_device_hour_event_num_freq,
-    #                              fea_device_weekday_event_num_freq])
-
-    # concat_feature('concat_11', [fea_phone_brand,
-    #                              fea_device_model,
-    #                              fea_installed_app,
-    #                              fea_installed_app_label,
-    #                              fea_active_app_label_category])
-    #
-    # concat_feature('concat_12', [fea_phone_brand,
-    #                              fea_device_model,
-    #                              fea_installed_app,
-    #                              fea_installed_app_label,
-    #                              fea_active_app_label_diff_hour_category])
-
-    # concat_feature('concat_13', [fea_phone_brand,
-    #                              fea_device_model,
-    #                              fea_installed_app,
-    #                              fea_installed_app_label,
-    #                              fea_active_app_label_each_hour_category])
-
-    # concat_feature('concat_14', [fea_phone_brand,
-    #                              fea_device_model,
-    #                              fea_installed_app,
-    #                              fea_installed_app_label,
-    #                              fea_active_app_label,
-    #                              fea_device_hour_event_num_freq,
-    #                              fea_device_weekday_event_num_freq,
-    #                              fea_device_long_lat_norm,
-    #                              ])
-
-    # concat_feature('concat_15', [fea_phone_brand,
-    #                              fea_device_model,
-    #                              fea_installed_app,
-    #                              fea_installed_app_label,
-    #                              fea_active_app_label_category_num_tfidf])
-
-    # concat_feature('concat_16', [fea_phone_brand,
-    #                              fea_device_model,
-    #                              fea_installed_app,
-    #                              fea_installed_app_label,
-    #                              fea_active_app_label_cluster_40])
-
-    # concat_feature('concat_16_tfidf', [fea_phone_brand,
-    #                                    fea_device_model,
-    #                                    fea_installed_app,
-    #                                    fea_installed_app_label,
-    #                                    fea_active_app_label_cluster_40_num_tfidf])
-
-    # concat_feature('concat_16_2', [fea_phone_brand,
-    #                                fea_device_model,
-    #                                fea_installed_app,
-    #                                fea_installed_app_label,
-    #                                fea_active_app_label_cluster_100])
-
-    # concat_feature('concat_16_3', [fea_phone_brand,
-    #                                fea_device_model,
-    #                                fea_installed_app,
-    #                                fea_installed_app_label,
-    #                                fea_active_app_label_cluster_270])
-
-    # concat_feature('concat_17', [fea_phone_brand,
-    #                              fea_device_model,
-    #                              fea_installed_app,
-    #                              fea_installed_app_label,
-    #                              fea_active_app_label_num_tfidf])
-
-    # concat_feature('ensemble_4', [fea_concat_1_gbtree_1,
-    #                               fea_concat_1_gblinear_1,
-    #                               fea_concat_2_gbtree_1,
-    #                               fea_concat_2_gblinear_1,
-    #                               fea_concat_2_norm_gbtree_1,
-    #                               fea_concat_2_norm_gblinear_1,
-    #                               fea_concat_3_gbtree_1,
-    #                               fea_concat_3_gblinear_1,
-    #                               fea_concat_3_norm_gbtree_1,
-    #                               fea_concat_3_norm_gblinear_1,
-    #                               fea_concat_4_gbtree_1,
-    #                               fea_concat_4_gblinear_1,
-    #                               fea_concat_4_norm_gbtree_1,
-    #                               fea_concat_4_norm_gblinear_1,
-    #                               fea_concat_5_gbtree_1,
-    #                               fea_concat_5_gblinear_1,
-    #                               # fea_concat_5_norm_gbtree_1,
-    #                               # fea_concat_5_norm_gblinear_1,
-    #                               fea_concat_6_gbtree_1,
-    #                               fea_concat_6])
-    #
-
-    # concat_feature('concat_6_tfidf', [fea_phone_brand,
-    #                                   fea_device_model,
-    #                                   fea_installed_app_tfidf,
-    #                                   fea_installed_app_label_tfidf])
-
     # split_dataset('concat_6_tfidf', 0.2, zero_pad=True)
-    # split_dataset('bagofapps', 0.2, zero_pad=True)
-    # split_dataset('concat_12', 0.2, zero_pad=True)
-    # make_feature()
-    # split_dataset('concat_13', 0.2, zero_pad=True)
-    # split_dataset('concat_16_tfidf', 0.2, zero_pad=True)
-    # make_feature()
 
     # feature_tfidf('active_app_label_diff_hour_category_num')
     # feature_tfidf('installed_app')
     # feature_tfidf('installed_app_label')
 
     # feature_tfidf('active_app_label_cluster_40_num')
+    #
+    # import word2vec
+    # import matplotlib.pyplot as plt
+    #
+    # fea_installed_app.load()
+    #
+    # fea_tmp = fea_installed_app
+    # for k in [8, 16, 32, 64, 128]:
+    #     # w2v_path = '../data/' + fea_tmp.get_name() + '.vec.%d' % k
+    #     # w2v_model = word2vec.load(w2v_path, kind='bin')
+    #     # print w2v_model.vectors.shape
+    #     fea_name = fea_tmp.get_name() + '_w2v_%d' % k
+    #     # feature_w2v_embedding(fea_tmp, w2v_model, k, fea_name)
+    #     fea_w2v = feature.multi_feature(fea_name, dtype='f')
+    #     fea_w2v.load()
+    #     indices, values = fea_w2v.get_value()
+    #     sum_values = np.array(map(lambda x: sum(x), values))
+    #     # sum_values = sum_values[np.where(sum_values > 0)[0]]
+    #     print sum_values
+    #     plt.hist(sum_values, bins=1000)
+    #     plt.show()
+    #
+    concat_feature('concat_22_8', [fea_phone_brand,
+                                   fea_device_model,
+                                   fea_installed_app_w2v_8,
+                                   fea_installed_app_label_w2v_8])
+    concat_feature('concat_22_16', [fea_phone_brand,
+                                    fea_device_model,
+                                    fea_installed_app_w2v_16,
+                                    fea_installed_app_label_w2v_16])
+    concat_feature('concat_22_32', [fea_phone_brand,
+                                    fea_device_model,
+                                    fea_installed_app_w2v_32,
+                                    fea_installed_app_label_w2v_32])
+    concat_feature('concat_22_64', [fea_phone_brand,
+                                    fea_device_model,
+                                    fea_installed_app_w2v_64,
+                                    fea_installed_app_label_w2v_64])
+    concat_feature('concat_22_128', [fea_phone_brand,
+                                     fea_device_model,
+                                     fea_installed_app_w2v_128,
+                                     fea_installed_app_label_w2v_128])
+
+    split_dataset('concat_22_8')
+    split_dataset('concat_22_16')
+    split_dataset('concat_22_32')
+    split_dataset('concat_22_64')
+    split_dataset('concat_22_128')

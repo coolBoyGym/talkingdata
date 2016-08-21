@@ -92,6 +92,15 @@
 
     concat_21, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_day_event_num_freq,fea_device_hour_event_num_freq,fea_device_weekday_event_num_freq,fea_device_long_lat_norm,fea_active_app_label_category,fea_active_app_label_cluster_40]
 
+    concat_22_8, [fea_phone_brand,fea_device_model,fea_installed_app_w2v_8,fea_installed_app_label_w2v_8]
+    
+    concat_22_16, [fea_phone_brand,fea_device_model,fea_installed_app_w2v_16,fea_installed_app_label_w2v_16]
+    
+    concat_22_32, [fea_phone_brand,fea_device_model,fea_installed_app_w2v_32,fea_installed_app_label_w2v_32]
+    
+    concat_22_64, [fea_phone_brand,fea_device_model,fea_installed_app_w2v_64,fea_installed_app_label_w2v_64]
+    
+    concat_22_128, [fea_phone_brand,fea_device_model,fea_installed_app_w2v_128,fea_installed_app_label_w2v_128]
 
 ### ensemble features
 
@@ -204,7 +213,7 @@
             drops:
             multi-layer:
 
-    gym:
+### gym:
         mlp on other features
 
         concat_6_mlp_1:
@@ -486,5 +495,3 @@
                 num_round = 700
                 best iteration:
                 [489]	train_score: 2.201669	valid_score: 2.259127
-
-

@@ -19,13 +19,12 @@
 import word2vec
 
 corpus = 'installed_app_label'
-for size in [8, 16, 32, 64, 128]:
+for size in [256, 512]:
     word2vec.word2vec(train='../data/' + corpus + '.corpus',
                       output='../data/' + corpus + '.vec.%d' % size,
                       size=size,
                       min_count=0,
                       verbose=True)
 
-# model = word2vec.load('../data/' + corpus + '.vec.8')
-#
+# model = word2vec.load('../data/' + corpus + '.vec.8', kind='bin')
 # print model.vectors.shape
