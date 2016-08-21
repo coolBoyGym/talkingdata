@@ -4,6 +4,8 @@ from scipy.sparse import csr_matrix
 from sklearn.cross_validation import train_test_split
 
 import train_impl as ti
+import utils
+
 
 # def save_sparse_csr(filename, array):
 #     np.savez(filename, data=array.data, indices=array.indices,
@@ -12,6 +14,8 @@ def load_sparse_csr(filename):
     loader = np.load(filename)
     return csr_matrix((loader['data'], loader['indices'], loader['indptr']),
                       shape=loader['shape'])
+
+
 train_data_csr = load_sparse_csr('../input/bagofapps_train_csr.npz')
 test_data_csr = load_sparse_csr('../input/bagofapps_test_csr.npz')
 train_label = np.load('../input/bagofapps_train_label.npy')
@@ -43,13 +47,13 @@ if __name__ == '__main__':
         # dtrain = xgb.DMatrix(ti.PATH_TRAIN)
         # dtest = xgb.DMatrix(ti.PATH_TEST)
         #
-        train_indices, train_values, train_labels = ti.read_feature(open(ti.PATH_TRAIN_TRAIN), -1)
-        valid_indices, valid_values, valid_labels = ti.read_feature(open(ti.PATH_TRAIN_VALID), -1)
+        train_indices, train_values, train_labels = utils.read_feature(open(ti.PATH_TRAIN_TRAIN), -1, ti.NUM_CLASS)
+        valid_indices, valid_values, valid_labels = utils.read_feature(open(ti.PATH_TRAIN_VALID), -1, ti.NUM_CLASS)
 
-        X_train = ti.libsvm_2_csr_matrix(train_indices, train_values)
-        X_valid = ti.libsvm_2_csr_matrix(valid_indices, valid_values)
-        y_train = ti.label_2_group_id(train_labels)
-        y_valid = ti.label_2_group_id(valid_labels)
+        X_train = utils.libsvm_2_csr_matrix(train_indices, train_values)
+        X_valid = utils.libsvm_2_csr_matrix(valid_indices, valid_values)
+        y_train = utils.label_2_group_id(train_labels, ti.NUM_CLASS)
+        y_valid = utils.label_2_group_id(valid_labels, ti.NUM_CLASS)
         dtrain_train = xgb.DMatrix(X_train, label=y_train)
         dtrain_valid = xgb.DMatrix(X_valid, label=y_valid)
         # dtrain = xgb.DMatrix(train_data_csr, label=train_label)
@@ -122,4 +126,4 @@ if __name__ == '__main__':
         #                                early_stopping_round=10, verbose=True, save_log=True, save_model=True)
 
         ti.train_multi_layer_perceptron(dtrain, dtest, layer_sizes, layer_activates, opt_algo, learning_rate, drops,
-                                            num_round=num_round, batch_size=10000)
+                                        num_round=num_round, batch_size=10000)

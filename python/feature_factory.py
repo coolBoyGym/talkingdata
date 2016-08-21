@@ -6,7 +6,7 @@ from scipy.sparse import csr_matrix
 
 import feature
 import tf_idf
-from train_impl import csr_matrix_2_libsvm, libsvm_2_csr_matrix
+import utils
 
 data_app_events = '../data/raw/app_events.csv'
 data_app_labels = '../data/raw/app_labels.csv'
@@ -607,8 +607,8 @@ def load_sparse_csr(filename):
 def process_keras_data(keras_data_name):
     train_data_csr = load_sparse_csr('../data/' + keras_data_name + '_train_csr.npz')
     test_data_csr = load_sparse_csr('../data/' + keras_data_name + '_test_csr.npz')
-    train_indices, train_values = csr_matrix_2_libsvm(train_data_csr)
-    test_indices, test_values = csr_matrix_2_libsvm(test_data_csr)
+    train_indices, train_values = utils.csr_matrix_2_libsvm(train_data_csr)
+    test_indices, test_values = utils.csr_matrix_2_libsvm(test_data_csr)
     train_device_id = np.loadtxt(data_gender_age_train, delimiter=',', skiprows=1, usecols=[0], dtype=np.int64)
     dict_device_id = pkl.load(open('../data/dict_id_device.pkl'))
     dict_device_train = {}
@@ -643,7 +643,7 @@ def feature_tfidf(name):
     fea_tmp.load()
     feature_indices, feature_values = fea_tmp.get_value()
     feature_space = fea_tmp.get_space()
-    csr_fea = libsvm_2_csr_matrix(feature_indices, feature_values, feature_space)
+    csr_fea = utils.libsvm_2_csr_matrix(feature_indices, feature_values, feature_space)
     csr_tfidf = tf_idf.tf_idf(csr_fea)
     name_out = name + '_tfidf'
     csr_2_feature(name_out, csr_tfidf, reorder=True)
