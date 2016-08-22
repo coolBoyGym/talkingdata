@@ -412,6 +412,29 @@ def split_dataset(name, cv_rate=0.2, zero_pad=True):
     print 'train_size', train_size, 'valid_size', valid_size, 'test_size', test_size
 
 
+# def get_hour_event_num_distribution(device_id, dict_device_event):
+#     tmp = {}
+#     for did in device_id:
+#         if did in dict_device_event:
+#             hours = map(lambda x: get_time(x[1], ['hour'])[0], dict_device_event[did])
+#             for d in hours:
+#                 if d in tmp:
+#                     tmp[d] += 1
+#                 else:
+#                     tmp[d] = 1
+#
+#     sum_tmp = 0.0
+#     for k in tmp.keys():
+#         sum_tmp += tmp[k]
+#     res = {}
+#     for i in range(len(tmp)):
+#         res[i] = tmp[i] / sum_tmp
+#
+#     sorted_tmp = sorted(res.keys())
+#     indices = sorted_tmp
+#     values = map(lambda x: res[x], sorted_tmp)
+#     return indices, tmp, values
+
 def load_sparse_csr(filename):
     loader = np.load(filename)
     return csr_matrix((loader['data'], loader['indices'], loader['indptr']),
@@ -504,7 +527,6 @@ if __name__ == '__main__':
     # feature_tfidf('active_app_label_diff_hour_category_num')
     # feature_tfidf('installed_app')
     # feature_tfidf('installed_app_label')
-
     # feature_tfidf('active_app_label_cluster_40_num')
     #
     # import word2vec

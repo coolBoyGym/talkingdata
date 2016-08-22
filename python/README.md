@@ -193,6 +193,7 @@
                                 round=512, lambda=1, alpha=0.1, rate=0.2}
                              valid_score=2.28447753216, real_score=not yet, concat_10_gbtree
 
+
 ## 2016/8/14 Sun.
 
 ## 2016/8/15 Mon.
@@ -495,3 +496,27 @@
                 num_round = 700
                 best iteration:
                 [489]	train_score: 2.201669	valid_score: 2.259127
+
+
+## 2016/8/22 Mon
+
+### gym
+            concat_22_128_mlp_1:
+                learning_rate = 0.2
+                batch_size = 10000
+                num_round = 500
+            
+            concat_22_128_mlp_2:
+                learning_rate = 0.4
+                batch_size = 10000
+                num_round = 500
+                
+            concat_22_128_mlp_3:
+                learning_rate = 0.2
+                batch_size = 1000
+                num_round = 500
+                
+            concat_22_128_mlp_4:
+                learning_rate = 0.2
+                batch_size = 2000
+                num_round = 1000
