@@ -176,7 +176,7 @@ def draw_two_argument_picture(feature_name, booster_model):
 
 
 if __name__ == '__main__':
-    path_log = '../model/concat_22_128_mlp_1.log'
+    path_log = '../model/concat_6_embedding_64_mlp_5.log'
     # plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3)
     # path_log = '../model/concat_1_factorization_machine_1.log'
     # path_log = '../model/ensemble_1_gbtree_1.log'

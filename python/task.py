@@ -136,9 +136,9 @@ class Task:
         if save_model:
             model.dump()
         if save_feature:
-            train_pred = model.predict(dtrain)
-            valid_pred = model.predict(dtest)
-            test_pred = model.predict(dtest)
+            train_pred = model.predict(dtrain[0])
+            valid_pred = model.predict(dtest[0])
+            test_pred = model.predict(dtest[0])
             utils.make_feature_model_output(self.tag, [train_pred, valid_pred, test_pred], self.num_class)
 
     def train(self, dtrain=None, dtest=None, params=None, batch_size=None, num_round=None, verbose=True,
@@ -186,10 +186,11 @@ class Task:
         if save_model:
             model.dump()
         if save_submission:
-            test_pred = model.predict(dtest)
+            test_pred = model.predict(dtest[0])
             utils.make_submission(self.path_submission, test_pred)
 
     def predict_mlpmodel(self, data=None, params=None, batch_size=None):
+        data = utils.libsvm_2_csr(data[0], data[1], self.space)
         model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                      batch_size=batch_size,
                                      **params)

@@ -119,3 +119,15 @@ installed_app:
 installed_app_label
     mlp (0.2, 64)       [687]	train_score: 2.308083	valid_score: 2.320131       installed_app_label_mlp_1.bin
     embedding from this model   installed_app_label_embedding_1
+
+
+concat_6_embedding_64
+    mlp (0.2, 64)       [296]	train_score: 2.210399	valid_score: 2.264480       submission score=2.25093
+    mlp (0.2, 32)       [329]	train_score: 2.225020	valid_score: 2.265452
+    mlp bypass (0.1, 64, 64)        [287]	train_score: 2.202804	valid_score: 2.261038
+    mlp bypass (0.1, 64, 128)       [292]	train_score: 2.202365	valid_score: 2.260960
+    mlp bypass (0.1, 128, 64)       [271]	train_score: 2.203536	valid_score: 2.261078
+    mlp bypass (0.1, 128, 128)
+
+concat_6_ooee_64
+    mlp (0.2, 64)       [392]	train_score: 2.212981	valid_score: 2.267150

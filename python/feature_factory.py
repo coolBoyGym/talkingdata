@@ -76,6 +76,13 @@ def gather_event_id():
     print train_size, test_size, event_data.shape
     np.savetxt('../feature/event_id', event_data, header='%d,%d' % (train_size, test_size), fmt='%d,%d,%d')
 
+fea_phone_brand_embedding = feature.multi_feature(name='phone_brand_embedding_1', dtype='f')
+fea_device_model_embedding = feature.multi_feature(name='device_model_embedding_1',dtype='f')
+fea_installed_app_embedding = feature.multi_feature(name='installed_app_embedding_1', dtype='f')
+fea_installed_app_label_embedding = feature.multi_feature(name='installed_app_label_embedding_1', dtype='f')
+
+
+
 
 fea_phone_brand = feature.one_hot_feature(name='phone_brand', dtype='d')
 fea_device_model = feature.one_hot_feature(name='device_model', dtype='d')
@@ -550,29 +557,11 @@ if __name__ == '__main__':
     #     plt.hist(sum_values, bins=1000)
     #     plt.show()
     #
-    concat_feature('concat_22_8', [fea_phone_brand,
-                                   fea_device_model,
-                                   fea_installed_app_w2v_8,
-                                   fea_installed_app_label_w2v_8])
-    concat_feature('concat_22_16', [fea_phone_brand,
+    concat_feature('concat_6_ooee_64',
+                                    [fea_phone_brand,
                                     fea_device_model,
-                                    fea_installed_app_w2v_16,
-                                    fea_installed_app_label_w2v_16])
-    concat_feature('concat_22_32', [fea_phone_brand,
-                                    fea_device_model,
-                                    fea_installed_app_w2v_32,
-                                    fea_installed_app_label_w2v_32])
-    concat_feature('concat_22_64', [fea_phone_brand,
-                                    fea_device_model,
-                                    fea_installed_app_w2v_64,
-                                    fea_installed_app_label_w2v_64])
-    concat_feature('concat_22_128', [fea_phone_brand,
-                                     fea_device_model,
-                                     fea_installed_app_w2v_128,
-                                     fea_installed_app_label_w2v_128])
+                                    fea_installed_app_embedding,
+                                    fea_installed_app_label_embedding])
 
-    split_dataset('concat_22_8')
-    split_dataset('concat_22_16')
-    split_dataset('concat_22_32')
-    split_dataset('concat_22_64')
-    split_dataset('concat_22_128')
+    split_dataset('concat_6_ooee_64')
+

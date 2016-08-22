@@ -205,7 +205,7 @@ class TFClassifier(Classifier):
         for i in range(self.num_round):
             train_loss, train_y_prob = self.__train_round_csr(dtrain)
             train_score = log_loss(train_labels, train_y_prob)
-            valid_y_prob = self.predict(dvalid)
+            valid_y_prob = self.predict(dvalid[0])
             valid_score = log_loss(valid_labels, valid_y_prob)
             train_scores.append(train_score)
             valid_scores.append(valid_score)
@@ -229,8 +229,7 @@ class TFClassifier(Classifier):
         y_prob = self.run(self.y_prob, feed_dict=feed_dict)
         return y_prob
 
-    def predict(self, data):
-        csr_mat = data[0]
+    def predict(self, csr_mat):
         input_spaces = self.get_input_spaces()
         input_types = self.get_input_types()
         batch_size = self.batch_size
