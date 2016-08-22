@@ -104,12 +104,18 @@ embedding:
         (0.2, 32)       {[2891]	train_score: 2.374589	valid_score: 2.389791}
         (0.2, 128)      {[2288]	train_score: 2.368377	valid_score: 2.390303}
 
+phone_brand:
+    gbtree      [113]	train-mlogloss:2.396648	eval-mlogloss:2.402918
+phone_brand_embedding_32
+    gbtree      [51]	train-mlogloss:2.394280	eval-mlogloss:2.402758
+phone_brand_embedding_64
+    gbtree      [49]	train-mlogloss:2.393891	eval-mlogloss:2.4027
+phone_brand_embedding_128
+    gbtree      [52]	train-mlogloss:2.393246	eval-mlogloss:2.403260
 
-    phone_brand:
-        gbtree      [113]	train-mlogloss:2.396648	eval-mlogloss:2.402918
-    phone_brand_embedding_32
-        gbtree      [51]	train-mlogloss:2.394280	eval-mlogloss:2.402758
-    phone_brand_embedding_64
-        gbtree      [49]	train-mlogloss:2.393891	eval-mlogloss:2.4027
-    phone_brand_embedding_128
-        gbtree      [52]	train-mlogloss:2.393246	eval-mlogloss:2.403260
+installed_app:
+    mlp (0.2, 64)       [657]	train_score: 2.247402	valid_score: 2.287982      installed_app_mlp_1.bin
+    embedding from this model   installed_app_embedding_1
+installed_app_label
+    mlp (0.2, 64)       [687]	train_score: 2.308083	valid_score: 2.320131       installed_app_label_mlp_1.bin
+    embedding from this model   installed_app_label_embedding_1

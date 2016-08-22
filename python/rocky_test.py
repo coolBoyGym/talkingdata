@@ -1,8 +1,7 @@
 from task import Task
 import feature
-import predict_with_mlpmodel as pm
-dataset = 'installed_app'
-booster = 'mlp'
+dataset = 'device_model'
+booster = 'embedding'
 version = 1
 
 task = Task(dataset, booster, version)
@@ -81,7 +80,7 @@ elif booster == 'mnn':
     # task.train(params=params, num_round=num_round, verbose=True,
     #            batch_size=batch_size, save_model=False, save_submission=False)
 elif booster == 'embedding':
-    model_path = '../model/phone_brand_mlp_3.bin'
+    model_path = '../model/device_model_multi_layer_perceptron_1.bin'
     # feature_to_predict = 'phone_brand'
     fea_tmp = feature.multi_feature(name=dataset, dtype='f')
     fea_tmp.load()
