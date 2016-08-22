@@ -58,6 +58,8 @@ def check_type(data, dtype):
         return 'int' in dtype_name
     elif dtype == 'float':
         return 'float' in dtype_name
+    elif dtype == 'str':
+        return 'str' in dtype_name
     elif dtype == 'list':
         return 'list' in dtype_name or 'array' in dtype_name
     elif dtype == 'set':
@@ -90,14 +92,12 @@ def csr_slice(csr_mats, begin, size):
 
 def csr_2_coo(csr_mats):
     if not check_type(csr_mats, 'list'):
-        print 'csr not a list'
         coo_mat = csr_mats.tocoo()
         indices = np.transpose(np.vstack((coo_mat.row, coo_mat.col)))
         values = coo_mat.data
         shape = csr_mats.shape
         return indices, values, shape
     else:
-        print 'csr is a list'
         indices = []
         values = []
         shapes = []
@@ -121,8 +121,8 @@ def coo_2_csr(coo_indices, coo_values, coo_shapes):
         return csr_mats
 
 
-def csr_slice_coo(csr_mats, spaces, begin, size):
-    if check_type(spaces, 'int'):
+def csr_slice_coo(csr_mats, begin, size):
+    if not check_type(csr_mats, 'list'):
         csr_slc = csr_slice(csr_mats, begin, size)
         coo_slc = csr_slc.tocoo()
         indices = np.transpose(np.vstack((coo_slc.row, coo_slc.col)))
@@ -133,47 +133,72 @@ def csr_slice_coo(csr_mats, spaces, begin, size):
         indices = []
         values = []
         shapes = []
-        for i in range(len(spaces)):
-            indices_i, values_i, shape_i = csr_slice_coo(csr_mats[i], spaces[i], begin, size)
+        for i in range(len(csr_mats)):
+            indices_i, values_i, shape_i = csr_slice_coo(csr_mats[i], begin, size)
             indices.append(indices_i)
             values.append(values_i)
             shapes.append(shape_i)
         return indices, values, shapes
 
 
-def libsvm_2_csr(indices, values, spaces):
-    coo_indices, coo_values, coo_shapes = libsvm_2_coo(indices, values, spaces)
-    if check_type(spaces, 'int'):
-        coo_mat = coo_matrix((coo_values, (coo_indices[:, 0], coo_indices[:, 1])), shape=coo_shapes)
-        return coo_mat.tocsr()
+def csr_2_inputs(input_types, csr_mats):
+    if check_type(input_types, 'str'):
+        if input_types == 'sparse':
+            return csr_2_coo(csr_mats)
+        else:
+            return csr_mats.toarray()
     else:
-        csr_mats = []
-        for i in range(len(coo_indices)):
-            coo_mat_i = coo_matrix((coo_values[i], (coo_indices[i][:, 0], coo_indices[i][:, 1])), shape=coo_shapes[i])
-            csr_mats.append(coo_mat_i.tocsr())
-        return csr_mats
+        input_data = []
+        for i in range(len(input_types)):
+            input_data_i = csr_2_inputs(input_types[i], csr_mats[i])
+            input_data.append(input_data_i)
+        return input_data
 
 
-def libsvm_2_coo(indices, values, spaces):
-    if check_type(spaces, 'int'):
-        coo_indices = []
-        coo_values = []
-        for i in range(len(indices)):
-            coo_indices.extend(map(lambda x: [i, x], indices[i]))
-            coo_values.extend(values[i])
-        csr_shape = [len(indices), spaces]
-        return np.array(coo_indices), np.array(coo_values), csr_shape
+def feature_slice_inputs(input_types, csr_data, begin, size):
+    if check_type(input_types, 'str'):
+        if input_types == 'sparse':
+            return csr_slice_coo(csr_data, begin, size)
+        else:
+            return csr_data[begin:begin + size]
     else:
-        indices, values = split_feature(indices, values, spaces)
-        coo_indices = []
-        coo_values = []
-        csr_shapes = []
-        for i in range(len(indices)):
-            indices_i, values_i, shape_i = libsvm_2_coo(indices[i], values[i], spaces[i])
-            coo_indices.append(indices_i)
-            coo_values.append(values_i)
-            csr_shapes.append(shape_i)
-        return coo_indices, coo_values, csr_shapes
+        input_data = []
+        for i in range(len(input_types)):
+            input_data_i = feature_slice_inputs(input_types[i], csr_data[i], begin, size)
+            input_data.append(input_data_i)
+        return input_data
+
+
+def libsvm_2_coo(indices, values, space):
+    coo_indices = []
+    coo_values = []
+    for i in range(len(indices)):
+        coo_indices.extend(map(lambda x: [i, x], indices[i]))
+        coo_values.extend(values[i])
+    csr_shape = [len(indices), space]
+    return np.array(coo_indices), np.array(coo_values), csr_shape
+
+
+def libsvm_2_csr(indices, values, space):
+    coo_indices, coo_values, coo_shape = libsvm_2_coo(indices, values, space)
+    coo_mat = coo_matrix((coo_values, (coo_indices[:, 0], coo_indices[:, 1])), shape=coo_shape)
+    return coo_mat.tocsr()
+
+
+def libsvm_2_feature(indices, values, spaces, types):
+    if check_type(spaces, 'int'):
+        if types == 'sparse':
+            return libsvm_2_csr(indices, values, spaces)
+        elif len(values.shape) == 1:
+            return libsvm_2_csr(indices, values, spaces).toarray()
+        else:
+            return values
+    else:
+        csr_data = []
+        for i in range(len(spaces)):
+            csr_data_i = libsvm_2_feature(indices[i], values[i], spaces[i], types[i])
+            csr_data.append(csr_data_i)
+        return csr_data
 
 
 def csr_2_libsvm(csr_mat):
@@ -273,6 +298,45 @@ def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval
         else:
             print 'BadParam: init method', init_method
     return var_map
+
+
+def init_input_units(input_spaces, input_types):
+    if check_type(input_spaces, 'int'):
+        if input_types == 'sparse':
+            return tf.sparse_placeholder(tf.float32)
+        else:
+            return tf.placeholder(tf.float32)
+    else:
+        input_units = []
+        for i in range(len(input_spaces)):
+            input_unit_i = init_input_units(input_spaces[i], input_types[i])
+            input_units.append(input_unit_i)
+        return input_units
+
+
+def init_feed_dict(input_types, input_data, input_units, feed_dict):
+    if check_type(input_types, 'str'):
+        if input_types == 'sparse':
+            feed_dict[input_units] = tuple(input_data)
+        else:
+            feed_dict[input_units] = input_data
+    else:
+        for i in range(len(input_types)):
+            init_feed_dict(input_types[i], input_data[i], input_units[i], feed_dict)
+
+
+def embed_input_units(input_types, input_units, weights, biases):
+    if check_type(input_types, 'str'):
+        if input_types == 'sparse':
+            return tf.sparse_tensor_dense_matmul(input_units, weights) + biases
+        else:
+            return tf.matmul(input_units, weights) + biases
+    else:
+        embeds = []
+        for i in range(len(input_types)):
+            embed_i = embed_input_units(input_types[i], input_units[i], weights[i], biases[i])
+            embeds.append(embed_i)
+        return embeds
 
 
 def get_loss(loss_func, y, y_true):

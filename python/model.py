@@ -47,9 +47,11 @@ class model:
 
 
 class Classifier(model):
-    def __init__(self, name, eval_metric, input_spaces, num_class):
+    def __init__(self, name, eval_metric, input_spaces, input_types, num_class):
         model.__init__(self, name, 'classifier', eval_metric)
+        print 'constructing classifier', name, eval_metric, input_spaces, input_types, num_class
         self.__input_spaces = input_spaces
+        self.__input_types = input_types
         self.__num_class = num_class
 
     def get_num_class(self):
@@ -57,6 +59,9 @@ class Classifier(model):
 
     def get_input_spaces(self):
         return self.__input_spaces
+
+    def get_input_types(self):
+        return self.__input_types
 
     def write_log_header(self):
         with open(self.__log_path, 'w') as fout:

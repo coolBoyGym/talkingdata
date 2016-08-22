@@ -118,9 +118,9 @@ class GBTree(Classifier):
 
 
 class TFClassifier(Classifier):
-    def __init__(self, name, eval_metric, input_spaces, num_class,
+    def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
                  batch_size=None, num_round=None, early_stop_round=None, verbose=True, save_log=True):
-        Classifier.__init__(self, name, eval_metric, input_spaces, num_class)
+        Classifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class)
         self.__graph = None
         self.__sess = None
         self.x = None
@@ -152,10 +152,7 @@ class TFClassifier(Classifier):
     def compile(self):
         self.__graph = tf.Graph()
         with self.__graph.as_default():
-            if utils.check_type(self.get_input_spaces(), 'int'):
-                self.x = tf.sparse_placeholder(tf.float32)
-            else:
-                self.x = map(lambda x: tf.sparse_placeholder(tf.float32), self.get_input_spaces())
+            self.x = utils.init_input_units(self.get_input_spaces(), self.get_input_types())
             self.y_true = tf.placeholder(tf.float32)
             self.drops = tf.placeholder(tf.float32)
             self.vars = utils.init_var_map(self.init_actions, self.init_path)
@@ -165,30 +162,26 @@ class TFClassifier(Classifier):
             self.build_graph()
             tf.initialize_all_variables().run(session=self.__sess)
 
-    def __train_batch_coo(self, indices, values, shapes, labels):
+    def __train_batch(self, batch_data, labels):
         feed_dict = {self.y_true: labels, self.drops: self.layer_drops}
-        if utils.check_type(self.get_input_spaces(), 'int'):
-            feed_dict[self.x] = (indices, values, shapes)
-        else:
-            for i in range(len(self.x)):
-                feed_dict[self.x[i]] = (indices[i], values[i], shapes[i])
+        utils.init_feed_dict(self.get_input_types(), batch_data, self.x, feed_dict)
         _, l, y_prob = self.__sess.run(fetches=[self.optimizer, self.loss, self.y_prob], feed_dict=feed_dict)
         return l, y_prob
 
     def __train_round_csr(self, dtrain):
         csr_mats, labels = dtrain
-        input_spaces = self.get_input_spaces()
         batch_size = self.batch_size
+        input_types = self.get_input_types()
         if batch_size == -1:
-            indices, values, shapes = utils.csr_2_coo(csr_mats)
-            loss, y_prob = self.__train_batch_coo(indices, values, shapes, labels)
+            input_data = utils.csr_2_inputs(input_types, csr_mats)
+            loss, y_prob = self.__train_batch(input_data, labels)
             return loss, y_prob
         loss = []
         y_prob = []
         for i in range(len(labels) / batch_size + 1):
-            indices_i, values_i, shapes_i = utils.csr_slice_coo(csr_mats, input_spaces, i * batch_size, batch_size)
+            batch_i = utils.feature_slice_inputs(input_types, csr_mats, i * batch_size, batch_size)
             labels_i = labels[i * batch_size: (i + 1) * batch_size]
-            batch_loss, batch_y_prob = self.__train_batch_coo(indices_i, values_i, shapes_i, labels_i)
+            batch_loss, batch_y_prob = self.__train_batch(batch_i, labels_i)
             loss.append(batch_loss)
             y_prob.extend(batch_y_prob)
         return np.array(loss), np.array(y_prob)
@@ -230,22 +223,19 @@ class TFClassifier(Classifier):
         print '[-1]\ttrain_score: %f\tvalid_score: %f' % (train_scores[-1], valid_scores[-1])
         return train_scores[-1], valid_scores[-1]
 
-    def __predict_batch(self, indices, values, shapes):
+    def __predict_batch(self, batch_data):
         feed_dict = {self.drops: [1] * len(self.layer_drops)}
-        if utils.check_type(self.get_input_spaces(), 'int'):
-            feed_dict[self.x] = (indices, values, shapes)
-        else:
-            for i in range(len(self.x)):
-                feed_dict[self.x[i]] = (indices[i], values[i], shapes[i])
+        utils.init_feed_dict(self.get_input_types(), batch_data, self.x, feed_dict)
         y_prob = self.run(self.y_prob, feed_dict=feed_dict)
         return y_prob
 
     def predict(self, data):
         csr_mat = data[0]
         input_spaces = self.get_input_spaces()
+        input_types = self.get_input_types()
         batch_size = self.batch_size
         if batch_size == -1:
-            indices, values, shapes = utils.csr_2_coo(csr_mat)
+            indices, values, shapes = utils.csr_2_inputs(input_types, csr_mat)
             y_prob = self.__predict_batch(indices, values, input_spaces)
             return y_prob
         y_prob = []
@@ -254,8 +244,8 @@ class TFClassifier(Classifier):
         else:
             data_size = csr_mat[0].shape[0]
         for i in range(data_size / batch_size + 1):
-            indices_i, values_i, shapes_i = utils.csr_slice_coo(csr_mat, input_spaces, i * batch_size, batch_size)
-            y_prob_i = self.__predict_batch(indices_i, values_i, shapes_i)
+            batch_i = utils.feature_slice_inputs(input_types, csr_mat, i * batch_size, batch_size)
+            y_prob_i = self.__predict_batch(batch_i)
             y_prob.extend(y_prob_i)
         return np.array(y_prob)
 
@@ -286,13 +276,12 @@ class TFClassifier(Classifier):
 
 
 class FactorizationMachine(TFClassifier):
-    def __init__(self, name, eval_metric, input_spaces, num_class, batch_size=None, num_round=None,
+    def __init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size=None, num_round=None,
                  early_stop_round=None, verbose=True, save_log=True,
                  factor_order=None, opt_algo=None, learning_rate=None,
-                 l1_w=0, l1_v=0, l2_w=0, l2_v=0, l2_b=0
-                 ):
-        TFClassifier.__init__(self, name, eval_metric, input_spaces, num_class, batch_size, num_round, early_stop_round,
-                              verbose, save_log)
+                 l1_w=0, l1_v=0, l2_w=0, l2_v=0, l2_b=0):
+        TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class,
+                              batch_size, num_round, early_stop_round, verbose, save_log)
         self.init_actions = [('w', [input_spaces, num_class], 'normal', tf.float32),
                              ('v', [input_spaces, factor_order * num_class], 'normal', tf.float32),
                              ('b', [num_class], 'zero', tf.float32)],
@@ -306,15 +295,21 @@ class FactorizationMachine(TFClassifier):
         self.l2_b = l2_b
 
     def build_graph(self):
-        x_square = tf.SparseTensor(self.x.indices, tf.square(self.x.values), self.x.shape)
         w = self.vars['w']
         v = self.vars['v']
         b = self.vars['b']
-        self.y = tf.sparse_tensor_dense_matmul(self.x, w) + b
-        self.y += tf.reduce_sum(tf.reshape(
-            tf.square(tf.sparse_tensor_dense_matmul(self.x, v)) - \
-            tf.sparse_tensor_dense_matmul(x_square, tf.square(v)),
-            [-1, self.factor_order, self.get_num_class()]), reduction_indices=[1])
+        if self.get_input_types() == 'sparse':
+            x_square = tf.SparseTensor(self.x.indices, tf.square(self.x.values), self.x.shape)
+            self.y = tf.sparse_tensor_dense_matmul(self.x, w) + b
+            self.y += tf.reduce_sum(tf.reshape(
+                tf.square(tf.sparse_tensor_dense_matmul(self.x, v)) - \
+                tf.sparse_tensor_dense_matmul(x_square, tf.square(v)),
+                [-1, self.factor_order, self.get_num_class()]), reduction_indices=[1])
+        else:
+            self.y = tf.matmul(self.x, w) + b
+            self.y += tf.reduce_sum(
+                tf.reshape(tf.square(tf.matmul(self.x, v)) - tf.matmul(tf.square(self.x), tf.square(v)),
+                           [-1, self.factor_order, self.get_num_class()]), reduction_indices=[1])
         self.y_prob, self.loss = utils.get_loss(self.get_eval_metric(), self.y, self.y_true)
         self.loss += self.l1_w * utils.get_l1_loss(w) + self.l1_v * utils.get_l1_loss(v) + \
                      self.l2_w * tf.nn.l2_loss(w) + self.l2_v * tf.nn.l2_loss(v) + self.l2_b * tf.nn.l2_loss(b)
@@ -322,11 +317,11 @@ class FactorizationMachine(TFClassifier):
 
 
 class MultiLayerPerceptron(TFClassifier):
-    def __init__(self, name, eval_metric, input_spaces, num_class,
+    def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
                  batch_size=None, num_round=None, early_stop_round=None, verbose=True, save_log=True,
                  layer_sizes=None, layer_activates=None, layer_drops=None, layer_inits=None, init_path=None,
                  opt_algo=None, learning_rate=None):
-        TFClassifier.__init__(self, name, eval_metric, input_spaces, num_class, batch_size=batch_size,
+        TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size=batch_size,
                               num_round=num_round, early_stop_round=early_stop_round, verbose=verbose,
                               save_log=save_log)
         self.init_actions = []
@@ -343,7 +338,8 @@ class MultiLayerPerceptron(TFClassifier):
     def build_graph(self):
         w0 = self.vars['w0']
         b0 = self.vars['b0']
-        l = utils.activate(tf.sparse_tensor_dense_matmul(self.x, w0) + b0, self.layer_activates[0])
+        l = utils.embed_input_units(self.get_input_types(), self.x, w0, b0)
+        l = utils.activate(l, self.layer_activates[0])
         l = tf.nn.dropout(l, keep_prob=self.drops[0])
         for i in range(1, len(self.vars) / 2):
             wi = self.vars['w%d' % i]
@@ -356,11 +352,11 @@ class MultiLayerPerceptron(TFClassifier):
 
 
 class MultiplexNeuralNetwork(TFClassifier):
-    def __init__(self, name, eval_metric, input_spaces, num_class,
+    def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
                  batch_size=None, num_round=None, early_stop_round=None, verbose=True, save_log=True,
                  layer_sizes=None, layer_activates=None, layer_drops=None, layer_inits=None, init_path=None,
                  opt_algo=None, learning_rate=None):
-        TFClassifier.__init__(self, name, eval_metric, input_spaces, num_class, batch_size=batch_size,
+        TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size=batch_size,
                               num_round=num_round, early_stop_round=early_stop_round, verbose=verbose,
                               save_log=save_log)
         self.init_actions = []
@@ -387,10 +383,8 @@ class MultiplexNeuralNetwork(TFClassifier):
         num_input = len(self.get_input_spaces())
         w0 = [self.vars['w0_%d' % i] for i in range(num_input)]
         b0 = [self.vars['b0_%d' % i] for i in range(num_input)]
-        l = tf.nn.dropout(
-            utils.activate(
-                tf.concat(1, [tf.sparse_tensor_dense_matmul(self.x[i], w0[i]) + b0[i] for i in range(num_input)]),
-                self.layer_activates[0]), self.drops[0])
+        l = tf.concat(1, utils.embed_input_units(self.get_input_types(), self.x, w0, b0))
+        l = tf.nn.dropout(utils.activate(l, self.layer_activates[0]), self.drops[0])
         for i in range(1, len(self.vars) / 2 - num_input + 1):
             wi = self.vars['w%d' % i]
             bi = self.vars['b%d' % i]

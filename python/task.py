@@ -9,6 +9,8 @@ from model_impl import GBLinear, GBTree, MultiLayerPerceptron, MultiplexNeuralNe
 
 class Task:
     def __init__(self, dataset, booster, version,
+                 input_type=None,
+                 sub_input_types=None,
                  eval_metric='softmax_log_loss',
                  random_state=0,
                  num_class=12,
@@ -34,6 +36,13 @@ class Task:
         fea_tmp.load_meta()
         self.space = fea_tmp.get_space()
         self.rank = fea_tmp.get_rank()
+        self.input_type = input_type
+        self.sub_input_types = sub_input_types
+        if self.input_type is None:
+            if self.space == self.rank:
+                self.input_type = 'dense'
+            else:
+                self.input_type = 'sparse'
         self.size = fea_tmp.get_size()
         self.train_size = train_size
         self.valid_size = valid_size
@@ -43,6 +52,13 @@ class Task:
             self.sub_features = fea_tmp.get_sub_features()
             self.sub_spaces = fea_tmp.get_sub_spaces()
             self.sub_ranks = fea_tmp.get_sub_ranks()
+            if self.sub_input_types is None:
+                self.sub_input_types = []
+                for i in range(len(self.sub_features)):
+                    if self.sub_spaces[i] == self.sub_ranks[i]:
+                        self.sub_input_types.append('dense')
+                    else:
+                        self.sub_input_types.append('sparse')
         print 'feature space: %d, rank: %d, size: %d, num class: %d' % (
             self.space, self.rank, self.size, self.num_class)
 
@@ -57,10 +73,12 @@ class Task:
             return xgb.DMatrix(path)
         elif self.booster in {'mlp'}:
             data = utils.read_feature(open(path), batch_size, num_class)
-            return [utils.libsvm_2_csr(data[0], data[1], self.space), data[2]]
+            return [utils.libsvm_2_feature(data[0], data[1], self.space, self.input_type), data[2]]
         elif self.booster in {'mnn'}:
-            data = utils.read_feature(open(path), batch_size, num_class)
-            return [utils.libsvm_2_csr(data[0], data[1], self.sub_spaces), data[2]]
+            indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
+            split_indices, split_values = utils.split_feature(indices, values, self.sub_spaces)
+            data = utils.libsvm_2_feature(split_indices, split_indices, self.sub_spaces, self.sub_input_types)
+            return [data, labels]
 
     def tune(self, dtrain=None, dvalid=None, params=None, batch_size=None, num_round=None, early_stop_round=None,
              verbose=True, save_log=True, save_model=False, dtest=None, save_feature=False):
@@ -89,7 +107,7 @@ class Task:
                            **params)
         elif self.booster == 'mlp':
             start_time = time.time()
-            model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.num_class,
+            model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                          batch_size=batch_size,
                                          num_round=num_round,
                                          early_stop_round=early_stop_round,
@@ -100,7 +118,8 @@ class Task:
             print 'build graph', time.time() - start_time
         elif self.booster == 'mnn':
             start_time = time.time()
-            model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.num_class,
+            model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
+                                           self.num_class,
                                            batch_size=batch_size,
                                            num_round=num_round,
                                            early_stop_round=early_stop_round,
@@ -142,7 +161,7 @@ class Task:
                            **params)
         elif self.booster == 'mlp':
             start_time = time.time()
-            model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.num_class,
+            model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                          batch_size=batch_size,
                                          num_round=num_round,
                                          verbose=verbose,
@@ -151,7 +170,8 @@ class Task:
             print 'build graph', time.time() - start_time
         elif self.booster == 'mnn':
             start_time = time.time()
-            model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.num_class,
+            model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
+                                           self.num_class,
                                            batch_size=batch_size,
                                            num_round=num_round,
                                            verbose=verbose,
@@ -170,7 +190,7 @@ class Task:
             utils.make_submission(self.path_submission, test_pred)
 
     def predict_mlpmodel(self, data=None, params=None, batch_size=None):
-        model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.num_class,
+        model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                      batch_size=batch_size,
                                      **params)
         model.compile()
