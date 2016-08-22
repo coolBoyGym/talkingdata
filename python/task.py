@@ -1,8 +1,9 @@
 import time
+
 import xgboost as xgb
+
 import feature
 import utils
-import numpy as np
 from model_impl import GBLinear, GBTree, MultiLayerPerceptron, MultiplexNeuralNetwork
 
 
@@ -50,21 +51,28 @@ class Task:
             fout.write(log_str)
 
     def __load_data(self, path, batch_size=-1, num_class=None):
+        if num_class is None:
+            num_class = self.num_class
         if self.booster in {'gblinear', 'gbtree'}:
             return xgb.DMatrix(path)
-        elif self.booster in {'mlp', 'mnn'}:
-            if num_class is None:
-                num_class = self.num_class
-            return utils.read_feature(open(path), batch_size, num_class)
+        elif self.booster in {'mlp'}:
+            data = utils.read_feature(open(path), batch_size, num_class)
+            return [utils.libsvm_2_csr(data[0], data[1], self.space), data[2]]
+        elif self.booster in {'mnn'}:
+            data = utils.read_feature(open(path), batch_size, num_class)
+            return [utils.libsvm_2_csr(data[0], data[1], self.sub_spaces), data[2]]
 
     def tune(self, dtrain=None, dvalid=None, params=None, batch_size=None, num_round=None, early_stop_round=None,
              verbose=True, save_log=True, save_model=False, dtest=None, save_feature=False):
+        start_time = time.time()
         if dtrain is None:
             dtrain = self.__load_data(self.path_train_train)
         if dvalid is None:
             dvalid = self.__load_data(self.path_train_valid)
         if save_feature and dtest is None:
             dtest = self.__load_data(self.path_test)
+        print 'load data', time.time() - start_time
+
         if self.booster == 'gblinear':
             print 'params [batch_size, save_log] will not be used'
             model = GBLinear(self.tag, self.eval_metric, self.space, self.num_class,
@@ -80,6 +88,7 @@ class Task:
                            verbose=verbose,
                            **params)
         elif self.booster == 'mlp':
+            start_time = time.time()
             model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.num_class,
                                          batch_size=batch_size,
                                          num_round=num_round,
@@ -88,7 +97,9 @@ class Task:
                                          save_log=save_log,
                                          **params)
             model.compile()
+            print 'build graph', time.time() - start_time
         elif self.booster == 'mnn':
+            start_time = time.time()
             model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.num_class,
                                            batch_size=batch_size,
                                            num_round=num_round,
@@ -97,10 +108,11 @@ class Task:
                                            save_log=save_log,
                                            **params)
             model.compile()
+            print 'build graph', time.time() - start_time
 
         start_time = time.time()
         model.train(dtrain, dvalid)
-        print 'time elapsed: %f' % (time.time() - start_time)
+        print 'training time elapsed: %f' % (time.time() - start_time)
 
         if save_model:
             model.dump()
@@ -129,19 +141,24 @@ class Task:
                            verbose=verbose,
                            **params)
         elif self.booster == 'mlp':
+            start_time = time.time()
             model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.num_class,
                                          batch_size=batch_size,
                                          num_round=num_round,
                                          verbose=verbose,
                                          **params)
             model.compile()
+            print 'build graph', time.time() - start_time
         elif self.booster == 'mnn':
+            start_time = time.time()
             model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.num_class,
                                            batch_size=batch_size,
                                            num_round=num_round,
                                            verbose=verbose,
                                            **params)
             model.compile()
+            print 'build graph', time.time() - start_time
+
         start_time = time.time()
         model.train(dtrain)
         print 'time elapsed: %f' % (time.time() - start_time)

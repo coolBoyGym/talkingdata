@@ -191,15 +191,15 @@ def ensemble_model(train_data, valid_data, test_data, model_list):
     valid_indices, valid_values, valid_labels = valid_data
     test_indices, test_values, test_labels = test_data
 
-    train_csr = utils.libsvm_2_csr_matrix(train_indices, train_values)
+    train_csr = utils.libsvm_2_csr(train_indices, train_values)
     train_labels_groupid = utils.label_2_group_id(train_labels, NUM_CLASS)
     d_train = xgb.DMatrix(train_csr, label=train_labels_groupid)
 
-    valid_csr = utils.libsvm_2_csr_matrix(valid_indices, valid_values)
+    valid_csr = utils.libsvm_2_csr(valid_indices, valid_values)
     valid_labels_groupid = utils.label_2_group_id(valid_labels, NUM_CLASS)
     d_valid = xgb.DMatrix(valid_csr, label=valid_labels_groupid)
 
-    test_csr = utils.libsvm_2_csr_matrix(test_indices, test_values)
+    test_csr = utils.libsvm_2_csr(test_indices, test_values)
     d_test = xgb.DMatrix(test_csr, label=utils.label_2_group_id(test_labels, NUM_CLASS))
 
     features_for_ensemble = []
@@ -258,9 +258,9 @@ if __name__ == '__main__':
     valid_data = utils.read_feature(open(PATH_TRAIN_VALID), -1, NUM_CLASS)
     train_indices, train_values, train_labels = train_data
     valid_indices, valid_values, valid_labels = valid_data
-    train_csr = utils.libsvm_2_csr_matrix(train_indices, train_values)
+    train_csr = utils.libsvm_2_csr(train_indices, train_values)
     train_labels_groupid = utils.label_2_group_id(train_labels, NUM_CLASS)
-    valid_csr = utils.libsvm_2_csr_matrix(valid_indices, valid_values)
+    valid_csr = utils.libsvm_2_csr(valid_indices, valid_values)
     valid_labels_groupid = utils.label_2_group_id(valid_labels, NUM_CLASS)
 
     n_estimators = 200

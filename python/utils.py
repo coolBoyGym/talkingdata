@@ -2,7 +2,7 @@ import cPickle as pkl
 
 import numpy as np
 import tensorflow as tf
-from scipy.sparse import csr_matrix
+from scipy.sparse import coo_matrix
 
 import feature
 
@@ -13,7 +13,7 @@ def make_submission(path_submission, test_pred):
         fout.write('device_id,F23-,F24-26,F27-28,F29-32,F33-42,F43+,M22-,M23-26,M27-28,M29-31,M32-38,M39+\n')
         for i in range(len(test_device_id)):
             fout.write('%s,%s\n' % (test_device_id[i], ','.join(map(lambda d: str(d), test_pred[i]))))
-    print path_submission
+    print 'output submission file', path_submission
 
 
 def make_feature_model_output(name, pred_list, num_class, dump=True):
@@ -80,34 +80,103 @@ def group_id_2_label(group_ids, num_class):
     return labels
 
 
-def libsvm_2_csr(indices, values, spaces):
+def csr_slice(csr_mats, begin, size):
+    begin = min(begin, csr_mats.shape[0])
+    if size == -1:
+        return csr_mats[begin:]
+    end = min(begin + size, csr_mats.shape[0])
+    return csr_mats[begin:end]
+
+
+def csr_2_coo(csr_mats):
+    if not check_type(csr_mats, 'list'):
+        print 'csr not a list'
+        coo_mat = csr_mats.tocoo()
+        indices = np.transpose(np.vstack((coo_mat.row, coo_mat.col)))
+        values = coo_mat.data
+        shape = csr_mats.shape
+        return indices, values, shape
+    else:
+        print 'csr is a list'
+        indices = []
+        values = []
+        shapes = []
+        for i in range(len(csr_mats)):
+            indices_i, values_i, shape_i = csr_2_coo(csr_mats[i])
+            indices.append(indices_i)
+            values.append(values_i)
+            shapes.append(shape_i)
+        return indices, values, shapes
+
+
+def coo_2_csr(coo_indices, coo_values, coo_shapes):
+    if not check_type(coo_indices, 'list'):
+        coo_mat = coo_matrix((coo_values, (coo_indices[:, 0], coo_indices[:, 1])), shape=coo_shapes)
+        return coo_mat.tocsr()
+    else:
+        csr_mats = []
+        for i in range(len(coo_indices)):
+            csr_i = coo_2_csr(coo_indices[i], coo_values[i], coo_shapes[i])
+            csr_mats.append(csr_i)
+        return csr_mats
+
+
+def csr_slice_coo(csr_mats, spaces, begin, size):
     if check_type(spaces, 'int'):
-        csr_indices = []
-        csr_values = []
+        csr_slc = csr_slice(csr_mats, begin, size)
+        coo_slc = csr_slc.tocoo()
+        indices = np.transpose(np.vstack((coo_slc.row, coo_slc.col)))
+        values = coo_slc.data
+        shape = csr_slc.shape
+        return indices, values, shape
+    else:
+        indices = []
+        values = []
+        shapes = []
+        for i in range(len(spaces)):
+            indices_i, values_i, shape_i = csr_slice_coo(csr_mats[i], spaces[i], begin, size)
+            indices.append(indices_i)
+            values.append(values_i)
+            shapes.append(shape_i)
+        return indices, values, shapes
+
+
+def libsvm_2_csr(indices, values, spaces):
+    coo_indices, coo_values, coo_shapes = libsvm_2_coo(indices, values, spaces)
+    if check_type(spaces, 'int'):
+        coo_mat = coo_matrix((coo_values, (coo_indices[:, 0], coo_indices[:, 1])), shape=coo_shapes)
+        return coo_mat.tocsr()
+    else:
+        csr_mats = []
+        for i in range(len(coo_indices)):
+            coo_mat_i = coo_matrix((coo_values[i], (coo_indices[i][:, 0], coo_indices[i][:, 1])), shape=coo_shapes[i])
+            csr_mats.append(coo_mat_i.tocsr())
+        return csr_mats
+
+
+def libsvm_2_coo(indices, values, spaces):
+    if check_type(spaces, 'int'):
+        coo_indices = []
+        coo_values = []
         for i in range(len(indices)):
-            csr_indices.extend(map(lambda x: [i, x], indices[i]))
-            csr_values.extend(values[i])
+            coo_indices.extend(map(lambda x: [i, x], indices[i]))
+            coo_values.extend(values[i])
         csr_shape = [len(indices), spaces]
-        return np.array(csr_indices), np.array(csr_values), csr_shape
+        return np.array(coo_indices), np.array(coo_values), csr_shape
     else:
         indices, values = split_feature(indices, values, spaces)
-        csr_indices = []
-        csr_values = []
+        coo_indices = []
+        coo_values = []
         csr_shapes = []
         for i in range(len(indices)):
-            indices_i, values_i, shape_i = libsvm_2_csr(indices[i], values[i], spaces[i])
-            csr_indices.append(indices_i)
-            csr_values.append(values_i)
+            indices_i, values_i, shape_i = libsvm_2_coo(indices[i], values[i], spaces[i])
+            coo_indices.append(indices_i)
+            coo_values.append(values_i)
             csr_shapes.append(shape_i)
-        return csr_indices, csr_values, csr_shapes
+        return coo_indices, coo_values, csr_shapes
 
 
-def libsvm_2_csr_matrix(indices, values, spaces=None):
-    csr_indices, csr_values, csr_shape = libsvm_2_csr(indices, values, spaces)
-    return csr_matrix((csr_values, (csr_indices[:, 0], csr_indices[:, 1])), shape=csr_shape)
-
-
-def csr_matrix_2_libsvm(csr_mat):
+def csr_2_libsvm(csr_mat):
     indices = csr_mat.indices
     indptr = csr_mat.indptr
     values = csr_mat.data
@@ -119,11 +188,10 @@ def csr_matrix_2_libsvm(csr_mat):
     return np.array(libsvm_indices), np.array(libsvm_values)
 
 
-def csr_2_libsvm(csr_indices, csr_values, csr_shape, reorder=False):
-    data = np.hstack((csr_indices, np.reshape(csr_values, [-1, 1])))
+def coo_2_libsvm(coo_indices, coo_values, coo_shape, reorder=False):
+    data = np.hstack((coo_indices, np.reshape(coo_values, [-1, 1])))
     if reorder:
         data = sorted(data, key=lambda x: (x[0], x[1]))
-    print data
     indices = []
     values = []
     for i in range(len(data)):
@@ -137,94 +205,10 @@ def csr_2_libsvm(csr_indices, csr_values, csr_shape, reorder=False):
         elif len(indices) == r + 1:
             indices[r].append(c)
             values[r].append(v)
-    while len(indices) < csr_shape[0]:
+    while len(indices) < coo_shape[0]:
         indices.append([])
         values.append([])
     return np.array(indices), np.array(values)
-
-
-def csr_matrix_2_csr(csr_mat):
-    indices = csr_mat.indices
-    indptr = csr_mat.indptr
-    values = csr_mat.data
-    csr_indices = []
-    csr_values = []
-    for i in range(csr_mat.shape[0]):
-        for j in range(indptr[i], indptr[i + 1]):
-            csr_indices.append([i, indices[j]])
-            csr_values.append(values[j])
-    csr_indices = np.array(csr_indices)
-    csr_values = np.array(csr_values)
-    return csr_indices, csr_values, csr_mat.shape
-
-
-# def train_single_round(model, dtrain, batch_size):
-#     indices, values, labels = dtrain
-#     loss = []
-#     y = []
-#     y_prob = []
-#     input_spaces = model.get_input_spaces()
-#     drops = model.get_layer_drops()
-#     if batch_size == -1:
-#         indices, values, shape = libsvm_2_csr(indices, values, input_spaces)
-#         loss, y, y_prob = model.train_batch(indices, values, shape, labels)
-#     else:
-#         for i in range(len(indices) / batch_size + 1):
-#             batch_indices = indices[i * batch_size: (i + 1) * batch_size]
-#             batch_values = values[i * batch_size: (i + 1) * batch_size]
-#             batch_labels = labels[i * batch_size: (i + 1) * batch_size]
-#             batch_indices, batch_values, batch_shape = libsvm_2_csr(batch_indices, batch_values, input_spaces)
-#             batch_loss, batch_y, batch_y_prob = model.train_batch(batch_indices, batch_values, batch_shape,
-#                                                                   batch_labels, drops)
-#             loss.append(batch_loss)
-#             y.extend(batch_y)
-#             y_prob.extend(batch_y_prob)
-#     return np.array(loss), np.array(y), np.array(y_prob)
-
-
-# def predict(model, data, spaces, drops, batch_size):
-#     indices, values = data[:2]
-#     y = []
-#     y_prob = []
-#     if batch_size == -1:
-#         indices, values, shape = libsvm_2_csr(indices, values, spaces)
-#         y, y_prob = model.predict_batch(indices, values, shape)
-#     else:
-#         for i in range(len(indices) / batch_size + 1):
-#             batch_indices = indices[i * batch_size: (i + 1) * batch_size]
-#             batch_values = values[i * batch_size: (i + 1) * batch_size]
-#             batch_indices, batch_values, batch_shape = libsvm_2_csr(batch_indices, batch_values, spaces)
-#             batch_y, batch_y_prob = model.predict_batch(batch_indices, batch_values, batch_shape, drops)
-#             y.extend(batch_y)
-#             y_prob.extend(batch_y_prob)
-#     return np.array(y), np.array(y_prob)
-
-
-# def train(model, dtrain, dvalid, input_spaces, num_round, drops, batch_size, verbose, save_log, early_stop_round):
-#     train_indices, train_values, train_labels = dtrain
-#     valid_indices, valid_values, valid_labels = dvalid
-#     train_scores = []
-#     valid_scores = []
-#     for i in range(num_round):
-#         train_loss, train_y, train_y_prob = train_single_round(model, dtrain, input_spaces, drops, batch_size)
-#         valid_y, valid_y_prob = predict(model, dvalid[:2], input_spaces, [1] * len(drops), batch_size)
-#         train_score = log_loss(train_labels, train_y_prob)
-#         valid_score = log_loss(valid_labels, valid_y_prob)
-#         if verbose:
-#             print '[%d]\tloss: %f \ttrain_score: %f\tvalid_score: %f' % \
-#                   (i, train_loss.mean(), train_score, valid_score)
-#         if save_log:
-#             log_str = '%d\t%f\t%f\t%f\n' % (i, train_loss.mean(), train_score, valid_score)
-#             model.write_log(log_str)
-#         train_scores.append(train_score)
-#         valid_scores.append(valid_score)
-#         if check_early_stop(valid_scores, early_stop_round, 'no_decrease'):
-#             if verbose:
-#                 best_iteration = i + 1 - early_stop_round
-#                 print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
-#                     best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
-#             break
-#     return train_scores[-1], valid_scores[-1]
 
 
 def check_early_stop(valid_scores, early_stop_round, mode, early_stop_precision=0.0001):

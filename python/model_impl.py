@@ -165,77 +165,70 @@ class TFClassifier(Classifier):
             self.build_graph()
             tf.initialize_all_variables().run(session=self.__sess)
 
-    def __train_batch(self, indices, values, shapes, labels):
+    def __train_batch_coo(self, indices, values, shapes, labels):
         feed_dict = {self.y_true: labels, self.drops: self.layer_drops}
         if utils.check_type(self.get_input_spaces(), 'int'):
             feed_dict[self.x] = (indices, values, shapes)
         else:
             for i in range(len(self.x)):
                 feed_dict[self.x[i]] = (indices[i], values[i], shapes[i])
-        _, l, y, y_prob = self.__sess.run(fetches=[self.optimizer, self.loss, self.y, self.y_prob],
-                                          feed_dict=feed_dict)
-        return l, y, y_prob
+        _, l, y_prob = self.__sess.run(fetches=[self.optimizer, self.loss, self.y_prob], feed_dict=feed_dict)
+        return l, y_prob
 
-    def __train_round(self, dtrain):
-        indices, values, labels = dtrain
-        loss, y, y_prob = [], [], []
+    def __train_round_csr(self, dtrain):
+        csr_mats, labels = dtrain
         input_spaces = self.get_input_spaces()
         batch_size = self.batch_size
         if batch_size == -1:
-            indices, values, shape = utils.libsvm_2_csr(indices, values, input_spaces)
-            loss, y, y_prob = self.__train_batch(indices, values, shape, labels)
-        else:
-            for i in range(len(indices) / batch_size + 1):
-                indices_i = indices[i * batch_size: (i + 1) * batch_size]
-                values_i = values[i * batch_size: (i + 1) * batch_size]
-                labels_i = labels[i * batch_size: (i + 1) * batch_size]
-                indices_i, values_i, batch_shape = utils.libsvm_2_csr(indices_i, values_i, input_spaces)
-                batch_loss, batch_y, batch_y_prob = self.__train_batch(indices_i, values_i, batch_shape, labels_i)
-                loss.append(batch_loss)
-                y.extend(batch_y)
-                y_prob.extend(batch_y_prob)
-        return np.array(loss), np.array(y), np.array(y_prob)
+            indices, values, shapes = utils.csr_2_coo(csr_mats)
+            loss, y_prob = self.__train_batch_coo(indices, values, shapes, labels)
+            return loss, y_prob
+        loss = []
+        y_prob = []
+        for i in range(len(labels) / batch_size + 1):
+            indices_i, values_i, shapes_i = utils.csr_slice_coo(csr_mats, input_spaces, i * batch_size, batch_size)
+            labels_i = labels[i * batch_size: (i + 1) * batch_size]
+            batch_loss, batch_y_prob = self.__train_batch_coo(indices_i, values_i, shapes_i, labels_i)
+            loss.append(batch_loss)
+            y_prob.extend(batch_y_prob)
+        return np.array(loss), np.array(y_prob)
 
     def train(self, dtrain, dvalid=None):
-        train_indices, train_values, train_labels = dtrain
+        train_labels = dtrain[-1]
         train_scores = []
-        if dvalid is not None:
-            valid_indices, valid_values, valid_labels = dvalid
-            valid_scores = []
-        for i in range(self.num_round):
-            train_loss, train_y, train_y_prob = self.__train_round(dtrain)
-            train_score = log_loss(train_labels, train_y_prob)
-            if dvalid is not None:
-                valid_y_prob = self.predict(dvalid[:2])
-                valid_score = log_loss(valid_labels, valid_y_prob)
-            if self.verbose:
-                if dvalid is not None:
-                    print '[%d]\tloss: %f \ttrain_score: %f\tvalid_score: %f' % \
-                          (i, train_loss.mean(), train_score, valid_score)
-                else:
-                    print '[%d]\tloss: %f \ttrain_score: %f\t' % \
-                          (i, train_loss.mean(), train_score)
-            if self.save_log:
-                if dvalid is not None:
-                    log_str = '%d\t%f\t%f\t%f\n' % (i, train_loss.mean(), train_score, valid_score)
-                else:
-                    log_str = '%d\t%f\t%f\n' % (i, train_loss.mean(), train_score)
-                self.write_log(log_str)
-            train_scores.append(train_score)
-            if dvalid is not None:
-                valid_scores.append(valid_score)
-                if utils.check_early_stop(valid_scores, self.early_stop_round, 'no_decrease'):
-                    if self.verbose:
-                        best_iteration = i + 1 - self.early_stop_round
-                        print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
-                            best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
-                    break
-        if dvalid is not None:
-            print '[-1]\ttrain_score: %f\tvalid_score: %f' % (train_scores[-1], valid_scores[-1])
-            return train_scores[-1], valid_scores[-1]
-        else:
+        if dvalid is None:
+            for i in range(self.num_round):
+                train_loss, train_y_prob = self.__train_round_csr(dtrain)
+                train_score = log_loss(train_labels, train_y_prob)
+                if self.save_log:
+                    self.write_log('%d\t%f\t%f\n' % (i, train_loss.mean(), train_score))
+                if self.verbose:
+                    print '[%d]\tloss: %f\ttrain_score: %f\t' % (i, train_loss.mean(), train_score)
+                train_scores.append(train_score)
             print '[-1]\ttrain_score: %f' % train_scores[-1]
             return train_scores[-1]
+        valid_labels = dvalid[-1]
+        valid_scores = []
+        for i in range(self.num_round):
+            train_loss, train_y_prob = self.__train_round_csr(dtrain)
+            train_score = log_loss(train_labels, train_y_prob)
+            valid_y_prob = self.predict(dvalid)
+            valid_score = log_loss(valid_labels, valid_y_prob)
+            train_scores.append(train_score)
+            valid_scores.append(valid_score)
+            if self.save_log:
+                log_str = '%d\t%f\t%f\t%f\n' % (i, train_loss.mean(), train_score, valid_score)
+                self.write_log(log_str)
+            if self.verbose:
+                print '[%d]\tloss: %f \ttrain_score: %f\tvalid_score: %f' % \
+                      (i, train_loss.mean(), train_score, valid_score)
+            if utils.check_early_stop(valid_scores, self.early_stop_round, 'no_decrease'):
+                best_iteration = i + 1 - self.early_stop_round
+                print 'best iteration:\n[%d]\ttrain_score: %f\tvalid_score: %f' % (
+                    best_iteration, train_scores[best_iteration], valid_scores[best_iteration])
+                break
+        print '[-1]\ttrain_score: %f\tvalid_score: %f' % (train_scores[-1], valid_scores[-1])
+        return train_scores[-1], valid_scores[-1]
 
     def __predict_batch(self, indices, values, shapes):
         feed_dict = {self.drops: [1] * len(self.layer_drops)}
@@ -248,20 +241,22 @@ class TFClassifier(Classifier):
         return y_prob
 
     def predict(self, data):
-        indices, values = data[:2]
+        csr_mat = data[0]
         input_spaces = self.get_input_spaces()
-        y_prob = []
         batch_size = self.batch_size
         if batch_size == -1:
-            indices, values, shape = utils.libsvm_2_csr(indices, values, input_spaces)
-            y_prob = self.__predict_batch(indices, values, shape)
+            indices, values, shapes = utils.csr_2_coo(csr_mat)
+            y_prob = self.__predict_batch(indices, values, input_spaces)
+            return y_prob
+        y_prob = []
+        if utils.check_type(input_spaces, 'int'):
+            data_size = csr_mat.shape[0]
         else:
-            for i in range(len(indices) / batch_size + 1):
-                indices_i = indices[i * batch_size: (i + 1) * batch_size]
-                values_i = values[i * batch_size: (i + 1) * batch_size]
-                indices_i, values_i, shape_i = utils.libsvm_2_csr(indices_i, values_i, input_spaces)
-                y_prob_i = self.__predict_batch(indices_i, values_i, shape_i)
-                y_prob.extend(y_prob_i)
+            data_size = csr_mat[0].shape[0]
+        for i in range(data_size / batch_size + 1):
+            indices_i, values_i, shapes_i = utils.csr_slice_coo(csr_mat, input_spaces, i * batch_size, batch_size)
+            y_prob_i = self.__predict_batch(indices_i, values_i, shapes_i)
+            y_prob.extend(y_prob_i)
         return np.array(y_prob)
 
     def dump(self):
