@@ -520,3 +520,67 @@
                 learning_rate = 0.2
                 batch_size = 2000
                 num_round = 1000
+                
+## 16/8/23
+
+### xepa
+        
+        concat_6_mlp_107.submission
+            layer_sizes = [task.space, 100, task.num_class]
+            layer_activates = ['relu', None]
+            layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+            init_path = '../model/concat_6_mlp_100.bin'
+            layer_drops = [0.5, 1]
+            opt_algo = 'adam'
+            learning_rate = 0.0001
+            batch_size = -1
+            num_round = 180
+            score = 2.24192
+            
+        concat_6_mlp_108.submission
+            layer_sizes = [task.space, 100, task.num_class]
+            layer_activates = ['relu', None]
+            layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+            init_path = '../model/concat_6_mlp_100.bin'
+            layer_drops = [0.5, 1]
+            opt_algo = 'adam'
+            learning_rate = 0.0001
+            batch_size = -1
+            num_round = 200
+            score = 2.24151
+            
+        concat_6_mlp_109.submission
+            layer_sizes = [task.space, 100, task.num_class]
+            layer_activates = ['relu', None]
+            layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+            init_path = '../model/concat_6_mlp_100.bin'
+            layer_drops = [0.5, 1]
+            opt_algo = 'adam'
+            learning_rate = 0.0001
+            batch_size = -1
+            num_round = 220
+            score = 2.24117
+            
+        concat_6_mlp_110.submission
+            layer_sizes = [task.space, 100, task.num_class]
+            layer_activates = ['relu', None]
+            layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+            init_path = '../model/concat_6_mlp_100.bin'
+            layer_drops = [0.5, 1]
+            opt_algo = 'adam'
+            learning_rate = 0.0001
+            batch_size = -1
+            num_round = 250
+            score = 2.24100
+           
+        concat_6_mlp_110.submission
+            layer_sizes = [task.space, 100, task.num_class]
+            layer_activates = ['relu', None]
+            layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+            init_path = '../model/concat_6_mlp_100.bin'
+            layer_drops = [0.5, 1]
+            opt_algo = 'adam'
+            learning_rate = 0.0001
+            batch_size = -1
+            num_round = 300
+            score = 2.24122

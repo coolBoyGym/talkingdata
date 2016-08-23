@@ -155,7 +155,7 @@ class Task:
             utils.make_feature_model_output(self.tag, [train_pred, valid_pred, test_pred], self.num_class)
 
     def train(self, dtrain=None, dtest=None, params=None, batch_size=None, num_round=None, verbose=True,
-              save_model=False, save_submission=True):
+              save_log=True, save_model=False, save_submission=True):
         if dtrain is None:
             dtrain = self.load_data(self.path_train)
         if dtest is None:
@@ -178,6 +178,7 @@ class Task:
                                          batch_size=batch_size,
                                          num_round=num_round,
                                          verbose=verbose,
+                                         save_log=save_log,
                                          **params)
             model.compile()
             print 'build graph', time.time() - start_time
@@ -188,6 +189,7 @@ class Task:
                                            batch_size=batch_size,
                                            num_round=num_round,
                                            verbose=verbose,
+                                           save_log=save_log,
                                            **params)
             model.compile()
             print 'build graph', time.time() - start_time

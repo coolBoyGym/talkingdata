@@ -155,9 +155,9 @@ def plot_concat_score(path_logs, plot_train=True, plot_valid=True):
     for pl in path_logs:
         score = np.loadtxt(pl, delimiter='\t', usecols=[2, 3])
         if plot_train:
-            plt.plot(np.arange(len(score)) + start_point, score[:, 0], label=pl[-7] + '.train')
+            plt.plot(np.arange(len(score)) + start_point, score[:, 0], label=pl[-7:] + '.train')
         if plot_valid:
-            plt.plot(np.arange(len(score)) + start_point, score[:, 1], label=pl[-7] + '.valid')
+            plt.plot(np.arange(len(score)) + start_point, score[:, 1], label=pl[-7:] + '.valid')
         start_point += len(score)
     plt.legend()
     plt.show()
@@ -200,9 +200,9 @@ def draw_two_argument_picture(feature_name, booster_model):
 
 
 if __name__ == '__main__':
-    # path_log = '../model/concat_22_128_mlp_8.log'
-    # plot_train_valid_score(path_log)
+    path_log = '../model/concat_6_mlp_111.log'
+    plot_train_valid_score(path_log, train_col=2, valid_col=3)
     # plot_xgb_train_valid_score(path_log)
-    path_logs = ['../model/concat_22_128_mlp_%d.log' % i for i in [7, 21]]
-    plot_concat_score(path_logs)
+    # path_logs = ['../model/concat_6_mlp_%d.log' % i for i in [100, 106]]
+    # plot_concat_score(path_logs)
     # plot_multi_score(path_logs)

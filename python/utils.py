@@ -141,20 +141,6 @@ def csr_slice_coo(csr_mats, begin, size):
         return indices, values, shapes
 
 
-def csr_2_inputs(input_types, csr_mats):
-    if check_type(input_types, 'str'):
-        if input_types == 'sparse':
-            return csr_2_coo(csr_mats)
-        else:
-            return csr_mats.toarray()
-    else:
-        input_data = []
-        for i in range(len(input_types)):
-            input_data_i = csr_2_inputs(input_types[i], csr_mats[i])
-            input_data.append(input_data_i)
-        return input_data
-
-
 def feature_slice_inputs(input_types, csr_data, begin, size):
     if check_type(input_types, 'str'):
         if input_types == 'sparse':

@@ -13,7 +13,7 @@ class GBLinear(Classifier):
     def __init__(self, name, eval_metric, input_spaces, num_class,
                  num_round=10, early_stop_round=None, verbose=True,
                  gblinear_alpha=0, gblinear_lambda=0, random_state=0):
-        Classifier.__init__(self, name, eval_metric, input_spaces, num_class)
+        Classifier.__init__(self, name, eval_metric, input_spaces, None, num_class)
         self.params = {
             'booster': 'gblinear',
             'silent': 1,
@@ -65,7 +65,7 @@ class GBTree(Classifier):
     def __init__(self, name, eval_metric, input_spaces, num_class, num_round=10, early_stop_round=None, verbose=True,
                  eta=0.1, max_depth=3, subsample=0.7, colsample_bytree=0.7, gbtree_alpha=0, gbtree_lambda=0,
                  random_state=0):
-        Classifier.__init__(self, name, eval_metric, input_spaces, num_class)
+        Classifier.__init__(self, name, eval_metric, input_spaces, None, num_class)
         self.params = {
             "booster": 'gbtree',
             "silent": 1,
@@ -173,7 +173,7 @@ class TFClassifier(Classifier):
         batch_size = self.batch_size
         input_types = self.get_input_types()
         if batch_size == -1:
-            input_data = utils.csr_2_inputs(input_types, csr_mats)
+            input_data = utils.feature_slice_inputs(input_types, csr_mats, 0, batch_size)
             loss, y_prob = self.__train_batch(input_data, labels)
             return loss, y_prob
         loss = []
@@ -234,8 +234,8 @@ class TFClassifier(Classifier):
         input_types = self.get_input_types()
         batch_size = self.batch_size
         if batch_size == -1:
-            indices, values, shapes = utils.csr_2_inputs(input_types, csr_mat)
-            y_prob = self.__predict_batch(indices, values, input_spaces)
+            input_data = utils.feature_slice_inputs(input_types, csr_mat, 0, batch_size)
+            y_prob = self.__predict_batch(input_data)
             return y_prob
         y_prob = []
         if utils.check_type(input_spaces, 'int'):
