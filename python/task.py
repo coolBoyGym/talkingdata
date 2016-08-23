@@ -62,34 +62,47 @@ class Task:
         print 'feature space: %d, rank: %d, size: %d, num class: %d' % (
             self.space, self.rank, self.size, self.num_class)
 
+    def upgrade_version(self, offset=1, version=None):
+        if version is None:
+            self.version += offset
+        else:
+            self.version = version
+        self.tag = '%s_%s_%d' % (self.dataset, self.booster, self.version)
+        print 'upgrading task version', self.tag
+        self.path_log = '../model/' + self.tag + '.log'
+        self.path_bin = '../model/' + self.tag + '.bin'
+        self.path_dump = '../model/' + self.tag + '.dump'
+        self.path_submission = '../output/' + self.tag + '.submission'
+
     def __write_log(self, log_str):
         with open(self.path_log, 'a') as fout:
             fout.write(log_str)
 
-    def __load_data(self, path, batch_size=-1, num_class=None):
+    def load_data(self, path, batch_size=-1, num_class=None):
+        start_time = time.time()
         if num_class is None:
             num_class = self.num_class
         if self.booster in {'gblinear', 'gbtree'}:
-            return xgb.DMatrix(path)
+            data = xgb.DMatrix(path)
         elif self.booster in {'mlp'}:
-            data = utils.read_feature(open(path), batch_size, num_class)
-            return [utils.libsvm_2_feature(data[0], data[1], self.space, self.input_type), data[2]]
+            indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
+            data = [utils.libsvm_2_feature(indices, values, self.space, self.input_type), labels]
         elif self.booster in {'mnn'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             split_indices, split_values = utils.split_feature(indices, values, self.sub_spaces)
-            data = utils.libsvm_2_feature(split_indices, split_indices, self.sub_spaces, self.sub_input_types)
-            return [data, labels]
+            features = utils.libsvm_2_feature(split_indices, split_indices, self.sub_spaces, self.sub_input_types)
+            data = [features, labels]
+        print 'load data', path, time.time() - start_time
+        return data
 
     def tune(self, dtrain=None, dvalid=None, params=None, batch_size=None, num_round=None, early_stop_round=None,
              verbose=True, save_log=True, save_model=False, dtest=None, save_feature=False):
-        start_time = time.time()
         if dtrain is None:
-            dtrain = self.__load_data(self.path_train_train)
+            dtrain = self.load_data(self.path_train_train)
         if dvalid is None:
-            dvalid = self.__load_data(self.path_train_valid)
+            dvalid = self.load_data(self.path_train_valid)
         if save_feature and dtest is None:
-            dtest = self.__load_data(self.path_test)
-        print 'load data', time.time() - start_time
+            dtest = self.load_data(self.path_test)
 
         if self.booster == 'gblinear':
             print 'params [batch_size, save_log] will not be used'
@@ -144,9 +157,9 @@ class Task:
     def train(self, dtrain=None, dtest=None, params=None, batch_size=None, num_round=None, verbose=True,
               save_model=False, save_submission=True):
         if dtrain is None:
-            dtrain = self.__load_data(self.path_train)
+            dtrain = self.load_data(self.path_train)
         if dtest is None:
-            dtest = self.__load_data(self.path_test)
+            dtest = self.load_data(self.path_test)
         if self.booster == 'gblinear':
             print 'param [batch_size] will not be used'
             model = GBLinear(self.tag, self.eval_metric, self.space, self.num_class,

@@ -126,7 +126,7 @@ def wire3d_demo():
     plt.show()
 
 
-def plot_train_valid_score(path_log, x_col=None, train_col=None, valid_col=None):
+def plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3):
     if x_col is None:
         score = np.loadtxt(path_log, delimiter='\t', usecols=[train_col, valid_col])
         plt.plot(range(len(score)), score[:, 0], color=colors[2])
@@ -137,6 +137,30 @@ def plot_train_valid_score(path_log, x_col=None, train_col=None, valid_col=None)
         plt.plot(score[:, 0], score[:, 1], color=colors[2])
         plt.plot(score[:, 0], score[:, 2], color=colors[0])
         plt.show()
+
+
+def plot_multi_score(path_logs, plot_train=False, plot_valid=True):
+    for pl in path_logs:
+        score = np.loadtxt(pl, delimiter='\t', usecols=[2, 3])
+        if plot_train:
+            plt.plot(range(len(score)), score[:, 0], label=pl + '.train')
+        if plot_valid:
+            plt.plot(range(len(score)), score[:, 1], label=pl + '.valid')
+    plt.legend()
+    plt.show()
+
+
+def plot_concat_score(path_logs, plot_train=True, plot_valid=True):
+    start_point = 0
+    for pl in path_logs:
+        score = np.loadtxt(pl, delimiter='\t', usecols=[2, 3])
+        if plot_train:
+            plt.plot(np.arange(len(score)) + start_point, score[:, 0], label=pl[-7] + '.train')
+        if plot_valid:
+            plt.plot(np.arange(len(score)) + start_point, score[:, 1], label=pl[-7] + '.valid')
+        start_point += len(score)
+    plt.legend()
+    plt.show()
 
 
 def plot_xgb_train_valid_score(path_log):
@@ -176,9 +200,9 @@ def draw_two_argument_picture(feature_name, booster_model):
 
 
 if __name__ == '__main__':
-    path_log = '../model/concat_6_embedding_64_mlp_5.log'
-    # plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3)
-    # path_log = '../model/concat_1_factorization_machine_1.log'
-    # path_log = '../model/ensemble_1_gbtree_1.log'
-    plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3)
+    # path_log = '../model/concat_22_128_mlp_8.log'
+    # plot_train_valid_score(path_log)
     # plot_xgb_train_valid_score(path_log)
+    path_logs = ['../model/concat_22_128_mlp_%d.log' % i for i in [7, 21]]
+    plot_concat_score(path_logs)
+    # plot_multi_score(path_logs)
