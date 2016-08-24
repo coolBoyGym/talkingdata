@@ -150,7 +150,7 @@ class Task:
             model.dump()
         if save_feature:
             train_pred = model.predict(dtrain[0])
-            valid_pred = model.predict(dtest[0])
+            valid_pred = model.predict(dvalid[0])
             test_pred = model.predict(dtest[0])
             utils.make_feature_model_output(self.tag, [train_pred, valid_pred, test_pred], self.num_class)
 

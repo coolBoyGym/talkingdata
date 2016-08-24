@@ -2,9 +2,9 @@ import numpy as np
 
 from task import Task
 
-dataset = 'concat_21'
+dataset = 'concat_6'
 booster = 'mlp'
-version = 9
+version = 125
 
 task = Task(dataset, booster, version)
 if booster is 'gblinear':
@@ -36,18 +36,18 @@ elif booster == 'gbtree':
 elif booster == 'mlp':
     dtrain = task.load_data(task.path_train_train)
     dvalid = task.load_data(task.path_train_valid)
-    # dtest = task.load_data(task.path_test)
+    dtest = task.load_data(task.path_test)
 
     layer_sizes = [task.space, 100, task.num_class]
     layer_activates = ['relu', None]
-    layer_l2 = [0, 0]
-    layer_inits = [('normal', 'zero'), ('normal', 'zero')]
-    init_path = None
+    layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+    init_path = '../model/concat_6_mlp_100.bin'
     layer_drops = [0.5, 1]
-    opt_algo = 'gd'
-    learning_rate = 0.001
+    layer_l2 = [0, 0]
+    opt_algo = 'adam'
+    learning_rate = 0.0001
     batch_size = 1024
-    num_round = 2000
+    num_round = 500
     early_stop_round = 10
 
     params = {
@@ -61,14 +61,14 @@ elif booster == 'mlp':
         'learning_rate': learning_rate,
     }
 
-    for i, l1 in enumerate([60, 80, 100, 120]):
-        params['layer_sizes'][1] = l1
-        params['init_path'] = '../model/concat_21_mlp_%d' % (i + 5)
-        print params
-        task.tune(dtrain=dtrain, dvalid=dvalid, params=params, batch_size=batch_size, num_round=num_round,
-                  early_stop_round=early_stop_round, verbose=True, save_log=True, save_model=True, dtest=None,
-                  save_feature=False)
-        task.upgrade_version()
+    for learning_rate in [1e-5, 5e-5, 1e-4, 5e-4, 1e-3]:
+        for batch_size in [128, 512, 1024, 4096]:
+            params['learning_rate'] = learning_rate
+            print params
+            task.tune(dtrain=dtrain, dvalid=dvalid, params=params, batch_size=batch_size, num_round=num_round,
+                      early_stop_round=early_stop_round, verbose=True, save_log=True, save_model=True, dtest=dtest,
+                      save_feature=True)
+            task.upgrade_version()
         # task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_model=False,
         #            save_submission=True)
 elif booster == 'mnn':

@@ -203,8 +203,8 @@ if __name__ == '__main__':
     # path_log = '../model/concat_6_mlp_100.log'
     # plot_train_valid_score(path_log, train_col=2, valid_col=3)
     # plot_xgb_train_valid_score(path_log)
-    # r = range(201, 207)
+    # r = range(1)
     # r.extend(range(221, 229))
-    path_logs = ['../model/concat_21_mlp_%d.log' % i for i in range(1, 9)]
+    path_logs = ['../model/concat_6_mlp_%d.log' % i for i in range(115, 125)]
     plot_concat_score(path_logs)
     # plot_multi_score(path_logs)
