@@ -130,3 +130,8 @@ dict_device_event中数据的格式为： [(3164698, '2016-05-06 23:47:05', 0.0,
 
 注意:所有pkl文件中的device id 和app id 都是经过重新映射处理的 去除了没有在app_events中出现的app id 和没有在app_label中出现的label id
 
+
+2016.8.23 Tue
+
+训练停止时如果曲线末端呈现出抖动的状态 可以降低learning rate继续训练 但注意要逐步降低 不断优化 而不能一下子降到底
+
