@@ -881,11 +881,13 @@
     learning rate：lr越小，需要训练的轮数越多。对比5,9,10大概是lr取小一点会稍微好一点
     神经元个数 ：对比11,12。64一直以来比128（以及32）好点
     在用gd训练好后，用它的参数再取比较小lr用adam算法可以有一点点提升。
+    二层：
+    大概是加不上去了
 
 **ensemble_6**
 
     mlp
         (0.2, 64), batch_size=10000, drops=(0.5, 1)     {[154]	train_score: 2.117223	valid_score: 2.265209}      ensemble_6_mlp_1.bin
         (0.2, 64), batch_size=10000, drops=(0.5, 1)     {[150]	train_score: 2.120430	valid_score: 2.264654}
-        (0.2, 64), batch_size=-1   , drops=(0.5, 1)     {电脑瘫痪，大概数据稠密，内存爆了}
+        (0.2, 64), batch_size=-1   , drops=(0.5, 1)     {电脑瘫痪，大概数据稠密，内存爆了？？}
         (0.1, 64), batch_size=4096 , drops=(0.5, 1)     {[302]	train_score: 2.122921	valid_score: 2.266524}
