@@ -146,7 +146,10 @@ def feature_slice_inputs(input_types, csr_data, begin, size):
         if input_types == 'sparse':
             return csr_slice_coo(csr_data, begin, size)
         else:
-            return csr_data[begin:begin + size]
+            if size == -1:
+                return csr_data[begin:]
+            else:
+                return csr_data[begin:begin + size]
     else:
         input_data = []
         for i in range(len(input_types)):

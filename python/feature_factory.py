@@ -557,11 +557,11 @@ if __name__ == '__main__':
     #     plt.hist(sum_values, bins=1000)
     #     plt.show()
     #
-    concat_feature('concat_6_ooee_64',
-                                    [fea_phone_brand,
-                                    fea_device_model,
-                                    fea_installed_app_embedding,
-                                    fea_installed_app_label_embedding])
+    # concat_feature('concat_6_ooee_64',
+    #                                 [fea_phone_brand,
+    #                                 fea_device_model,
+    #                                 fea_installed_app_embedding,
+    #                                 fea_installed_app_label_embedding])
 
-    split_dataset('concat_6_ooee_64')
+    split_dataset('concat_7')
 

@@ -318,7 +318,8 @@ class FactorizationMachine(TFClassifier):
 class MultiLayerPerceptron(TFClassifier):
     def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
                  batch_size=None, num_round=None, early_stop_round=None, verbose=True, save_log=True,
-                 layer_sizes=None, layer_activates=None, layer_drops=None, layer_inits=None, init_path=None,
+                 layer_sizes=None, layer_activates=None, layer_drops=None, layer_l2=None, layer_inits=None,
+                 init_path=None,
                  opt_algo=None, learning_rate=None):
         TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size=batch_size,
                               num_round=num_round, early_stop_round=early_stop_round, verbose=verbose,
@@ -329,8 +330,10 @@ class MultiLayerPerceptron(TFClassifier):
             self.init_actions.append(('b%d' % i, [layer_sizes[i + 1]], layer_inits[i][1], tf.float32))
         self.layer_inits = layer_inits
         self.init_path = init_path
+        self.layer_sizes = layer_sizes
         self.layer_activates = layer_activates
         self.layer_drops = layer_drops
+        self.layer_l2 = layer_l2
         self.opt_algo = opt_algo
         self.learning_rate = learning_rate
 
@@ -340,21 +343,26 @@ class MultiLayerPerceptron(TFClassifier):
         l = utils.embed_input_units(self.get_input_types(), self.x, w0, b0)
         l = utils.activate(l, self.layer_activates[0])
         l = tf.nn.dropout(l, keep_prob=self.drops[0])
-        for i in range(1, len(self.vars) / 2):
+        for i in range(1, len(self.layer_sizes) - 1):
             wi = self.vars['w%d' % i]
             bi = self.vars['b%d' % i]
             l = utils.activate(tf.matmul(l, wi) + bi, self.layer_activates[i])
             l = tf.nn.dropout(l, keep_prob=self.drops[i])
         self.y = l
         self.y_prob, self.loss = utils.get_loss(self.get_eval_metric(), l, self.y_true)
+        if self.layer_l2 is not None:
+            for i in range(len(self.layer_sizes) - 1):
+                wi = self.vars['w%d' % i]
+                bi = self.vars['b%d' % i]
+                self.loss += self.layer_l2[i] * (tf.nn.l2_loss(wi) + tf.nn.l2_loss(bi))
         self.optimizer = utils.get_optimizer(self.opt_algo, self.learning_rate, self.loss)
 
 
 class MultiplexNeuralNetwork(TFClassifier):
     def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
                  batch_size=None, num_round=None, early_stop_round=None, verbose=True, save_log=True,
-                 layer_sizes=None, layer_activates=None, layer_drops=None, layer_inits=None, init_path=None,
-                 opt_algo=None, learning_rate=None):
+                 layer_sizes=None, layer_activates=None, layer_drops=None, layer_l2=None, layer_inits=None,
+                 init_path=None, opt_algo=None, learning_rate=None):
         TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size=batch_size,
                               num_round=num_round, early_stop_round=early_stop_round, verbose=verbose,
                               save_log=save_log)
@@ -371,10 +379,12 @@ class MultiplexNeuralNetwork(TFClassifier):
             layer_output = layer_sizes[i + 1]
             self.init_actions.append(('w%d' % i, [layer_input, layer_output], layer_inits[i][0], tf.float32))
             self.init_actions.append(('b%d' % i, [layer_output], layer_inits[i][1], tf.float32))
+        self.layer_sizes = layer_sizes
         self.layer_inits = layer_inits
         self.init_path = init_path
         self.layer_activates = layer_activates
         self.layer_drops = layer_drops
+        self.layer_l2 = layer_l2
         self.opt_algo = opt_algo
         self.learning_rate = learning_rate
 
@@ -384,10 +394,17 @@ class MultiplexNeuralNetwork(TFClassifier):
         b0 = [self.vars['b0_%d' % i] for i in range(num_input)]
         l = tf.concat(1, utils.embed_input_units(self.get_input_types(), self.x, w0, b0))
         l = tf.nn.dropout(utils.activate(l, self.layer_activates[0]), self.drops[0])
-        for i in range(1, len(self.vars) / 2 - num_input + 1):
+        for i in range(1, len(self.layer_sizes) - 1):
             wi = self.vars['w%d' % i]
             bi = self.vars['b%d' % i]
             l = tf.nn.dropout(utils.activate(tf.matmul(l, wi) + bi, self.layer_activates[i]), keep_prob=self.drops[i])
+        if self.layer_sizes is not None:
+            for i in range(num_input):
+                l += self.layer_l2[0] * (w0[i] + b0[i])
+            for i in range(1, len(self.layer_sizes) - 1):
+                wi = self.vars['w%d' % i]
+                bi = self.vars['b%d' % i]
+                l += self.layer_l2[i] * (wi + bi)
         self.y = l
         self.y_prob, self.loss = utils.get_loss(self.get_eval_metric(), l, self.y_true)
         self.optimizer = utils.get_optimizer(self.opt_algo, self.learning_rate, self.loss)

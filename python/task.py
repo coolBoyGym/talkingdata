@@ -90,7 +90,7 @@ class Task:
         elif self.booster in {'mnn'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             split_indices, split_values = utils.split_feature(indices, values, self.sub_spaces)
-            features = utils.libsvm_2_feature(split_indices, split_indices, self.sub_spaces, self.sub_input_types)
+            features = utils.libsvm_2_feature(split_indices, split_values, self.sub_spaces, self.sub_input_types)
             data = [features, labels]
         print 'load data', path, time.time() - start_time
         return data
