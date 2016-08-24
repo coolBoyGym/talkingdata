@@ -101,6 +101,8 @@
     concat_22_64, [fea_phone_brand,fea_device_model,fea_installed_app_w2v_64,fea_installed_app_label_w2v_64]
     
     concat_22_128, [fea_phone_brand,fea_device_model,fea_installed_app_w2v_128,fea_installed_app_label_w2v_128]
+    
+    concat_6_ooee_64,[fea_phone_brand,fea_device_model,fea_installed_app_embedding,fea_installed_app_label_embedding])
 
 ### ensemble features
 
@@ -672,6 +674,7 @@
                 [66]	train_score: 2.166202	valid_score: 2.257378
 
      
+### gym
             concat_15_mlp_2:
                 layer_sizes = [task.space, 128, task.num_class]
                 learning_rate = 0.2
@@ -751,8 +754,31 @@
 
 ### gym
             
+            concat_15_mlp_5:
+                layer_sizes = [task.space, 100, task.num_class]
+                init_path = '../model/concat_15_mlp_2.bin'
+                opt_algo = 'adam'
+                learning_rate = 0.0001
+                early_stop_round = 5
+                best iteration:
+                [8]	loss: 2.161406 	train_score: 2.161406	valid_score: 2.255653
+                [-1]	train_score: 2.161382	valid_score: 2.255770
+                
+            concat_15_mlp_6:
+                 new task.py
+                 same as concat_15_mlp_5
+                 
+            concat_16_mlp_3:
+                layer_sizes = [task.space, 100, task.num_class]
+                init_path = '../model/concat_16_mlp_2.bin'
+                opt_algo = 'adam'
+                learning_rate = 0.0001
+                early_stop_round = 3
+                best iteration:
+                [31]	loss: 2.166870 	train_score: 2.166886	valid_score: 2.256226
+                [-1]	train_score: 2.165275	valid_score: 2.256271
+                
             
-                             
             
                 
                 

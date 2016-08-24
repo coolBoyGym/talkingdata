@@ -1,11 +1,12 @@
 from task import Task
 import feature
 
-dataset = 'concat_15'
+dataset = 'ensemble_5'
 booster = 'mlp'
 version = 2
 
 task = Task(dataset, booster, version)
+
 if booster is 'gblinear':
     params = {
         'gblinear_alpha': 0,
@@ -61,11 +62,13 @@ elif booster == 'gbtree':
 elif booster == 'mlp':
     layer_sizes = [task.space, 100, task.num_class]
     layer_activates = ['relu', None]
-    layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
-    # layer_inits = [('normal', 'zero'), ('normal', 'zero')]
-    init_path = '../model/concat_15_mlp_1.bin'
-    # init_path = None
+    # layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+    layer_inits = [('normal', 'zero'), ('normal', 'zero')]
+    # init_path = '../model/concat_10_mlp_1.bin'
+    init_path = None
     layer_drops = [0.5, 1]
+    # opt_algo = 'adam'
+    # learning_rate = 0.00001
     opt_algo = 'adam'
     learning_rate = 0.001
     params = {
@@ -77,8 +80,8 @@ elif booster == 'mlp':
         'opt_algo': opt_algo,
         'learning_rate': learning_rate,
     }
-    num_round = 1000
-    early_stop_round = 5
+    num_round = 2000
+    early_stop_round = 10
     batch_size = -1
     # for learning_rate in [0.1, 0.01, 0.001, 0.0001]:
     # for batch_size in [1000]:

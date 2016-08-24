@@ -211,6 +211,15 @@ fea_concat_5_gbtree_1 = feature.multi_feature(name='concat_5_gbtree_1', dtype='f
 fea_concat_5_norm_gblinear_1 = feature.multi_feature(name='concat_5_norm_gblinear_1', dtype='f')
 fea_concat_5_norm_gbtree_1 = feature.multi_feature(name='concat_5_norm_gbtree_1', dtype='f')
 fea_concat_6_gbtree_1 = feature.multi_feature(name='concat_6_gbtree_1', dtype='f')
+fea_concat_6_embedding_64_mlp_for_ensemble = feature.multi_feature(name='concat_6_embedding_64_mlp_for_ensemble', dtype='f')
+fea_concat_6_mlp_136 = feature.multi_feature(name='concat_6_mlp_136', dtype='f')
+fea_concat_6_mlp_for_ensemble = feature.multi_feature(name='concat_6_mlp_for_ensemble', dtype='f')
+fea_concat_6_tfidf_gbtree_1 = feature.multi_feature(name='concat_6_tfidf_gbtree_1', dtype='f')
+fea_concat_7_norm_for_ensemble = feature.multi_feature(name='concat_7_norm_for_ensemble', dtype='f')
+fea_concat_15_mlp_6 = feature.multi_feature(name='concat_15_mlp_6', dtype='f')
+fea_concat_16_mlp_3 = feature.multi_feature(name='concat_16_mlp_3', dtype='f')
+fea_concat_20_mlp_for_ensemble = feature.multi_feature(name='concat_20_mlp_for_ensemble', dtype='f')
+fea_concat_21_mlp_for_ensemble = feature.multi_feature(name='concat_21_mlp_for_ensemble', dtype='f')
 
 
 def make_feature():
@@ -556,12 +565,54 @@ if __name__ == '__main__':
     #     print sum_values
     #     plt.hist(sum_values, bins=1000)
     #     plt.show()
-    #
-    # concat_feature('concat_6_ooee_64',
-    #                                 [fea_phone_brand,
-    #                                 fea_device_model,
-    #                                 fea_installed_app_embedding,
-    #                                 fea_installed_app_label_embedding])
 
-    split_dataset('concat_16')
+    # split_dataset('ensemble_5')
+    # concat_feature('ensemble_5', [fea_concat_1_gblinear_1,
+    #                               fea_concat_1_gbtree_1,
+    #                               fea_concat_2_norm_gblinear_1,
+    #                               fea_concat_2_norm_gbtree_1,
+    #                               fea_concat_3_norm_gblinear_1,
+    #                               fea_concat_3_norm_gbtree_1,
+    #                               fea_concat_4_gblinear_1,
+    #                               fea_concat_4_gbtree_1,
+    #                               fea_concat_4_norm_gblinear_1,
+    #                               fea_concat_4_norm_gbtree_1,
+    #                               fea_concat_5_norm_gblinear_1,
+    #                               fea_concat_5_norm_gbtree_1,
+    #                               fea_concat_6_embedding_64_mlp_for_ensemble,
+    #                               fea_concat_6_gbtree_1,
+    #                               fea_concat_6_mlp_136,
+    #                               fea_concat_6_mlp_for_ensemble,
+    #                               fea_concat_6_tfidf_gbtree_1,
+    #                               fea_concat_7_norm_for_ensemble,
+    #                               fea_concat_15_mlp_6,
+    #                               fea_concat_16_mlp_3,
+    #                               fea_concat_20_mlp_for_ensemble,
+    #                               fea_concat_21_mlp_for_ensemble])
 
+    # concat_feature('ensemble_6', [fea_concat_1_gblinear_1,
+    #                               fea_concat_1_gbtree_1,
+    #                               fea_concat_2_norm_gblinear_1,
+    #                               fea_concat_2_norm_gbtree_1,
+    #                               fea_concat_3_norm_gblinear_1,
+    #                               fea_concat_3_norm_gbtree_1,
+    #                               fea_concat_4_gblinear_1,
+    #                               fea_concat_4_gbtree_1,
+    #                               fea_concat_4_norm_gblinear_1,
+    #                               fea_concat_4_norm_gbtree_1,
+    #                               fea_concat_5_norm_gblinear_1,
+    #                               fea_concat_5_norm_gbtree_1,
+    #                               fea_concat_6_embedding_64_mlp_for_ensemble,
+    #                               fea_concat_6_gbtree_1,
+    #                               fea_concat_6_mlp_136,
+    #                               fea_concat_6_mlp_for_ensemble,
+    #                               fea_concat_6_tfidf_gbtree_1,
+    #                               fea_concat_7_norm_for_ensemble,
+    #                               fea_concat_15_mlp_6,
+    #                               fea_concat_16_mlp_3,
+    #                               fea_concat_20_mlp_for_ensemble,
+    #                               fea_concat_21_mlp_for_ensemble,
+    #                               fea_phone_brand,
+    #                               fea_device_model,
+    #                               fea_installed_app,
+    #                               fea_installed_app_label])
