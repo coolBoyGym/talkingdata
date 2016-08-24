@@ -1,3 +1,4 @@
+
 # Features
 
 ### feature_name, feature_type, spaces, rank
@@ -793,3 +794,98 @@
         concat_6_mlp_141
             470
             score = 2.24003
+            
+---
+            
+### rocky
+
+**embedding**
+
+    phone_brand:
+        (0.2, 64)       {[2121]	train_score: 2.402465	valid_score: 2.402623}      phone_brand_multi_layer_perceptron_1.bin
+        (0.2, 128)      {[1825]	train_score: 2.401376	valid_score: 2.402689}      phone_brand_mlp_3.bin
+        (0.2, 32)       {[1846]	train_score: 2.403960	valid_score: 2.403217}      phone_brand_multi_layer_perceptron_2
+    device_model:
+        (0.2, 64)       {[2652]	train_score: 2.369331	valid_score: 2.389789}      device_model_multi_layer_perceptron_1.bin
+        (0.2, 32)       {[2891]	train_score: 2.374589	valid_score: 2.389791}
+        (0.2, 128)      {[2288]	train_score: 2.368377	valid_score: 2.390303}
+
+    phone_brand:
+        gbtree      [113]	train-mlogloss:2.396648	eval-mlogloss:2.402918
+    phone_brand_embedding_32
+        gbtree      [51]	train-mlogloss:2.394280	eval-mlogloss:2.402758
+    phone_brand_embedding_64
+        gbtree      [49]	train-mlogloss:2.393891	eval-mlogloss:2.4027
+    phone_brand_embedding_128
+        gbtree      [52]	train-mlogloss:2.393246	eval-mlogloss:2.403260
+
+    installed_app:
+        mlp (0.2, 64)       [657]	train_score: 2.247402	valid_score: 2.287982      installed_app_mlp_1.bin
+        embedding from this model   installed_app_embedding_1
+    installed_app_label
+        mlp (0.2, 64)       [687]	train_score: 2.308083	valid_score: 2.320131       installed_app_label_mlp_1.bin
+        embedding from this model   installed_app_label_embedding_1
+
+**concat_6_embedding_64**
+
+    mlp (0.2, 64)       [296]	train_score: 2.210399	valid_score: 2.264480       concat_6_embedding_64_mlp_1.bin
+                                submission score=2.25093
+    mlp bypass (0.1, 64, 64)        [287]	train_score: 2.202804	valid_score: 2.261038
+    mlp bypass (0.1, 64, 128)       [292]	train_score: 2.202365	valid_score: 2.260960   concat_6_embedding_64_mlp_3.bin
+    mlp bypass (0.1, 128, 64)       [271]	train_score: 2.203536	valid_score: 2.261078
+    mlp bypass (0.1, 128, 128)      [320]	train_score: 2.202656	valid_score: 2.261202
+    based on concat_6_embedding_64_mlp_3.bin
+    layer_sizes = [task.space, 64, 64, 128,  task.num_class]
+    layer_inits = [('res:w0', 'res:b0'), ('res:pass', 'zero'), ('res:w1', 'res:b1'), ('res:w2', 'res:b2')]
+    [0]	train_score: 2.213178	valid_score: 2.261509
+    layer_sizes = [task.space, 64, 128, 128,  task.num_class]
+    layer_inits = [('res:w0', 'res:b0'), ('res:pass', 'zero'), ('res:w1', 'res:b1'), ('res:w2', 'res:b2')]
+    [0]	train_score: 2.215293	valid_score: 2.261441
+    layer_sizes = [task.space, 64, 128, 128,  task.num_class]
+    layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1'), ('res:pass', 'zero'), ('res:w2', 'res:b2')]
+    [0]	train_score: 2.213601	valid_score: 2.261232
+
+
+    mlp (0.2, 128)      [232]	train_score: 2.206101	valid_score: 2.264820       concat_6_embedding_64_mlp_5.bin
+    mlp bypass (0.1, 128, 128)      [251]	train_score: 2.195242	valid_score: 2.262748
+
+    mlp (0.2, 32)       [329]	train_score: 2.225020	valid_score: 2.265452
+
+**concat_6_ooee_64**
+
+    mlp (0.2, 64)       [392]	train_score: 2.212981	valid_score: 2.267150
+
+**cocnat_21**
+
+    mlp{gd}
+    1    (0.2, 64), batch_size=-1   , drops=(0.5, 1)     {[3076]train_score: 2.207119	valid_score: 2.258043}
+    2    (0.2, 64), batch_size=10000, drops=(0.5, 1)     {[557]	train_score: 2.201392	valid_score: 2.257924}
+    3    (0.2, 64), batch_size=10000, drops=(0.75,1)     {[441]	train_score: 2.198582	valid_score: 2.260310}
+    4    (0.2, 64), batch_size=10000, drops=(0.25,1)     {[659]	train_score: 2.226501	valid_score: 2.260723}
+    5    (0.2, 64), batch_size=1000 , drops=(0.5, 1)     {[56]	train_score: 2.207921	valid_score: 2.260046}
+    6    (0.2, 64), batch_size=5000 , drops=(0.5, 1)     {[265]	train_score: 2.207076	valid_score: 2.258683}
+    7    (0.2, 64), batch_size=15000, drops=(0.5, 1)     {[786]	train_score: 2.204690	valid_score: 2.259189}
+    8    (0.2, 64), batch_size=20000, drops=(0.5, 1)     {[1074]train_score: 2.204936	valid_score: 2.258583}
+    9    (0.1, 64), batch_size=1000 , drops=(0.5, 1)     {[118]	train_score: 2.195672	valid_score: 2.258665}
+    10   (0.05,64), batch_size=1000 , drops=(0.5, 1)     {[203]	train_score: 2.206909	valid_score: 2.258858}
+    11   (0.1, 64), batch_size=10000, drops=(0.5, 1)     {[1077]train_score: 2.200618	valid_score: 2.257873}      concat_21_mlp_1.bin
+    12   (0.1,128), batch_size=10000, drops=(0.5, 1)     {[939]	train_score: 2.199193	valid_score: 2.258999}
+    mlp{adam}
+        (1e-4,64), batch_size=-1   , drops=(0.5, 1)     {[71]	train_score: 2.173218	valid_score: 2.256882}      submission score: 2.24364
+
+    一层：
+    曲线大概已经对应不上了。单从结果来看。
+    batch_size：bs越大，步长越小，需要训练的轮数越多，对收敛结果的影响不规则，不同bs造成的影响差距感觉更来源于参数初始化时候的不确定性，
+                理由为在参数（0.2， 64， 10000）条件下，多次训练有时也无法达到2.2579+ ， 对比1,2,5,6,7,8. 2中结果最好，1次之
+    drop out  :drops取个中间值感觉较好，对比2,3,4分别取值为0.5,0.25,0.75 其中取值0.5时效果较好，不同取值差距较大。
+    learning rate：lr越小，需要训练的轮数越多。对比5,9,10大概是lr取小一点会稍微好一点
+    神经元个数 ：对比11,12。64一直以来比128（以及32）好点
+    在用gd训练好后，用它的参数再取比较小lr用adam算法可以有一点点提升。
+
+**ensemble_6**
+
+    mlp
+        (0.2, 64), batch_size=10000, drops=(0.5, 1)     {[154]	train_score: 2.117223	valid_score: 2.265209}      ensemble_6_mlp_1.bin
+        (0.2, 64), batch_size=10000, drops=(0.5, 1)     {[150]	train_score: 2.120430	valid_score: 2.264654}
+        (0.2, 64), batch_size=-1   , drops=(0.5, 1)     {电脑瘫痪，大概数据稠密，内存爆了}
+        (0.1, 64), batch_size=4096 , drops=(0.5, 1)     {[302]	train_score: 2.122921	valid_score: 2.266524}
