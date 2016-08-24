@@ -502,23 +502,106 @@
 
 ### gym
             concat_22_128_mlp_1:
-                learning_rate = 0.2
-                batch_size = 10000
-                num_round = 500
-            
-            concat_22_128_mlp_2:
-                learning_rate = 0.4
-                batch_size = 10000
-                num_round = 500
-                
-            concat_22_128_mlp_3:
+                layer_sizes = [task.space, 64, task.num_class]
                 learning_rate = 0.2
                 batch_size = 1000
                 num_round = 500
                 
-            concat_22_128_mlp_4:
+            concat_22_128_mlp_2:
+                layer_sizes = [task.space, 64, 64, task.num_class]
+                layer_activates = ['relu', 'relu', None]
+                layer_inits = [('res:w0', 'res:b0'), ('res:pass', 'zero'), ('res:w1', 'res:b1')]
+                init_path = '../model/concat_22_128_mlp_1.bin'
+                layer_drops = [0.5, 0.75, 1]
+                opt_algo = 'gd'
+                learning_rate = 0.1
+                num_round = 1000
+                early_stop_round = 30
+                
+            concat_22_128_mlp_5:
+                layer_sizes = [task.space, 64, task.num_class]
+                learning_rate = 0.1
+                batch_size = 128 256 512 1024 
+                num_round = 1000
+                
+            concat_22_128_mlp_6:
+                layer_sizes = [task.space, 64, task.num_class]
                 learning_rate = 0.2
-                batch_size = 2000
+                batch_size = [32*2**p for p in range(7)]
+            
+            concat_15_mlp_1:
+                learning_rate = 0.2
+                num_round = 1000
+                batch_size = [32*2**p for p in range(7)]
+            
+            concat_15_mlp_2:
+                learning_rate = 0.1
+                num_round = 1000
+                batch_size = [32*2**p for p in range(10)]
+            
+
+## 2016/8/23 Tue
+
+### gym
+            concat_6_mnn_1:
+                layer_sizes = [task.sub_spaces, [64, 64, 128, 64], task.num_class]
+                layer_activates = ['relu', None]
+                layer_inits = [('normal', 'zero'), ('normal', 'zero')]
+                init_path = None
+                layer_drops = [0.5, 1]
+                opt_algo = 'gd'
+                learning_rate = 0.1
+                num_round = 1000
+                early_stop_round = 20
+                for batch_size in [1024, 2048, 4096, 8192, 64, 128, 256, 512]
+                
+            concat_6_mnn_2:
+                layer_sizes = [task.sub_spaces, [64, 64, 128, 64], task.num_class]
+                layer_activates = ['relu', None]
+                layer_inits = [('normal', 'zero'), ('normal', 'zero')]
+                init_path = None
+                layer_drops = [0.5, 1]
+                opt_algo = 'adam'
+                num_round = 1000
+                early_stop_round = 20
+                batch_size = 1024
+                for learning_rate in [0.1, 0.01, 0.001, 0.0001]
+             
+            
+            版本3,4基于1 
+            concat_7_norm_mlp_1:
+                layer_sizes = [task.space, 100, task.num_class]
+                opt_algo = 'gd'
+                learning_rate = 0.2
+                num_round = 1000
+                early_stop_round = 30
+                batch_size = 10000
+                [90]	train_score: 2.206810	valid_score: 2.259412
+            
+            concat_7_norm_mlp_2:
+                layer_sizes = [task.space, 100, task.num_class]
+                opt_algo = 'gd'
+                learning_rate = 0.2
+                num_round = 1000
+                early_stop_round = 10
+                batch_size = 1000
+                [49]	train_score: 2.208927	valid_score: 2.259177
+            
+            concat_7_norm_mlp_2继续训练的结果没有提高
+            
+            concat_7_norm_mlp_3:
+                learning_rate = 0.0001
+                layer_drops = [0.5, 0.75, 1]
+                layer_sizes = [task.space, 128, 256, task.num_class]
+                [3]	train_score: 2.203337	valid_score: 2.257690
+          
+            concat_7_norm_mlp_5:
+                layer_sizes = [task.space, 128, task.num_class]
+                layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+                init_path = '../model/concat_7_norm_mlp_4.bin'
+                layer_drops = [0.5, 1]
+                opt_algo = 'adam'
+                learning_rate = 0.00001
                 num_round = 1000
                 
 ## 16/8/23
@@ -584,3 +667,100 @@
             batch_size = -1
             num_round = 300
             score = 2.24122
+                early_stop_round = 5
+                batch_size = 20000
+                [66]	train_score: 2.166202	valid_score: 2.257378
+
+     
+            concat_15_mlp_2:
+                layer_sizes = [task.space, 128, task.num_class]
+                learning_rate = 0.2
+                batch_size = 1000
+                early_stop_round = 5
+                [49]	train_score: 2.200459	valid_score: 2.259897
+                
+            concat_15_mlp_3:
+                layer_sizes = [task.space, 128, 256, task.num_class]
+                init_path = '../model/concat_15_mlp_2.bin'
+                layer_drops = [0.5, 0.5, 1]
+                opt_algo = 'adam'
+                learning_rate = 0.0001
+                early_stop_round = 3
+                batch_size = 1000
+                [2]	train_score: 2.226319	valid_score: 2.257795
+                
+            concat_15_mlp_4:
+                layer_sizes = [task.space, 128, task.num_class]
+                layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+                init_path = '../model/concat_15_mlp_2.bin'
+                layer_drops = [0.5, 1]
+                opt_algo = 'adam'
+                learning_rate = 0.0001
+                early_stop_round = 3
+                batch_size = 1000
+                [5]	train_score: 2.178618	valid_score: 2.256920
+                
+            concat_15_mlp_5:
+                layer_sizes = [task.space, 128, task.num_class]
+                layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+                init_path = '../model/concat_15_mlp_4.bin'
+                layer_drops = [0.5, 1]
+                opt_algo = 'adam'
+                learning_rate = 0.00001
+                early_stop_round = 3
+                batch_size = 20000
+                [7]	train_score: 2.166192	valid_score: 2.256692
+                
+            
+            concat_16_mlp_2:
+                layer_sizes = [task.space, 128, task.num_class]
+                learning_rate = 0.2
+                batch_size = 10000
+                early_stop_round = 10
+                [445]	train_score: 2.204272	valid_score: 2.259139
+                
+            concat_16_mlp_3:
+                layer_sizes = [task.space, 128, task.num_class]
+                init_path = '../model/concat_16_mlp_2.bin'
+                opt_algo = 'adam'
+                learning_rate = 0.0001
+                batch_size = 10000
+                early_stop_round = 10
+                [34]	train_score: 2.154118	valid_score: 2.256728
+                
+            concat_16_mlp_5:
+                layer_sizes = [task.space, 256, task.num_class]
+                init_path = '../model/concat_16_mlp_4.bin'
+                opt_algo = 'adam'
+                learning_rate = 0.00001
+                batch_size = 10000
+                early_stop_round = 10
+                [4]	train_score: 2.154436	valid_score: 2.256839
+
+            
+            concat_15_mlp_1:
+                layer_sizes = [task.space, 100, task.num_class]
+                opt_algo = 'gd'
+                learning_rate = 0.2
+                batch_size = 10000
+                [450]	train_score: 2.210901	valid_score: 2.258963
+                [-1]	train_score: 2.208840	valid_score: 2.258979
+
+                
+## 2016/8/24 Wen
+
+### gym
+            
+            
+                             
+            
+                
+                
+                
+                
+                
+                
+                
+               
+                
+          

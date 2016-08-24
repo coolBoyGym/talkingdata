@@ -123,4 +123,4 @@ elif booster == 'embedding':
         'learning_rate': learning_rate,
     }
     task = Task(dataset, booster, version, eval_metric='relu_mse', num_class=num_class)
-    task.predict_mlpmodel(data, params=params, batch_size=batch_size )
+    task.predict_mlpmodel(data, params=params, batch_size=batch_size)
