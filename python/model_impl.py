@@ -234,7 +234,7 @@ class TFClassifier(Classifier):
         input_types = self.get_input_types()
         batch_size = self.batch_size
         if batch_size == -1:
-            input_data = utils.csr_2_inputs(input_types, csr_mat)
+            input_data = utils.feature_slice_inputs(input_types, csr_mat, 0, batch_size)
             y_prob = self.__predict_batch(input_data)
             return y_prob
         y_prob = []
