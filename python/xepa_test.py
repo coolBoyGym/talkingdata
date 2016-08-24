@@ -4,7 +4,7 @@ from task import Task
 
 dataset = 'concat_6'
 booster = 'mlp'
-version = 125
+version = 141
 
 task = Task(dataset, booster, version)
 if booster is 'gblinear':
@@ -34,9 +34,9 @@ elif booster == 'gbtree':
               dtest=None, save_feature=False)
     # task.train(params=params, num_round=num_round, verbose=True, save_model=False, save_submission=False)
 elif booster == 'mlp':
-    dtrain = task.load_data(task.path_train_train)
-    dvalid = task.load_data(task.path_train_valid)
-    dtest = task.load_data(task.path_test)
+    # dtrain = task.load_data(task.path_train_train)
+    # dvalid = task.load_data(task.path_train_valid)
+    # dtest = task.load_data(task.path_test)
 
     layer_sizes = [task.space, 100, task.num_class]
     layer_activates = ['relu', None]
@@ -47,7 +47,7 @@ elif booster == 'mlp':
     opt_algo = 'adam'
     learning_rate = 0.0001
     batch_size = 1024
-    num_round = 500
+    num_round = 470
     early_stop_round = 10
 
     params = {
@@ -61,16 +61,16 @@ elif booster == 'mlp':
         'learning_rate': learning_rate,
     }
 
-    for learning_rate in [1e-5, 5e-5, 1e-4, 5e-4, 1e-3]:
-        for batch_size in [128, 512, 1024, 4096]:
+    for learning_rate in [1e-5]:
+        for batch_size in [4000]:
             params['learning_rate'] = learning_rate
             print params
-            task.tune(dtrain=dtrain, dvalid=dvalid, params=params, batch_size=batch_size, num_round=num_round,
-                      early_stop_round=early_stop_round, verbose=True, save_log=True, save_model=True, dtest=dtest,
-                      save_feature=True)
-            task.upgrade_version()
-        # task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_model=False,
-        #            save_submission=True)
+            # task.tune(dtrain=dtrain, dvalid=dvalid, params=params, batch_size=batch_size, num_round=num_round,
+            #           early_stop_round=early_stop_round, verbose=True, save_log=True, save_model=True, dtest=dtest,
+            #           save_feature=True)
+            # task.upgrade_version()
+            task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_model=False,
+                       save_submission=True)
 elif booster == 'mnn':
     layer_sizes = [task.sub_spaces, None, task.num_class]
     layer_activates = ['relu', None]

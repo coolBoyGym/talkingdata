@@ -261,8 +261,12 @@ def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval
                 print 'BadParam: init method', init_method, 'shape', var_shape, load_var_map[init_method].shape
         elif 'res' in init_method:
             res_method = init_method.split(':')[1]
-            if res_method in load_var_map:
-                var_load = load_var_map[res_method]
+            if res_method != 'pass':
+                if res_method in load_var_map:
+                    load_var_name = res_method
+                else:
+                    load_var_name = var_name
+                var_load = load_var_map[load_var_name]
                 var_extend = np.zeros(var_shape, dtype=np.float32)
                 if len(var_load.shape) == 2:
                     var_extend[:var_load.shape[0], :var_load.shape[1]] += var_load

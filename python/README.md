@@ -675,118 +675,121 @@
 
      
 ### gym
-            concat_15_mlp_2:
-                layer_sizes = [task.space, 128, task.num_class]
-                learning_rate = 0.2
-                batch_size = 1000
-                early_stop_round = 5
-                [49]	train_score: 2.200459	valid_score: 2.259897
+        concat_15_mlp_2:
+            layer_sizes = [task.space, 128, task.num_class]
+            learning_rate = 0.2
+            batch_size = 1000
+            early_stop_round = 5
+            [49]	train_score: 2.200459	valid_score: 2.259897
+            
+        concat_15_mlp_3:
+            layer_sizes = [task.space, 128, 256, task.num_class]
+            init_path = '../model/concat_15_mlp_2.bin'
+            layer_drops = [0.5, 0.5, 1]
+            opt_algo = 'adam'
+            learning_rate = 0.0001
+            early_stop_round = 3
+            batch_size = 1000
+            [2]	train_score: 2.226319	valid_score: 2.257795
                 
-            concat_15_mlp_3:
-                layer_sizes = [task.space, 128, 256, task.num_class]
-                init_path = '../model/concat_15_mlp_2.bin'
-                layer_drops = [0.5, 0.5, 1]
-                opt_algo = 'adam'
-                learning_rate = 0.0001
-                early_stop_round = 3
-                batch_size = 1000
-                [2]	train_score: 2.226319	valid_score: 2.257795
+        concat_15_mlp_4:
+            layer_sizes = [task.space, 128, task.num_class]
+            layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+            init_path = '../model/concat_15_mlp_2.bin'
+            layer_drops = [0.5, 1]
+            opt_algo = 'adam'
+            learning_rate = 0.0001
+            early_stop_round = 3
+            batch_size = 1000
+            [5]	train_score: 2.178618	valid_score: 2.256920
                 
-            concat_15_mlp_4:
-                layer_sizes = [task.space, 128, task.num_class]
-                layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
-                init_path = '../model/concat_15_mlp_2.bin'
-                layer_drops = [0.5, 1]
-                opt_algo = 'adam'
-                learning_rate = 0.0001
-                early_stop_round = 3
-                batch_size = 1000
-                [5]	train_score: 2.178618	valid_score: 2.256920
-                
-            concat_15_mlp_5:
-                layer_sizes = [task.space, 128, task.num_class]
-                layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
-                init_path = '../model/concat_15_mlp_4.bin'
-                layer_drops = [0.5, 1]
-                opt_algo = 'adam'
-                learning_rate = 0.00001
-                early_stop_round = 3
-                batch_size = 20000
-                [7]	train_score: 2.166192	valid_score: 2.256692
+        concat_15_mlp_5:
+            layer_sizes = [task.space, 128, task.num_class]
+            layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+            init_path = '../model/concat_15_mlp_4.bin'
+            layer_drops = [0.5, 1]
+            opt_algo = 'adam'
+            learning_rate = 0.00001
+            early_stop_round = 3
+            batch_size = 20000
+            [7]	train_score: 2.166192	valid_score: 2.256692
                 
             
-            concat_16_mlp_2:
-                layer_sizes = [task.space, 128, task.num_class]
-                learning_rate = 0.2
-                batch_size = 10000
-                early_stop_round = 10
-                [445]	train_score: 2.204272	valid_score: 2.259139
+        concat_16_mlp_2:
+            layer_sizes = [task.space, 128, task.num_class]
+            learning_rate = 0.2
+            batch_size = 10000
+            early_stop_round = 10
+            [445]	train_score: 2.204272	valid_score: 2.259139
                 
-            concat_16_mlp_3:
-                layer_sizes = [task.space, 128, task.num_class]
-                init_path = '../model/concat_16_mlp_2.bin'
-                opt_algo = 'adam'
-                learning_rate = 0.0001
-                batch_size = 10000
-                early_stop_round = 10
-                [34]	train_score: 2.154118	valid_score: 2.256728
+        concat_16_mlp_3:
+            layer_sizes = [task.space, 128, task.num_class]
+            init_path = '../model/concat_16_mlp_2.bin'
+            opt_algo = 'adam'
+            learning_rate = 0.0001
+            batch_size = 10000
+            early_stop_round = 10
+            [34]	train_score: 2.154118	valid_score: 2.256728
                 
-            concat_16_mlp_5:
-                layer_sizes = [task.space, 256, task.num_class]
-                init_path = '../model/concat_16_mlp_4.bin'
-                opt_algo = 'adam'
-                learning_rate = 0.00001
-                batch_size = 10000
-                early_stop_round = 10
-                [4]	train_score: 2.154436	valid_score: 2.256839
+        concat_16_mlp_5:
+            layer_sizes = [task.space, 256, task.num_class]
+            init_path = '../model/concat_16_mlp_4.bin'
+            opt_algo = 'adam'
+            learning_rate = 0.00001
+            batch_size = 10000
+            early_stop_round = 10
+            [4]	train_score: 2.154436	valid_score: 2.256839
 
             
-            concat_15_mlp_1:
-                layer_sizes = [task.space, 100, task.num_class]
-                opt_algo = 'gd'
-                learning_rate = 0.2
-                batch_size = 10000
-                [450]	train_score: 2.210901	valid_score: 2.258963
-                [-1]	train_score: 2.208840	valid_score: 2.258979
+        concat_15_mlp_1:
+            layer_sizes = [task.space, 100, task.num_class]
+            opt_algo = 'gd'
+            learning_rate = 0.2
+            batch_size = 10000
+            [450]	train_score: 2.210901	valid_score: 2.258963
+            [-1]	train_score: 2.208840	valid_score: 2.258979
 
                 
 ## 2016/8/24 Wen
 
 ### gym
-            
-            concat_15_mlp_5:
-                layer_sizes = [task.space, 100, task.num_class]
-                init_path = '../model/concat_15_mlp_2.bin'
-                opt_algo = 'adam'
-                learning_rate = 0.0001
-                early_stop_round = 5
-                best iteration:
-                [8]	loss: 2.161406 	train_score: 2.161406	valid_score: 2.255653
-                [-1]	train_score: 2.161382	valid_score: 2.255770
+        concat_15_mlp_5:
+            layer_sizes = [task.space, 100, task.num_class]
+            init_path = '../model/concat_15_mlp_2.bin'
+            opt_algo = 'adam'
+            learning_rate = 0.0001
+            early_stop_round = 5
+            best iteration:
+            [8]	loss: 2.161406 	train_score: 2.161406	valid_score: 2.255653
+            [-1]	train_score: 2.161382	valid_score: 2.255770
                 
-            concat_15_mlp_6:
-                 new task.py
-                 same as concat_15_mlp_5
+        concat_15_mlp_6:
+            new task.py
+            same as concat_15_mlp_5
                  
-            concat_16_mlp_3:
-                layer_sizes = [task.space, 100, task.num_class]
-                init_path = '../model/concat_16_mlp_2.bin'
-                opt_algo = 'adam'
-                learning_rate = 0.0001
-                early_stop_round = 3
-                best iteration:
-                [31]	loss: 2.166870 	train_score: 2.166886	valid_score: 2.256226
-                [-1]	train_score: 2.165275	valid_score: 2.256271
+        concat_16_mlp_3:
+            layer_sizes = [task.space, 100, task.num_class]
+            init_path = '../model/concat_16_mlp_2.bin'
+            opt_algo = 'adam'
+            learning_rate = 0.0001
+            early_stop_round = 3
+            best iteration:
+            [31]	loss: 2.166870 	train_score: 2.166886	valid_score: 2.256226
+            [-1]	train_score: 2.165275	valid_score: 2.256271
                 
+### xepa
+        concat_6_mlp_138
+            400
+            score = 2.24015
             
+        concat_6_mlp_139
+            420
+            score = 2.24001
             
-                
-                
-                
-                
-                
-                
-                
-               
-                
-          
+        concat_6_mlp_140
+            450
+            score = 2.24002
+            
+        concat_6_mlp_141
+            470
+            score = 2.24003
