@@ -220,6 +220,7 @@ fea_concat_15_mlp_6 = feature.multi_feature(name='concat_15_mlp_6', dtype='f')
 fea_concat_16_mlp_3 = feature.multi_feature(name='concat_16_mlp_3', dtype='f')
 fea_concat_20_mlp_for_ensemble = feature.multi_feature(name='concat_20_mlp_for_ensemble', dtype='f')
 fea_concat_21_mlp_for_ensemble = feature.multi_feature(name='concat_21_mlp_for_ensemble', dtype='f')
+fea_ensemble_5 = feature.multi_feature(name='ensemble_5', dtype='f')
 
 
 def make_feature():

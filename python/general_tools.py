@@ -213,6 +213,6 @@ if __name__ == '__main__':
     # plot_xgb_train_valid_score(path_log)
     # r = range(1)
     # r.extend(range(221, 229))
-    path_logs = ['ensemble_7_mnn_%d' % i for i in [16, 18]]
+    path_logs = ['../model/ensemble_6_mnn_%d.log' % i for i in [2]]
     plot_concat_score(path_logs)
     # plot_multi_score(path_logs)

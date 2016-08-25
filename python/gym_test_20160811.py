@@ -1,8 +1,9 @@
 from task import Task
 import feature
+import numpy as np
 
-dataset = 'ensemble_5'
-booster = 'mlp'
+dataset = 'ensemble_6'
+booster = 'mnn'
 version = 2
 
 task = Task(dataset, booster, version)
@@ -59,16 +60,81 @@ elif booster == 'gbtree':
     #           verbose=True, save_log=True, save_model=True, dtest=None, save_feature=False)
     # task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_model=False,
     #            save_submission=False)
+# elif booster == 'mlp':
+#     layer_sizes = [task.space, 100, task.num_class]
+#     layer_activates = ['relu', None]
+#     layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+#     layer_inits = [('normal', 'zero'), ('normal', 'zero')]
+    # init_path = '../model/ensemble_5_mlp_3.bin'
+    # init_path = None
+    # layer_drops = [0.5, 0.9]
+    # opt_algo = 'adam'
+    # learning_rate = 0.00001
+    # opt_algo = 'gd'
+    # learning_rate = 0.15
+    # params = {
+    #     'layer_sizes': layer_sizes,
+    #     'layer_activates': layer_activates,
+    #     'layer_drops': layer_drops,
+    #     'layer_inits': layer_inits,
+    #     'init_path': init_path,
+    #     'opt_algo': opt_algo,
+    #     'learning_rate': learning_rate,
+    # }
+    # num_round = 2000
+    # early_stop_round = 5
+    # batch_size = -1
+    # for learning_rate in [0.1, 0.01, 0.001, 0.0001]:
+    # for batch_size in [1000]:
+    # task.tune(params=params, batch_size=batch_size, num_round=num_round, early_stop_round=early_stop_round,
+    #           verbose=True, save_log=True, save_model=True, dtest=None, save_feature=False)
+    # task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_model=False,
+    #            save_submission=False)
+
 elif booster == 'mlp':
+    dtrain = task.load_data(task.path_train_train)
+    dvalid = task.load_data(task.path_train_valid)
+    dtest = task.load_data(task.path_test)
+
     layer_sizes = [task.space, 100, task.num_class]
     layer_activates = ['relu', None]
     # layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+    # init_path = '../model/ensemble_7_mlp_1.bin'
     layer_inits = [('normal', 'zero'), ('normal', 'zero')]
-    # init_path = '../model/concat_10_mlp_1.bin'
     init_path = None
     layer_drops = [0.5, 1]
-    # opt_algo = 'adam'
-    # learning_rate = 0.00001
+    layer_l2 = [0, 0]
+    opt_algo = 'adam'
+    learning_rate = 0.001
+    batch_size = 1000
+    num_round = 1000
+    early_stop_round = 5
+
+    params = {
+        'layer_sizes': layer_sizes,
+        'layer_activates': layer_activates,
+        'layer_drops': layer_drops,
+        'layer_l2': layer_l2,
+        'layer_inits': layer_inits,
+        'init_path': init_path,
+        'opt_algo': opt_algo,
+        'learning_rate': learning_rate,
+    }
+
+    task.tune(dtrain=dtrain, dvalid=dvalid, params=params, batch_size=batch_size, num_round=num_round,
+              early_stop_round=early_stop_round, verbose=True, save_log=True, save_model=True, dtest=dtest,
+              save_feature=False)
+    # task.upgrade_version
+    #  task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_model=False
+    #            save_submission=True)
+
+elif booster == 'mnn':
+    layer_sizes = [task.sub_spaces, map(int, np.log(task.sub_spaces) * 4), task.num_class]
+    # print 'task.sub_space =', task.sub_spaces
+    layer_activates = ['relu', None]
+    layer_inits = [('tnormal', 'zero'), ('tnormal', 'zero')]
+    init_path = None
+    layer_drops = [0.8, 1]
     opt_algo = 'adam'
     learning_rate = 0.001
     params = {
@@ -80,37 +146,9 @@ elif booster == 'mlp':
         'opt_algo': opt_algo,
         'learning_rate': learning_rate,
     }
-    num_round = 2000
-    early_stop_round = 10
-    batch_size = -1
-    # for learning_rate in [0.1, 0.01, 0.001, 0.0001]:
-    # for batch_size in [1000]:
-    task.tune(params=params, batch_size=batch_size, num_round=num_round, early_stop_round=early_stop_round,
-              verbose=True, save_log=True, save_model=True, dtest=None, save_feature=False)
-    # task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_model=False,
-    #            save_submission=False)
-
-elif booster == 'mnn':
-    layer_sizes = [task.sub_spaces, [64, 64, 256, 64], task.num_class]
-    # print 'task.sub_space =', task.sub_spaces
-    layer_activates = ['relu', None]
-    layer_inits = [('normal', 'zero'), ('normal', 'zero')]
-    init_path = None
-    layer_drops = [0.5, 1]
-    opt_algo = 'gd'
-    learning_rate = 0.1
-    params = {
-        'layer_sizes': layer_sizes,
-        'layer_activates': layer_activates,
-        'layer_drops': layer_drops,
-        'layer_inits': layer_inits,
-        'init_path': init_path,
-        'opt_algo': opt_algo,
-        'learning_rate': learning_rate,
-    }
     batch_size = 1024
     num_round = 1000
-    early_stop_round = 50
+    early_stop_round = 10
     dtrain = task.load_data(task.path_train_train)
     dvalid = task.load_data(task.path_train_valid)
     for batch_size in [1024]:

@@ -1,4 +1,3 @@
-
 # Features
 
 ### feature_name, feature_type, spaces, rank
@@ -114,7 +113,23 @@
     ensemble_3: [concat_1_gbtree_1, concat_1_gblinear_1, concat_6]
 
     ensemble_4, [fea_concat_1_gbtree_1,fea_concat_1_gblinear_1,fea_concat_2_gbtree_1,fea_concat_2_gblinear_1,fea_concat_2_norm_gbtree_1,fea_concat_2_norm_gblinear_1,fea_concat_3_gbtree_1,fea_concat_3_gblinear_1,fea_concat_3_norm_gbtree_1,fea_concat_3_norm_gblinear_1,fea_concat_4_gbtree_1,fea_concat_4_gblinear_1,fea_concat_4_norm_gbtree_1,fea_concat_4_norm_gblinear_1,fea_concat_5_gbtree_1,fea_concat_5_gblinear_1,# fea_concat_5_norm_gbtree_1,# fea_concat_5_norm_gblinear_1,fea_concat_6_gbtree_1,fea_concat_6])
-
+    
+    ensemble_5, [fea_concat_1_gblinear_1,fea_concat_1_gbtree_1,
+                    fea_concat_2_norm_gblinear_1,fea_concat_2_norm_gbtree_1,
+                    fea_concat_3_norm_gblinear_1,fea_concat_3_norm_gbtree_1,
+                    fea_concat_4_gblinear_1,fea_concat_4_gbtree_1,fea_concat_4_norm_gblinear_1,fea_concat_4_norm_gbtree_1,
+                    fea_concat_5_norm_gblinear_1,fea_concat_5_norm_gbtree_1,
+                    fea_concat_6_embedding_64_mlp_for_ensemble,fea_concat_6_gbtree_1,fea_concat_6_mlp_136,fea_concat_6_mlp_for_ensemble,fea_concat_6_tfidf_gbtree_1,
+                    fea_concat_7_norm_for_ensemble,
+                    fea_concat_15_mlp_6,
+                    fea_concat_16_mlp_3,
+                    fea_concat_20_mlp_for_ensemble,
+                    fea_concat_21_mlp_for_ensemble]
+                    
+    ensemble_6, [fea_ensemble_5,fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label]
+    
+    ensemble_7, [fea_ensemble_5,fea_concat_6]
+    
 # Models
 
 ### GBLinear
@@ -891,3 +906,6 @@
         (0.2, 64), batch_size=10000, drops=(0.5, 1)     {[150]	train_score: 2.120430	valid_score: 2.264654}
         (0.2, 64), batch_size=-1   , drops=(0.5, 1)     {电脑瘫痪，大概数据稠密，内存爆了？？}
         (0.1, 64), batch_size=4096 , drops=(0.5, 1)     {[302]	train_score: 2.122921	valid_score: 2.266524}
+        
+
+## 2016/8/25 Thu
