@@ -1,8 +1,8 @@
 from task import Task
 import feature
-dataset = 'concat_6_embedding_64'
+dataset = 'ensemble_6'
 booster = 'mlp'
-version = 5
+version = 2
 
 task = Task(dataset, booster, version)
 if booster is 'gblinear':
@@ -32,13 +32,38 @@ elif booster == 'gbtree':
               dtest=None, save_feature=False)
     # task.train(params=params, num_round=num_round, verbose=True, save_model=False, save_submission=False)
 elif booster == 'mlp':
-    # layer_sizes = [task.space, 64, task.num_class]
-    # layer_activates = ['relu', None]
-    # layer_inits = [('normal', 'zero'), ('normal', 'zero')]
-    # init_path = None
-    # layer_drops = [0.5, 1]
-    # opt_algo = 'gd'
-    # learning_rate = 0.2
+    layer_sizes = [task.space, 100, task.num_class]
+    layer_activates = ['relu', None]
+    # layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+    layer_inits = [('tnormal', 'zero'), ('tnormal', 'zero')]
+    # init_path = '../model/concat_6_mlp_100.bin'
+    init_path = None
+    layer_drops = [0.8, 1]
+    layer_l2 = [0.001, 0.001]
+    opt_algo = 'adam'
+    learning_rate = 0.0001
+    batch_size = 10000
+    num_round = 2000
+    early_stop_round = 20
+
+    params = {
+        'layer_sizes': layer_sizes,
+        'layer_activates': layer_activates,
+        'layer_drops': layer_drops,
+        'layer_l2': layer_l2,
+        'layer_inits': layer_inits,
+        'init_path': init_path,
+        'opt_algo': opt_algo,
+        'learning_rate': learning_rate,
+    }
+    #
+    # layer_sizes = [task.space, 64, 128, task.num_class]
+    # layer_activates = ['relu', 'relu', None]
+    # layer_inits = [('res:w0', 'res:b0'), ('res:pass', 'zero'), ('res:w1', 'res:b1')]
+    # init_path = '../model/ensemble_6_mlp_1.bin'
+    # layer_drops = [0.5, 0.75, 1]
+    # opt_algo = 'adam'
+    # learning_rate = 0.0001
     # params = {
     #     'layer_sizes': layer_sizes,
     #     'layer_activates': layer_activates,
@@ -48,26 +73,6 @@ elif booster == 'mlp':
     #     'opt_algo': opt_algo,
     #     'learning_rate': learning_rate,
     # }
-
-    layer_sizes = [task.space, 128, 128, task.num_class]
-    layer_activates = ['relu', 'relu', None]
-    layer_inits = [('res:w0', 'res:b0'), ('res:pass', 'zero'), ('res:w1', 'res:b1')]
-    init_path = '../model/concat_6_embedding_64_mlp_1.bin'
-    layer_drops = [0.5, 0.75, 1]
-    opt_algo = 'gd'
-    learning_rate = 0.1
-    params = {
-        'layer_sizes': layer_sizes,
-        'layer_activates': layer_activates,
-        'layer_drops': layer_drops,
-        'layer_inits': layer_inits,
-        'init_path': init_path,
-        'opt_algo': opt_algo,
-        'learning_rate': learning_rate,
-    }
-    num_round = 1000
-    early_stop_round = 20
-    batch_size = 10000
     task.tune(params=params, batch_size=batch_size, num_round=num_round, early_stop_round=early_stop_round,
               verbose=True, save_log=True, save_model=True, dtest=None, save_feature=False)
     # task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_model=False,
