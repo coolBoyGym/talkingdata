@@ -6,6 +6,8 @@ from scipy.sparse import coo_matrix
 
 import feature
 
+DTYPE = tf.float32
+
 
 def make_submission(path_submission, test_pred):
     test_device_id = np.loadtxt('../data/raw/gender_age_test.csv', skiprows=1, dtype=np.int64)
@@ -299,9 +301,9 @@ def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval
 def init_input_units(input_spaces, input_types):
     if check_type(input_spaces, 'int'):
         if input_types == 'sparse':
-            return tf.sparse_placeholder(tf.float32)
+            return tf.sparse_placeholder(DTYPE)
         else:
-            return tf.placeholder(tf.float32)
+            return tf.placeholder(DTYPE)
     else:
         input_units = []
         for i in range(len(input_spaces)):

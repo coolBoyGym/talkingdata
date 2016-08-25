@@ -4,7 +4,7 @@ import xgboost as xgb
 
 import feature
 import utils
-from model_impl import GBLinear, GBTree, MultiLayerPerceptron, MultiplexNeuralNetwork
+from model_impl import GBLinear, GBTree, MultiLayerPerceptron, MultiplexNeuralNetwork, TextConvolutionalNeuralNetwork
 
 
 class Task:
@@ -87,7 +87,7 @@ class Task:
         elif self.booster in {'mlp'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             data = [utils.libsvm_2_feature(indices, values, self.space, self.input_type), labels]
-        elif self.booster in {'mnn'}:
+        elif self.booster in {'mnn', 'tcnn'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             split_indices, split_values = utils.split_feature(indices, values, self.sub_spaces)
             features = utils.libsvm_2_feature(split_indices, split_values, self.sub_spaces, self.sub_input_types)
@@ -119,7 +119,6 @@ class Task:
                            verbose=verbose,
                            **params)
         elif self.booster == 'mlp':
-            start_time = time.time()
             model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                          batch_size=batch_size,
                                          num_round=num_round,
@@ -128,9 +127,7 @@ class Task:
                                          save_log=save_log,
                                          **params)
             model.compile()
-            print 'build graph', time.time() - start_time
         elif self.booster == 'mnn':
-            start_time = time.time()
             model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
                                            self.num_class,
                                            batch_size=batch_size,
@@ -140,7 +137,16 @@ class Task:
                                            save_log=save_log,
                                            **params)
             model.compile()
-            print 'build graph', time.time() - start_time
+        elif self.booster == 'tcnn':
+            model = TextConvolutionalNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
+                                                   self.num_class,
+                                                   batch_size=batch_size,
+                                                   num_round=num_round,
+                                                   early_stop_round=early_stop_round,
+                                                   verbose=verbose,
+                                                   save_log=save_log,
+                                                   **params)
+            model.compile()
 
         start_time = time.time()
         model.train(dtrain, dvalid)
@@ -173,7 +179,6 @@ class Task:
                            verbose=verbose,
                            **params)
         elif self.booster == 'mlp':
-            start_time = time.time()
             model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                          batch_size=batch_size,
                                          num_round=num_round,
@@ -181,9 +186,7 @@ class Task:
                                          save_log=save_log,
                                          **params)
             model.compile()
-            print 'build graph', time.time() - start_time
         elif self.booster == 'mnn':
-            start_time = time.time()
             model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
                                            self.num_class,
                                            batch_size=batch_size,
@@ -192,7 +195,6 @@ class Task:
                                            save_log=save_log,
                                            **params)
             model.compile()
-            print 'build graph', time.time() - start_time
 
         start_time = time.time()
         model.train(dtrain)

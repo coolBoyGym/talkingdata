@@ -126,14 +126,22 @@ def wire3d_demo():
     plt.show()
 
 
+def wrap_path_log(path_log):
+    if '../model/' not in path_log:
+        path_log = '../model/' + path_log
+    if '.log' not in path_log:
+        path_log += '.log'
+    return path_log
+
+
 def plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3):
     if x_col is None:
-        score = np.loadtxt(path_log, delimiter='\t', usecols=[train_col, valid_col])
+        score = np.loadtxt(wrap_path_log(path_log), delimiter='\t', usecols=[train_col, valid_col])
         plt.plot(range(len(score)), score[:, 0], color=colors[2])
         plt.plot(range(len(score)), score[:, 1], color=colors[0])
         plt.show()
     else:
-        score = np.loadtxt(path_log, delimiter='\t', usecols=[x_col, train_col, valid_col])
+        score = np.loadtxt(wrap_path_log(path_log), delimiter='\t', usecols=[x_col, train_col, valid_col])
         plt.plot(score[:, 0], score[:, 1], color=colors[2])
         plt.plot(score[:, 0], score[:, 2], color=colors[0])
         plt.show()
@@ -153,7 +161,7 @@ def plot_multi_score(path_logs, plot_train=False, plot_valid=True):
 def plot_concat_score(path_logs, plot_train=True, plot_valid=True):
     start_point = 0
     for pl in path_logs:
-        score = np.loadtxt(pl, delimiter='\t', usecols=[2, 3])
+        score = np.loadtxt(wrap_path_log(pl), delimiter='\t', usecols=[2, 3])
         if plot_train:
             plt.plot(np.arange(len(score)) + start_point, score[:, 0], label=pl[-7:] + '.train')
         if plot_valid:
@@ -164,7 +172,7 @@ def plot_concat_score(path_logs, plot_train=True, plot_valid=True):
 
 
 def plot_xgb_train_valid_score(path_log):
-    data = np.loadtxt(path_log, delimiter='\t', dtype=str, usecols=[1, 2])
+    data = np.loadtxt(wrap_path_log(path_log), delimiter='\t', dtype=str, usecols=[1, 2])
     score = np.array(map(lambda x: [float(x[0].split(':')[1]), float(x[1].split(':')[1])], data))
     plt.plot(range(len(score)), score[:, 0], color=colors[2])
     plt.plot(range(len(score)), score[:, 1], color=colors[0])
@@ -200,11 +208,11 @@ def draw_two_argument_picture(feature_name, booster_model):
 
 
 if __name__ == '__main__':
-    # path_log = '../model/concat_6_mlp_100.log'
+    # path_log = '../model/concat_6_mlp_142.log'
     # plot_train_valid_score(path_log, train_col=2, valid_col=3)
     # plot_xgb_train_valid_score(path_log)
     # r = range(1)
     # r.extend(range(221, 229))
-    path_logs = ['../model/concat_21_mnn_%d.log' % i for i in range(154, 164)]
+    path_logs = ['ensemble_7_mnn_%d' % i for i in [16, 18]]
     plot_concat_score(path_logs)
     # plot_multi_score(path_logs)
