@@ -121,10 +121,16 @@ class GBTree(Classifier):
 
 class TFClassifier(Classifier):
     def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
-                 batch_size=None, num_round=None, early_stop_round=None, verbose=True, save_log=True):
+                 batch_size=None,
+                 num_round=None,
+                 early_stop_round=None,
+                 verbose=True,
+                 save_log=True,
+                 random_seed=None):
         Classifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class)
         self.__graph = None
         self.__sess = None
+        self.random_seed = random_seed
         self.x = None
         self.y_true = None
         self.drops = None
@@ -154,6 +160,8 @@ class TFClassifier(Classifier):
     def compile(self):
         self.__graph = tf.Graph()
         with self.__graph.as_default():
+            if self.random_seed is not None:
+                tf.set_random_seed(self.random_seed)
             self.x = utils.init_input_units(self.get_input_spaces(), self.get_input_types())
             self.y_true = tf.placeholder(DTYPE)
             self.drops = tf.placeholder(DTYPE)
@@ -277,12 +285,28 @@ class TFClassifier(Classifier):
 
 
 class FactorizationMachine(TFClassifier):
-    def __init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size=None, num_round=None,
-                 early_stop_round=None, verbose=True, save_log=True,
-                 factor_order=None, opt_algo=None, learning_rate=None,
-                 l1_w=0, l1_v=0, l2_w=0, l2_v=0, l2_b=0):
+    def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
+                 batch_size=None,
+                 num_round=None,
+                 early_stop_round=None,
+                 verbose=True,
+                 save_log=True,
+                 random_seed=None,
+                 factor_order=None,
+                 opt_algo=None,
+                 learning_rate=None,
+                 l1_w=0,
+                 l1_v=0,
+                 l2_w=0,
+                 l2_v=0,
+                 l2_b=0):
         TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class,
-                              batch_size, num_round, early_stop_round, verbose, save_log)
+                              batch_size=batch_size,
+                              num_round=num_round,
+                              early_stop_round=early_stop_round,
+                              verbose=verbose,
+                              save_log=save_log,
+                              random_seed=random_seed)
         self.init_actions = [('w', [input_spaces, num_class], 'normal', DTYPE),
                              ('v', [input_spaces, factor_order * num_class], 'normal', DTYPE),
                              ('b', [num_class], 'zero', DTYPE)],
@@ -294,6 +318,7 @@ class FactorizationMachine(TFClassifier):
         self.l2_w = l2_w
         self.l2_v = l2_v
         self.l2_b = l2_b
+        self.compile()
 
     def build_graph(self):
         w = self.vars['w']
@@ -319,13 +344,26 @@ class FactorizationMachine(TFClassifier):
 
 class MultiLayerPerceptron(TFClassifier):
     def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
-                 batch_size=None, num_round=None, early_stop_round=None, verbose=True, save_log=True,
-                 layer_sizes=None, layer_activates=None, layer_drops=None, layer_l2=None, layer_inits=None,
+                 batch_size=None,
+                 num_round=None,
+                 early_stop_round=None,
+                 verbose=True,
+                 save_log=True,
+                 random_seed=None,
+                 layer_sizes=None,
+                 layer_activates=None,
+                 layer_drops=None,
+                 layer_l2=None,
+                 layer_inits=None,
                  init_path=None,
                  opt_algo=None, learning_rate=None):
-        TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size=batch_size,
-                              num_round=num_round, early_stop_round=early_stop_round, verbose=verbose,
-                              save_log=save_log)
+        TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class,
+                              batch_size=batch_size,
+                              num_round=num_round,
+                              early_stop_round=early_stop_round,
+                              verbose=verbose,
+                              save_log=save_log,
+                              random_seed=random_seed)
         self.init_actions = []
         for i in range(len(layer_sizes) - 1):
             self.init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], layer_inits[i][0], DTYPE))
@@ -338,6 +376,7 @@ class MultiLayerPerceptron(TFClassifier):
         self.layer_l2 = layer_l2
         self.opt_algo = opt_algo
         self.learning_rate = learning_rate
+        self.compile()
 
     def build_graph(self):
         w0 = self.vars['w0']
@@ -362,12 +401,27 @@ class MultiLayerPerceptron(TFClassifier):
 
 class MultiplexNeuralNetwork(TFClassifier):
     def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
-                 batch_size=None, num_round=None, early_stop_round=None, verbose=True, save_log=True,
-                 layer_sizes=None, layer_activates=None, layer_drops=None, layer_l2=None, layer_inits=None,
-                 init_path=None, opt_algo=None, learning_rate=None):
-        TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size=batch_size,
-                              num_round=num_round, early_stop_round=early_stop_round, verbose=verbose,
-                              save_log=save_log)
+                 batch_size=None,
+                 num_round=None,
+                 early_stop_round=None,
+                 verbose=True,
+                 save_log=True,
+                 random_seed=None,
+                 layer_sizes=None,
+                 layer_activates=None,
+                 layer_drops=None,
+                 layer_l2=None,
+                 layer_inits=None,
+                 init_path=None,
+                 opt_algo=None,
+                 learning_rate=None):
+        TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class,
+                              batch_size=batch_size,
+                              num_round=num_round,
+                              early_stop_round=early_stop_round,
+                              verbose=verbose,
+                              save_log=save_log,
+                              random_seed=random_seed)
         self.init_actions = []
         for i in range(len(layer_sizes[0])):
             layer_input = layer_sizes[0][i]
@@ -389,6 +443,7 @@ class MultiplexNeuralNetwork(TFClassifier):
         self.layer_l2 = layer_l2
         self.opt_algo = opt_algo
         self.learning_rate = learning_rate
+        self.compile()
 
     def build_graph(self):
         num_input = len(self.get_input_spaces())
@@ -475,12 +530,31 @@ class MultiplexNeuralNetwork(TFClassifier):
 
 
 class TextConvolutionalNeuralNetwork(TFClassifier):
-    def __init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size=None, num_round=None,
-                 early_stop_round=None, verbose=True, save_log=True, layer_sizes=None, kernel_depth=None,
-                 layer_activates=None, layer_drops=None, layer_l2=None, kernel_l2=None, layer_inits=None,
-                 kernel_inits=None, init_path=None, opt_algo=None, learning_rate=None):
-        TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size, num_round,
-                              early_stop_round, verbose, save_log)
+    def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
+                 batch_size=None,
+                 num_round=None,
+                 early_stop_round=None,
+                 verbose=True,
+                 save_log=True,
+                 random_seed=None,
+                 layer_sizes=None,
+                 kernel_depth=None,
+                 layer_activates=None,
+                 layer_drops=None,
+                 layer_l2=None,
+                 kernel_l2=None,
+                 layer_inits=None,
+                 kernel_inits=None,
+                 init_path=None,
+                 opt_algo=None,
+                 learning_rate=None):
+        TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class,
+                              batch_size=batch_size,
+                              num_round=num_round,
+                              early_stop_round=early_stop_round,
+                              verbose=verbose,
+                              save_log=save_log,
+                              random_seed=random_seed)
         self.init_actions = []
         for i in range(len(layer_sizes[0])):
             layer_input = layer_sizes[0][i]
@@ -508,35 +582,7 @@ class TextConvolutionalNeuralNetwork(TFClassifier):
         self.init_path = init_path
         self.opt_algo = opt_algo
         self.learning_rate = learning_rate
-
-    # def __init__(self, name, eval_metric, input_spaces, num_class, layer_sizes, layer_activates, kernel_depth,
-    #               opt_algo,
-    #              learning_rate,
-    #              layer_inits=None, kernel_inits=None, init_path=None):
-    #     if layer_inits is None:
-    #         layer_inits = [('normal', 'zero')] * (len(layer_sizes) - 1)
-    #     init_actions = []
-    #     for i in range(len(layer_sizes[0])):
-    #         init_actions.append(('w0_%d' % i, [layer_sizes[0][i], layer_sizes[1][i]], layer_inits[0][0], tf.float32))
-    #         init_actions.append(('b0_%d' % i, [layer_sizes[1][i]], layer_inits[0][1], tf.float32))
-    #     for i in range(len(layer_sizes[0])):
-    #         init_actions.append(
-    #             ('k%d' % i, [i + 1, layer_sizes[1][0], 1, kernel_depth], kernel_inits[i][0], tf.float32))
-    #         init_actions.append(('kb%d' % i, [kernel_depth], kernel_inits[i][1], tf.float32))
-    #     init_actions.append(('w1', [len(layer_sizes[0]) * kernel_depth, layer_sizes[2]],
-    #                           layer_inits[1][0], tf.float32))
-    #     init_actions.append(('b1', [layer_sizes[2]], layer_inits[1][1], tf.float32))
-    #     for i in range(2, len(layer_sizes) - 1):
-    #         init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], layer_inits[i][0], tf.float32))
-    #         init_actions.append(('b%d' % i, [layer_sizes[i + 1]], layer_inits[i][1], tf.float32))
-    #     print init_actions
-    #     tf_classifier_multi.__init__(self, name, eval_metric, input_spaces, num_class,
-    #                                  init_actions=init_actions,
-    #                                  init_path=init_path,
-    #                                  layer_activates=layer_activates,
-    #                                  kernel_depth=kernel_depth,
-    #                                  opt_algo=opt_algo,
-    #                                  learning_rate=learning_rate, )
+        self.compile()
 
     def build_graph(self):
         num_input = len(self.get_input_spaces())
@@ -555,7 +601,6 @@ class TextConvolutionalNeuralNetwork(TFClassifier):
             l_arr.append(li)
         l = tf.concat(1, l_arr)
         l = tf.reshape(l, [-1, num_input * self.kernel_depth])
-        l = tf.nn.dropout(l, self.drops[0])
         for i in range(1, len(self.layer_sizes) - 1):
             wi = self.vars['w%d' % i]
             bi = self.vars['b%d' % i]
@@ -572,30 +617,99 @@ class TextConvolutionalNeuralNetwork(TFClassifier):
                 self.loss += self.layer_l2[i] * (tf.nn.l2_loss(wi) + tf.nn.l2_loss(bi))
         self.optimizer = utils.get_optimizer(self.opt_algo, self.learning_rate, self.loss)
 
-        # def build_graph(self, layer_activates, kernel_depth, opt_algo, learning_rate):
-        #     num_input = len(self.get_input_spaces())
-        #     w0 = [self.vars['w0_%d' % i] for i in range(num_input)]
-        #     b0 = [self.vars['b0_%d' % i] for i in range(num_input)]
-        #     l = [tf.reshape(tf.sparse_tensor_dense_matmul(self.x[i], w0[i]) + b0[i],
-        #                     [tf.shape(self.x[i])[0], 1, -1, 1]) for
-        #          i in range(num_input)]
-        #     l = activate(tf.concat(1, l), layer_activates[0])
-        #     print 0, layer_activates[0]
-        #     l_arr = []
-        #     for i in range(len(self.x)):
-        #         li = tf.nn.conv2d(l, self.vars['k%d' % i], strides=[1, 1, 1, 1], padding='VALID')
-        #         li = tf.nn.bias_add(li, self.vars['kb%d' % i])
-        #         li = tf.nn.max_pool(li, [1, len(self.x) - i, 1, 1], strides=[1, 1, 1, 1], padding='VALID')
-        #         l_arr.append(li)
-        #     l = tf.concat(1, l_arr)
-        #     l = tf.reshape(l, [-1, len(self.x) * kernel_depth])
-        #     l = tf.nn.dropout(l, self.drops[0])
-        #     for i in range(1, len(self.vars) / 2 - len(self.x) - num_input + 1):
-        #         wi = self.vars['w%d' % i]
-        #         bi = self.vars['b%d' % i]
-        #         print i, layer_activates[i]
-        #         l = tf.nn.dropout(activate(tf.matmul(l, wi) + bi, layer_activates[i]), keep_prob=self.drops[i])
-        #     y_prob, loss = get_loss(self.get_eval_metric(), l, self.y_true)
-        #     optimizer = get_optimizer(opt_algo, learning_rate, loss)
-        #     return l, y_prob, loss, optimizer
-        #     # return None, None, None, None
+
+class ProductNeuralNetworkI(TFClassifier):
+    def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
+                 batch_size=None,
+                 num_round=None,
+                 early_stop_round=None,
+                 verbose=True,
+                 save_log=True,
+                 random_seed=None,
+                 layer_sizes=None,
+                 kernel_depth=None,
+                 layer_activates=None,
+                 layer_drops=None,
+                 layer_l2=None,
+                 kernel_l2=None,
+                 layer_inits=None,
+                 kernel_inits=None,
+                 init_path=None,
+                 opt_algo=None,
+                 learning_rate=None):
+        TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class,
+                              batch_size=batch_size,
+                              num_round=num_round,
+                              early_stop_round=early_stop_round,
+                              verbose=verbose,
+                              save_log=save_log,
+                              random_seed=random_seed)
+        self.init_actions = []
+        for i in range(len(layer_sizes[0])):
+            layer_input = layer_sizes[0][i]
+            layer_output = layer_sizes[1]
+            self.init_actions.append(('w0_%d' % i, [layer_input, layer_output], layer_inits[0][0], DTYPE))
+            self.init_actions.append(('b0_%d' % i, [layer_output], layer_inits[0][1], DTYPE))
+        self.init_actions.append(('c0', [layer_sizes[1]], 'one', DTYPE))
+        self.init_actions.append(('k0', [len(layer_sizes[0]) + 1, kernel_depth], kernel_inits[0], DTYPE))
+        self.init_actions.append(('kb0', [kernel_depth], kernel_inits[1], DTYPE))
+        self.init_actions.append(('i0', [layer_sizes[1], layer_sizes[1]], kernel_inits[2], DTYPE))
+        self.init_actions.append(('ib0', [kernel_depth, kernel_depth], kernel_inits[3], DTYPE))
+        self.init_actions.append(('w1', [kernel_depth * kernel_depth, layer_sizes[2]], layer_inits[1][0], DTYPE))
+        self.init_actions.append(('b1', [layer_sizes[2]], layer_inits[1][1], DTYPE))
+        for i in range(2, len(layer_sizes) - 1):
+            self.init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], layer_inits[i][0], DTYPE))
+            self.init_actions.append(('b%d' % i, [layer_sizes[i + 1]], layer_inits[i][1], DTYPE))
+        self.layer_sizes = layer_sizes
+        self.kernel_depth = kernel_depth
+        self.layer_activates = layer_activates
+        self.layer_drops = layer_drops
+        self.layer_l2 = layer_l2
+        self.kernel_l2 = kernel_l2
+        self.layer_inits = layer_inits
+        self.kernel_inits = kernel_inits
+        self.init_path = init_path
+        self.opt_algo = opt_algo
+        self.learning_rate = learning_rate
+        self.compile()
+
+    def build_graph(self):
+        num_input = len(self.get_input_spaces())
+        w0 = [self.vars['w0_%d' % i] for i in range(num_input)]
+        b0 = [self.vars['b0_%d' % i] for i in range(num_input)]
+        l_arr = map(lambda x: tf.reshape(x, [-1, self.layer_sizes[1], 1]),
+                    utils.embed_input_units(self.get_input_types(), self.x, w0, b0))
+        c0 = self.vars['c0']
+        l_arr.append(tf.tile(tf.reshape(c0, [1, self.layer_sizes[1], 1]), [tf.shape(l_arr[0])[0], 1, 1]))
+        l = tf.concat(2, l_arr)
+        k0 = self.vars['k0']
+        kb0 = self.vars['kb0']
+        l = tf.reshape(l, [-1, len(self.layer_sizes[0]) + 1])
+        l = tf.matmul(l, k0) + kb0
+        l = tf.reshape(l, [-1, self.layer_sizes[1], self.kernel_depth])
+        l = tf.transpose(l, [0, 2, 1])
+        i0 = self.vars['i0']
+        ib0 = self.vars['ib0']
+        l_i = tf.reshape(l, [-1, self.layer_sizes[1]])
+        l_i = tf.matmul(l_i, i0)
+        l_i = tf.reshape(l_i, [-1, self.kernel_depth, self.layer_sizes[1]])
+        l = tf.transpose(l, [0, 2, 1])
+        l = tf.batch_matmul(l_i, l) + ib0
+        l = tf.reshape(l, [-1, self.kernel_depth * self.kernel_depth])
+        l = tf.nn.dropout(utils.activate(l, self.layer_activates[0]), self.drops[0])
+        for i in range(1, len(self.layer_sizes) - 1):
+            wi = self.vars['w%d' % i]
+            bi = self.vars['b%d' % i]
+            l = tf.nn.dropout(utils.activate(tf.matmul(l, wi) + bi, self.layer_sizes[i]), keep_prob=self.drops[i])
+        self.y = l
+        self.y_prob, self.loss = utils.get_loss(self.get_eval_metric(), l, self.y_true)
+        if self.layer_l2 is not None:
+            for i in range(num_input):
+                self.loss += self.layer_l2[0] * (tf.nn.l2_loss(w0[i]) + tf.nn.l2_loss(b0[i]))
+            self.loss += self.kernel_l2 * (
+                tf.nn.l2_loss(c0) + tf.nn.l2_loss(k0) + tf.nn.l2_loss(kb0) + tf.nn.l2_loss(i0) + tf.nn.l2_loss(ib0))
+            for i in range(1, len(self.layer_sizes) - 1):
+                wi = self.vars['w%d' % i]
+                bi = self.vars['b%d' % i]
+                self.loss += self.layer_l2[i] * (tf.nn.l2_loss(wi) + tf.nn.l2_loss(bi))
+        self.optimizer = utils.get_optimizer(self.opt_algo, self.learning_rate, self.loss)

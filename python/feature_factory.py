@@ -76,13 +76,11 @@ def gather_event_id():
     print train_size, test_size, event_data.shape
     np.savetxt('../feature/event_id', event_data, header='%d,%d' % (train_size, test_size), fmt='%d,%d,%d')
 
+
 fea_phone_brand_embedding = feature.multi_feature(name='phone_brand_embedding_1', dtype='f')
-fea_device_model_embedding = feature.multi_feature(name='device_model_embedding_1',dtype='f')
+fea_device_model_embedding = feature.multi_feature(name='device_model_embedding_1', dtype='f')
 fea_installed_app_embedding = feature.multi_feature(name='installed_app_embedding_1', dtype='f')
 fea_installed_app_label_embedding = feature.multi_feature(name='installed_app_label_embedding_1', dtype='f')
-
-
-
 
 fea_phone_brand = feature.one_hot_feature(name='phone_brand', dtype='d')
 fea_device_model = feature.one_hot_feature(name='device_model', dtype='d')
@@ -211,7 +209,8 @@ fea_concat_5_gbtree_1 = feature.multi_feature(name='concat_5_gbtree_1', dtype='f
 fea_concat_5_norm_gblinear_1 = feature.multi_feature(name='concat_5_norm_gblinear_1', dtype='f')
 fea_concat_5_norm_gbtree_1 = feature.multi_feature(name='concat_5_norm_gbtree_1', dtype='f')
 fea_concat_6_gbtree_1 = feature.multi_feature(name='concat_6_gbtree_1', dtype='f')
-fea_concat_6_embedding_64_mlp_for_ensemble = feature.multi_feature(name='concat_6_embedding_64_mlp_for_ensemble', dtype='f')
+fea_concat_6_embedding_64_mlp_for_ensemble = feature.multi_feature(name='concat_6_embedding_64_mlp_for_ensemble',
+                                                                   dtype='f')
 fea_concat_6_mlp_136 = feature.multi_feature(name='concat_6_mlp_136', dtype='f')
 fea_concat_6_mlp_for_ensemble = feature.multi_feature(name='concat_6_mlp_for_ensemble', dtype='f')
 fea_concat_6_tfidf_gbtree_1 = feature.multi_feature(name='concat_6_tfidf_gbtree_1', dtype='f')
@@ -429,28 +428,30 @@ def split_dataset(name, cv_rate=0.2, zero_pad=True):
     print 'train_size', train_size, 'valid_size', valid_size, 'test_size', test_size
 
 
-# def get_hour_event_num_distribution(device_id, dict_device_event):
-#     tmp = {}
-#     for did in device_id:
-#         if did in dict_device_event:
-#             hours = map(lambda x: get_time(x[1], ['hour'])[0], dict_device_event[did])
-#             for d in hours:
-#                 if d in tmp:
-#                     tmp[d] += 1
-#                 else:
-#                     tmp[d] = 1
-#
-#     sum_tmp = 0.0
-#     for k in tmp.keys():
-#         sum_tmp += tmp[k]
-#     res = {}
-#     for i in range(len(tmp)):
-#         res[i] = tmp[i] / sum_tmp
-#
-#     sorted_tmp = sorted(res.keys())
-#     indices = sorted_tmp
-#     values = map(lambda x: res[x], sorted_tmp)
-#     return indices, tmp, values
+def extract_test_preds(name):
+    train_size, test_size = get_subset_size()
+    test_preds = []
+    with open('../feature/' + name, 'r') as data_in:
+        next(data_in)
+        for i in range(train_size):
+            next(data_in)
+        for line in data_in:
+            test_preds.append(map(lambda x: float(x.split(':')[1]), line.strip().split(' ')))
+    test_preds = np.array(test_preds)
+    utils.make_submission('../output/' + name + '.submission', test_preds)
+
+
+def average_submissions(name, path_submissions):
+    model_preds = None
+    for ps in path_submissions:
+        preds_i = np.loadtxt(ps, delimiter=',', dtype=np.float64, skiprows=1, usecols=range(1, 13))
+        if model_preds is None:
+            model_preds = preds_i
+        else:
+            model_preds += preds_i
+    model_preds /= len(path_submissions)
+    utils.make_submission('../output/' + name + '.submission', model_preds)
+
 
 def load_sparse_csr(filename):
     loader = np.load(filename)
@@ -555,6 +556,7 @@ if __name__ == '__main__':
     # for k in [8, 16, 32, 64, 128]:
     #     # w2v_path = '../data/' + fea_tmp.get_name() + '.vec.%d' % k
     #     # w2v_model = word2vec.load(w2v_path, kind='bin')
+    #     # w2v_model = word2vec.load(w2v_path, kind='bin')
     #     # print w2v_model.vectors.shape
     #     fea_name = fea_tmp.get_name() + '_w2v_%d' % k
     #     # feature_w2v_embedding(fea_tmp, w2v_model, k, fea_name)
@@ -567,4 +569,9 @@ if __name__ == '__main__':
     #     plt.hist(sum_values, bins=1000)
     #     plt.show()
 
-    split_dataset('ensemble_7')
+    split_dataset('concat_20')
+    # for i in range(50):
+    #     name = 'concat_6_mlp_%d' % (300 + i)
+    #     extract_test_preds(name)
+
+    # average_submissions('concat_6_mlp_362', ['../output/concat_6_mlp_%d.submission' % (300 + i) for i in range(50, 60)])

@@ -909,3 +909,15 @@
         
 
 ## 2016/8/25 Thu
+
+### xepa
+    300 - 349: 5 fold, 10 repeats
+    350 - 359: full set, 10 repeats
+    concat_6_mlp_360.submission
+    2.24381
+    
+    concat_6_mlp_361.submission
+    2.24399
+    
+    concat_6_mlp_362.submission
+    2.24312
