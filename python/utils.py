@@ -468,3 +468,19 @@ def read_feature(fin, batch_size, num_class):
     values = np.array(values)
     labels = np.array(labels)
     return indices, values, labels
+
+
+def split_data_by_col(data, spaces, sub_spaces, split_cols):
+    if check_type(spaces, 'int'):
+        ids_1 = []
+        ids_2 = []
+        start_index = sum(sub_spaces[:split_cols])
+        end_index = sum(sub_spaces[:split_cols + 1])
+        for i in range(data.shape[0]):
+            if len(data[i, start_index:end_index].data) == 0:
+                ids_2.append(i)
+            else:
+                ids_1.append(i)
+        return np.array(ids_1), np.array(ids_2)
+    else:
+        return split_data_by_col(data[split_cols], spaces[split_cols], [spaces[split_cols]], 0)

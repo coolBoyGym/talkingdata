@@ -1,10 +1,13 @@
 import time
 
+import numpy as np
 import xgboost as xgb
+from sklearn.cross_validation import KFold
 
 import feature
 import utils
-from model_impl import GBLinear, GBTree, MultiLayerPerceptron, MultiplexNeuralNetwork, TextConvolutionalNeuralNetwork
+from model_impl import GBLinear, GBTree, MultiLayerPerceptron, MultiplexNeuralNetwork, TextConvolutionalNeuralNetwork, \
+    ProductNeuralNetworkI
 
 
 class Task:
@@ -87,7 +90,7 @@ class Task:
         elif self.booster in {'mlp'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             data = [utils.libsvm_2_feature(indices, values, self.space, self.input_type), labels]
-        elif self.booster in {'mnn', 'tcnn'}:
+        elif self.booster in {'mnn', 'tcnn', 'pnn1'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             split_indices, split_values = utils.split_feature(indices, values, self.sub_spaces)
             features = utils.libsvm_2_feature(split_indices, split_values, self.sub_spaces, self.sub_input_types)
@@ -126,7 +129,6 @@ class Task:
                                          verbose=verbose,
                                          save_log=save_log,
                                          **params)
-            model.compile()
         elif self.booster == 'mnn':
             model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
                                            self.num_class,
@@ -136,7 +138,6 @@ class Task:
                                            verbose=verbose,
                                            save_log=save_log,
                                            **params)
-            model.compile()
         elif self.booster == 'tcnn':
             model = TextConvolutionalNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
                                                    self.num_class,
@@ -146,7 +147,15 @@ class Task:
                                                    verbose=verbose,
                                                    save_log=save_log,
                                                    **params)
-            model.compile()
+        elif self.booster == 'pnn1':
+            model = ProductNeuralNetworkI(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
+                                          self.num_class,
+                                          batch_size=batch_size,
+                                          num_round=num_round,
+                                          early_stop_round=early_stop_round,
+                                          verbose=verbose,
+                                          save_log=save_log,
+                                          **params)
 
         start_time = time.time()
         model.train(dtrain, dvalid)
@@ -159,6 +168,7 @@ class Task:
             valid_pred = model.predict(dvalid[0])
             test_pred = model.predict(dtest[0])
             utils.make_feature_model_output(self.tag, [train_pred, valid_pred, test_pred], self.num_class)
+        return model
 
     def train(self, dtrain=None, dtest=None, params=None, batch_size=None, num_round=None, verbose=True,
               save_log=True, save_model=False, save_submission=True):
@@ -185,7 +195,6 @@ class Task:
                                          verbose=verbose,
                                          save_log=save_log,
                                          **params)
-            model.compile()
         elif self.booster == 'mnn':
             model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
                                            self.num_class,
@@ -194,7 +203,6 @@ class Task:
                                            verbose=verbose,
                                            save_log=save_log,
                                            **params)
-            model.compile()
 
         start_time = time.time()
         model.train(dtrain)
@@ -220,3 +228,31 @@ class Task:
         # fea_pred.set_value(indices, values)
         # fea_pred.dump()
         utils.make_feature_model_output(self.tag, [data_pred], self.num_class, dump=True)
+
+    def kfold(self, n_fold=5, n_repeat=10, dtrain=None, dtest=None, params=None, batch_size=None, num_round=None,
+              early_stop_round=None, verbose=True):
+        if dtrain is None:
+            dtrain = self.load_data(self.path_train)
+        if dtest is None:
+            dtest = self.load_data(self.path_test)
+        train_data, train_labels = dtrain
+        kf = KFold(train_data.shape[0], n_folds=n_fold, shuffle=True)
+        for i in range(n_repeat):
+            for train_indices, valid_indices in kf:
+                X_train, y_train = train_data[train_indices], train_labels[train_indices]
+                X_valid, y_valid = train_data[valid_indices], train_labels[valid_indices]
+                model_i = self.tune([X_train, y_train], [X_valid, y_valid],
+                                    params=params,
+                                    batch_size=batch_size,
+                                    num_round=num_round,
+                                    early_stop_round=early_stop_round,
+                                    verbose=verbose,
+                                    save_log=False,
+                                    save_model=False,
+                                    dtest=None,
+                                    save_feature=False)
+                train_pred = model_i.predict(dtrain[0])
+                test_pred = model_i.predict(dtest[0])
+                pred_k = np.vstack((train_pred, test_pred))
+                utils.make_feature_model_output(self.tag, [pred_k], self.num_class, dump=True)
+                self.upgrade_version()
