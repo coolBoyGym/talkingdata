@@ -163,9 +163,9 @@ def plot_concat_score(path_logs, plot_train=True, plot_valid=True):
     for pl in path_logs:
         score = np.loadtxt(wrap_path_log(pl), delimiter='\t', usecols=[2, 3])
         if plot_train:
-            plt.plot(np.arange(len(score)) + start_point, score[:, 0], label=pl[-7:] + '.train')
+            plt.plot(np.arange(len(score)) + start_point, score[:, 0], label=pl + '.train')
         if plot_valid:
-            plt.plot(np.arange(len(score)) + start_point, score[:, 1], label=pl[-7:] + '.valid')
+            plt.plot(np.arange(len(score)) + start_point, score[:, 1], label=pl + '.valid')
         start_point += len(score)
     plt.legend()
     plt.show()
@@ -213,6 +213,6 @@ if __name__ == '__main__':
     # plot_xgb_train_valid_score(path_log)
     # r = range(1)
     # r.extend(range(221, 229))
-    path_logs = ['../model/concat_20_mlp_%d.log' % i for i in range(4, 9)]
+    path_logs = ['concat_20_mnn_%d' % i for i in [12, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43]]
     plot_concat_score(path_logs)
     # plot_multi_score(path_logs)

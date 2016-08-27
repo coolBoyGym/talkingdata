@@ -238,6 +238,40 @@ def check_early_stop(valid_scores, early_stop_round, mode, early_stop_precision=
     return False
 
 
+def extend_var(x, new_shape):
+    if len(x.shape) == 2:
+        x = np.vstack((x, np.zeros([new_shape[0] - x.shape[0], x.shape[1]], dtype=np.float32)))
+        cols = np.arange(x.shape[1])
+        cols += np.arange(x.shape[1]) * x.shape[1]
+        indices = np.zeros((x.shape[1] * new_shape[1]), np.float32)
+        indices[cols] = 1
+        indices = np.reshape(indices, [new_shape[1], x.shape[1]])
+        indices = indices.transpose()
+        return x.dot(indices)
+    else:
+        x = np.reshape(x, [1, x.shape[0]])
+        extend_x = extend_var(x, [1, new_shape])
+        return np.reshape(extend_x, [-1])
+
+
+def random_repeat_var(x, new_shape):
+    if len(x.shape) == 2:
+        x = np.vstack((x, np.zeros([new_shape[0] - x.shape[0], x.shape[1]], dtype=np.float32)))
+        repeat_cols = np.random.randint(0, x.shape[1], [new_shape[1] - x.shape[1]])
+        repeat_cols = np.hstack((np.arange(x.shape[1]), repeat_cols))
+        repeat_cols += np.arange(new_shape[1]) * x.shape[1]
+        indices = np.zeros((x.shape[1] * new_shape[1]), np.float32)
+        indices[repeat_cols] = 1
+        indices = np.reshape(indices, [new_shape[1], x.shape[1]])
+        indices = indices.transpose()
+        indices = np.diag(np.power(np.sum(indices, axis=1), -1)).dot(indices)
+        return x.dot(indices)
+    else:
+        x = np.reshape(x, [1, x.shape[0]])
+        repeat_x = random_repeat_var(x, [1, new_shape])
+        return np.reshape(repeat_x, [-1])
+
+
 def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval=0.01):
     if init_path is not None:
         load_var_map = pkl.load(open(init_path, 'rb'))
@@ -272,15 +306,10 @@ def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval
                 else:
                     load_var_name = var_name
                 var_load = load_var_map[load_var_name]
-                var_extend = np.zeros(var_shape, dtype=np.float32)
-                if len(var_load.shape) == 2:
-                    var_extend[:var_load.shape[0], :var_load.shape[1]] += var_load
-                else:
-                    var_extend[:var_load.shape[0]] += var_load
-                print 'extend', var_load.shape, 'to', var_extend.shape
+                print 'extend', var_load.shape, 'to', var_shape
                 # print var_load
                 # print var_extend
-                var_map[var_name] = tf.Variable(var_extend, dtype=dtype)
+                var_map[var_name] = tf.Variable(extend_var(var_load, var_shape), dtype=dtype)
             elif res_method == 'pass':
                 if var_shape[0] <= var_shape[1]:
                     var_diag = np.diag(np.ones(var_shape[0], dtype=np.float32), var_shape[0] - var_shape[1])
@@ -293,6 +322,15 @@ def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval
                 var_map[var_name] = tf.Variable(var_diag, dtype=dtype)
             else:
                 print 'BadParam: init method', init_method
+        elif 'net2' in init_method:
+            res_method = init_method.split(':')[1]
+            if res_method in load_var_map:
+                load_var_name = res_method
+            else:
+                load_var_name = var_name
+            var_load = load_var_map[load_var_name]
+            print 'random repeat', var_load.shape, 'to', var_shape
+            var_map[var_name] = tf.Variable(random_repeat_var(var_load, var_shape), dtype=dtype)
         else:
             print 'BadParam: init method', init_method
     return var_map
