@@ -923,7 +923,7 @@
     2.24312
     
     
-## 2016/8/26 Thu
+## 2016/8/26 Fri
 
 ### gym:
     
@@ -941,7 +941,7 @@
         opt_algo = 'adam'
         learning_rate = 0.0001
         batch_size = 10000
-        [111]	loss: 2.264305 	train_score: 2.157803	valid_score: 2.254848
+        [95]	loss: 2.262365 	train_score: 2.150089	valid_score: 2.254761
         
         submission_1:
             num_round = 110
@@ -962,3 +962,9 @@
         submission_5:
             num_round = 140
             [139]	loss: 2.240977	train_score: 2.157368
+            
+       
+## 2016/8/27 Sat
+
+### gym:
+        
