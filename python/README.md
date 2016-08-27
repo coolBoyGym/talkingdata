@@ -950,6 +950,7 @@
         submission_2:
             num_round = 116
             [115]	loss: 2.258084	train_score: 2.167240
+            socre: 2.24152
         
         submission_3:
             num_round = 126
@@ -958,13 +959,33 @@
         submission_4:
             num_round = 135
             [134]	loss: 2.244782	train_score: 2.159963
+            score:2.24151
             
         submission_5:
             num_round = 140
             [139]	loss: 2.240977	train_score: 2.157368
+            score: 2.24166
             
        
 ## 2016/8/27 Sat
 
 ### gym:
+    
+     ensemble_7_mlp:
+        random_seed = 0x4567
+        layer_sizes = [task.space, 100, task.num_class]
+        layer_l2 = [0, 0.01]
+        opt_algo = 'adam'
+        learning_rate = 0.0001
+        layer_drops = [0.5, 1]
+        batch_size = 1000
+        [25]	loss: 2.090874 	train_score: 2.071044	valid_score: 2.254539
         
+        submission_1:
+            num_round = 25
+            [24]	loss: 2.116322	train_score: 2.096564
+            score:2.24347
+            
+        submission_2:
+            num_round = 28
+            score:2.24513
