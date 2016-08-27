@@ -250,7 +250,7 @@ def extend_var(x, new_shape):
         return x.dot(indices)
     else:
         x = np.reshape(x, [1, x.shape[0]])
-        extend_x = extend_var(x, [1, new_shape])
+        extend_x = extend_var(x, [1, new_shape[0]])
         return np.reshape(extend_x, [-1])
 
 
@@ -268,7 +268,7 @@ def random_repeat_var(x, new_shape):
         return x.dot(indices)
     else:
         x = np.reshape(x, [1, x.shape[0]])
-        repeat_x = random_repeat_var(x, [1, new_shape])
+        repeat_x = random_repeat_var(x, [1, new_shape[0]])
         return np.reshape(repeat_x, [-1])
 
 
