@@ -921,3 +921,50 @@
     
     concat_6_mlp_362.submission
     2.24312
+    
+    
+## 2016/8/26 Fri
+
+### gym:
+    
+    ensemble_6_mnn
+        layer_l2 = [0.1, 0.3]
+        batch_sizes = 1000
+        learning_rate = 0.0001
+        
+    concat_7_norm_mlp:
+        layer_l2 = [0, 0.01]
+        layer_sizes = [task.space, 72, task.num_class]
+        init_path = '../model/concat_7_norm_mlp_2.bin'
+        layer_drops = [0.6, 1]
+        layer_l2 = [0, 0.01]
+        opt_algo = 'adam'
+        learning_rate = 0.0001
+        batch_size = 10000
+        [95]	loss: 2.262365 	train_score: 2.150089	valid_score: 2.254761
+        
+        submission_1:
+            num_round = 110
+            [109]	loss: 2.263455	train_score: 2.170605
+         
+        submission_2:
+            num_round = 116
+            [115]	loss: 2.258084	train_score: 2.167240
+        
+        submission_3:
+            num_round = 126
+            [115]	loss: 2.258084	train_score: 2.167240
+        
+        submission_4:
+            num_round = 135
+            [134]	loss: 2.244782	train_score: 2.159963
+            
+        submission_5:
+            num_round = 140
+            [139]	loss: 2.240977	train_score: 2.157368
+            
+       
+## 2016/8/27 Sat
+
+### gym:
+        

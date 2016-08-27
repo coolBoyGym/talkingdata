@@ -3,6 +3,7 @@ import time
 import numpy as np
 import xgboost as xgb
 from sklearn.cross_validation import KFold
+from sklearn.metrics import log_loss
 
 import feature
 import utils
@@ -87,7 +88,7 @@ class Task:
             num_class = self.num_class
         if self.booster in {'gblinear', 'gbtree'}:
             data = xgb.DMatrix(path)
-        elif self.booster in {'mlp'}:
+        elif self.booster in {'mlp', 'net2net_mlp'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             data = [utils.libsvm_2_feature(indices, values, self.space, self.input_type), labels]
         elif self.booster in {'mnn', 'tcnn', 'pnn1'}:
@@ -219,14 +220,7 @@ class Task:
         model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                      batch_size=batch_size,
                                      **params)
-        model.compile()
         data_pred = model.predict(data)
-        # values = data_pred
-        # indices = np.zeros_like(values, dtype=np.int64) + range(self.num_class)
-        # fea_pred = feature.multi_feature(name=self.tag, dtype='f', space=self.num_class, rank=self.num_class,
-        #                                  size=len(indices))
-        # fea_pred.set_value(indices, values)
-        # fea_pred.dump()
         utils.make_feature_model_output(self.tag, [data_pred], self.num_class, dump=True)
 
     def kfold(self, n_fold=5, n_repeat=10, dtrain=None, dtest=None, params=None, batch_size=None, num_round=None,
@@ -256,3 +250,68 @@ class Task:
                 pred_k = np.vstack((train_pred, test_pred))
                 utils.make_feature_model_output(self.tag, [pred_k], self.num_class, dump=True)
                 self.upgrade_version()
+
+    def net2net_mlp(self, dtrain=None, dvalid=None, params_1=None, params_2=None, batch_size=None, num_round=None, early_stop_round=None,
+                    verbose=True, save_log=True, save_model=False, split_cols=0):
+        if dtrain is None:
+            dtrain = self.load_data(self.path_train_train)
+        if dvalid is None:
+            dvalid = self.load_data(self.path_train_valid)
+
+        model_1 = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
+                                       batch_size=batch_size,
+                                       **params_1)
+
+        model_2 = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
+                                     batch_size=batch_size,
+                                     num_round=num_round,
+                                     early_stop_round=early_stop_round,
+                                     verbose=verbose,
+                                     save_log=save_log,
+                                     **params_2)
+
+        train_split_index = utils.split_data_by_col(dtrain[0], self.space, self.sub_spaces, split_cols)
+        dtrain_event_data = dtrain[0][train_split_index[0]]
+        dtrain_event_label = dtrain[1][train_split_index[0]]
+        dtrain_event = [dtrain_event_data, dtrain_event_label]
+        dtrain_no_event_data = dtrain[0][train_split_index[1]]
+
+        valid_split_index = utils.split_data_by_col(dvalid[0], self.space, self.sub_spaces, split_cols)
+        dvalid_event_data = dvalid[0][valid_split_index[0]]
+        dvalid_event_label = dvalid[1][valid_split_index[0]]
+        dvalid_event = [dvalid_event_data, dvalid_event_label]
+        dvalid_no_event_data = dvalid[0][valid_split_index[1]]
+
+        start_time = time.time()
+        model_2.train(dtrain_event, dvalid_event)
+        print 'training time elapsed: %f' % (time.time() - start_time)
+
+        train_pred_1 = model_1.predict(dtrain_no_event_data)
+        train_pred_2 = model_2.predict(dtrain_event_data)
+        train_pred = np.zeros([self.train_size, self.num_class])
+        train_pred[train_split_index[0]] = train_pred_2
+        train_pred[train_split_index[1]] = train_pred_1
+        train_score = log_loss(dtrain[-1], train_pred)
+
+        valid_pred_1 = model_1.predict(dvalid_no_event_data)
+        valid_pred_2 = model_2.predict(dvalid_event_data)
+        valid_pred = np.zeros([self.valid_size, self.num_class])
+        valid_pred[valid_split_index[0]] = valid_pred_2
+        valid_pred[valid_split_index[1]] = valid_pred_1
+        valid_score = log_loss(dvalid[-1], valid_pred)
+
+        print "final train_score:", train_score, "final valid_score:", valid_score
+
+        if save_model:
+            model_2.dump()
+        return model_2
+
+    def predict(self, data, model=None, params=None, batch_size=None):
+        #TODO
+        if model is None:
+            model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
+                                         batch_size=batch_size,
+                                         **params)
+        preds = model.predict(data)
+        return preds
+
