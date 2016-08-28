@@ -2,9 +2,9 @@ import numpy as np
 
 from task import Task
 
-dataset = 'concat_20'
+dataset = 'concat_6'
 booster = 'mlp'
-version = 386
+version = 141
 
 task = Task(dataset, booster, version)
 if booster is 'gblinear':
@@ -43,6 +43,40 @@ elif booster == 'mlp':
         'layer_activates': ['relu', None],
         'layer_drops': [0.5, 1],
         'layer_l2': [0.0001, 0.0001],
+        'layer_inits': [('res:w0', 'res:b0'), ('res:w1', 'res:b1')],
+        'init_path': '../model/concat_6_mlp_100.bin',
+        'opt_algo': 'adam',
+        'learning_rate': 0.0001,
+        'random_seed': 0x0123,
+    }
+    batch_size = -1
+    num_round = 500
+    early_stop_round = 10
+
+    # params['learning_rate'] = learning_rate
+    # for l2 in [0, 0.0001, 0.001, 0.01]:
+    for seed in [0x0123, 0x4567, 0x89AB, 0xCDEF, 0x3210, 0x7654, 0xBA98, 0xFEDC]:
+        params['random_seed'] = seed
+        print seed
+        task.tune(dtrain, dvalid, params=params, batch_size=batch_size, num_round=num_round,
+                  early_stop_round=early_stop_round, verbose=True, save_log=True, save_model=True, dtest=dtest,
+                  save_feature=True)
+        # task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_log=False,
+        #            save_model=False, save_submission=True)
+        task.upgrade_version()
+        # task.kfold(n_fold=5, n_repeat=10, params=params, batch_size=batch_size, num_round=num_round,
+        #            early_stop_round=early_stop_round, verbose=True)
+elif booster == 'mlcp':
+    dtrain = task.load_data(task.path_train_train)
+    dvalid = task.load_data(task.path_train_valid)
+    dtest = task.load_data(task.path_test)
+
+    params = {
+        'layer_sizes': [task.space - 12, 100, task.num_class],
+        'layer_activates': ['relu', None],
+        'layer_drops': [0.5, 1],
+        'layer_l2': [0.0001, 0.0001],
+        'center_loss': 0.01,
         'layer_inits': [('normal', 'zero'), ('normal', 'zero')],
         'init_path': None,
         'opt_algo': 'adam',
@@ -51,21 +85,11 @@ elif booster == 'mlp':
     }
     batch_size = 1000
     num_round = 500
-    early_stop_round = 2
+    early_stop_round = 10
+    task.tune(dtrain, dvalid, params=params, batch_size=batch_size, num_round=num_round,
+              early_stop_round=early_stop_round, verbose=True, save_log=True, save_model=False, dtest=dtest,
+              save_feature=True)
 
-    # params['learning_rate'] = learning_rate
-    # for l2 in [0, 0.0001, 0.001, 0.01]:
-    for seed in [0x0123, 0x4567, 0x89AB, 0xCDEF]:
-        params['random_seed'] = seed
-        print seed
-        task.tune(dtrain, dvalid, params=params, batch_size=batch_size, num_round=num_round,
-                  early_stop_round=early_stop_round,
-                  verbose=True, save_log=True, save_model=False, dtest=dtest, save_feature=True)
-        # task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_log=False,
-        #            save_model=False, save_submission=True)
-        task.upgrade_version()
-        # task.kfold(n_fold=5, n_repeat=10, params=params, batch_size=batch_size, num_round=num_round,
-        #            early_stop_round=early_stop_round, verbose=True)
 elif booster == 'mnn':
     params = {
         'layer_sizes': [task.sub_spaces, map(int, np.log(task.sub_spaces) * 4), task.num_class],

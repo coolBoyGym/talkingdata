@@ -128,8 +128,8 @@ class TFClassifier(Classifier):
                  save_log=True,
                  random_seed=None):
         Classifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class)
-        self.__graph = None
-        self.__sess = None
+        self.graph = None
+        self.sess = None
         self.random_seed = random_seed
         self.x = None
         self.y_true = None
@@ -149,17 +149,17 @@ class TFClassifier(Classifier):
         self.save_log = save_log
 
     def __del__(self):
-        self.__sess.close()
+        self.sess.close()
 
     def build_graph(self):
         pass
 
     def run(self, fetches, feed_dict=None):
-        return self.__sess.run(fetches, feed_dict)
+        return self.sess.run(fetches, feed_dict)
 
     def compile(self):
-        self.__graph = tf.Graph()
-        with self.__graph.as_default():
+        self.graph = tf.Graph()
+        with self.graph.as_default():
             if self.random_seed is not None:
                 tf.set_random_seed(self.random_seed)
             self.x = utils.init_input_units(self.get_input_spaces(), self.get_input_types())
@@ -168,31 +168,31 @@ class TFClassifier(Classifier):
             self.vars = utils.init_var_map(self.init_actions, self.init_path)
             config = tf.ConfigProto()
             config.gpu_options.allow_growth = True
-            self.__sess = tf.Session(config=config)
+            self.sess = tf.Session(config=config)
             self.build_graph()
-            tf.initialize_all_variables().run(session=self.__sess)
+            tf.initialize_all_variables().run(session=self.sess)
 
-    def __train_batch(self, batch_data, labels):
+    def train_batch(self, batch_data, labels):
         feed_dict = {self.y_true: labels, self.drops: self.layer_drops}
         utils.init_feed_dict(self.get_input_types(), batch_data, self.x, feed_dict)
-        _, l, y_prob = self.__sess.run(fetches=[self.optimizer, self.loss, self.y_prob], feed_dict=feed_dict)
+        _, l, y_prob = self.sess.run(fetches=[self.optimizer, self.loss, self.y_prob], feed_dict=feed_dict)
         return l, y_prob
 
-    def __train_round_csr(self, dtrain):
+    def train_round_csr(self, dtrain):
         csr_mats, labels = dtrain
         batch_size = self.batch_size
         input_types = self.get_input_types()
         if batch_size == -1:
             input_data = utils.feature_slice_inputs(input_types, csr_mats, 0, batch_size)
-            loss, y_prob = self.__train_batch(input_data, labels)
+            loss, y_prob = self.train_batch(input_data, labels)
             return loss, y_prob
         loss = []
         y_prob = []
         for i in range(len(labels) / batch_size + 1):
             batch_i = utils.feature_slice_inputs(input_types, csr_mats, i * batch_size, batch_size)
             labels_i = labels[i * batch_size: (i + 1) * batch_size]
-            batch_loss, batch_y_prob = self.__train_batch(batch_i, labels_i)
-            loss.append(batch_loss)
+            batch_loss, batch_y_prob = self.train_batch(batch_i, labels_i)
+            loss.extend(batch_loss)
             y_prob.extend(batch_y_prob)
         return np.array(loss), np.array(y_prob)
 
@@ -201,7 +201,7 @@ class TFClassifier(Classifier):
         train_scores = []
         if dvalid is None:
             for i in range(self.num_round):
-                train_loss, train_y_prob = self.__train_round_csr(dtrain)
+                train_loss, train_y_prob = self.train_round_csr(dtrain)
                 train_score = log_loss(train_labels, train_y_prob)
                 if self.save_log:
                     self.write_log('%d\t%f\t%f\n' % (i, train_loss.mean(), train_score))
@@ -213,7 +213,7 @@ class TFClassifier(Classifier):
         valid_labels = dvalid[-1]
         valid_scores = []
         for i in range(self.num_round):
-            train_loss, train_y_prob = self.__train_round_csr(dtrain)
+            train_loss, train_y_prob = self.train_round_csr(dtrain)
             train_score = log_loss(train_labels, train_y_prob)
             valid_y_prob = self.predict(dvalid[0])
             valid_score = log_loss(valid_labels, valid_y_prob)
@@ -233,7 +233,7 @@ class TFClassifier(Classifier):
         print '[-1]\ttrain_score: %f\tvalid_score: %f' % (train_scores[-1], valid_scores[-1])
         return train_scores[-1], valid_scores[-1]
 
-    def __predict_batch(self, batch_data):
+    def predict_batch(self, batch_data):
         feed_dict = {self.drops: [1] * len(self.layer_drops)}
         utils.init_feed_dict(self.get_input_types(), batch_data, self.x, feed_dict)
         y_prob = self.run(self.y_prob, feed_dict=feed_dict)
@@ -245,7 +245,7 @@ class TFClassifier(Classifier):
         batch_size = self.batch_size
         if batch_size == -1:
             input_data = utils.feature_slice_inputs(input_types, csr_mat, 0, batch_size)
-            y_prob = self.__predict_batch(input_data)
+            y_prob = self.predict_batch(input_data)
             return y_prob
         y_prob = []
         if utils.check_type(input_spaces, 'int'):
@@ -254,7 +254,7 @@ class TFClassifier(Classifier):
             data_size = csr_mat[0].shape[0]
         for i in range(data_size / batch_size + 1):
             batch_i = utils.feature_slice_inputs(input_types, csr_mat, i * batch_size, batch_size)
-            y_prob_i = self.__predict_batch(batch_i)
+            y_prob_i = self.predict_batch(batch_i)
             y_prob.extend(y_prob_i)
         return np.array(y_prob)
 
@@ -265,6 +265,54 @@ class TFClassifier(Classifier):
         pkl.dump(var_map, open(self.get_bin_path(), 'wb'))
         print 'model dumped at', self.get_bin_path()
 
+
+class TFClusterClassifier(TFClassifier):
+    def __init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size=None, num_round=None,
+                 early_stop_round=None, verbose=True, save_log=True, random_seed=None):
+        TFClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size, num_round,
+                              early_stop_round, verbose, save_log, random_seed)
+        self.y_center = None
+
+    def compile(self):
+        self.graph = tf.Graph()
+        with self.graph.as_default():
+            if self.random_seed is not None:
+                tf.set_random_seed(self.random_seed)
+            self.x = utils.init_input_units(self.get_input_spaces(), self.get_input_types())
+            self.y_true = tf.placeholder(DTYPE)
+            self.y_center = tf.placeholder(DTYPE)
+            self.drops = tf.placeholder(DTYPE)
+            self.vars = utils.init_var_map(self.init_actions, self.init_path)
+            config = tf.ConfigProto()
+            config.gpu_options.allow_growth = True
+            self.sess = tf.Session(config=config)
+            self.build_graph()
+            tf.initialize_all_variables().run(session=self.sess)
+
+    def train_batch(self, batch_data, labels, centers=None):
+        feed_dict = {self.y_true: labels, self.y_center: centers, self.drops: self.layer_drops}
+        utils.init_feed_dict(self.get_input_types(), batch_data, self.x, feed_dict)
+        _, l, y_prob = self.sess.run(fetches=[self.optimizer, self.loss, self.y_prob], feed_dict=feed_dict)
+        return l, y_prob
+
+    def train_round_csr(self, dtrain):
+        csr_mats, centers, labels = dtrain
+        batch_size = self.batch_size
+        input_types = self.get_input_types()
+        if batch_size == -1:
+            input_data = utils.feature_slice_inputs(input_types, csr_mats, 0, batch_size)
+            loss, y_prob = self.train_batch(input_data, labels, centers)
+            return loss, y_prob
+        loss = []
+        y_prob = []
+        for i in range(len(labels) / batch_size + 1):
+            batch_i = utils.feature_slice_inputs(input_types, csr_mats, i * batch_size, batch_size)
+            labels_i = labels[i * batch_size: (i + 1) * batch_size]
+            centers_i = labels[i * batch_size: (i + 1) * batch_size]
+            loss_i, y_prob_i = self.train_batch(batch_i, labels_i, centers_i)
+            loss.extend(loss_i)
+            y_prob.extend(y_prob_i)
+        return np.array(loss), np.array(y_prob)
 
 # class logistic_regression(tf_classifier):
 #     def __init__(self, name, eval_metric, num_class, input_space, opt_algo, learning_rate, l1_w=0, l2_w=0, l2_b=0):
@@ -391,6 +439,62 @@ class MultiLayerPerceptron(TFClassifier):
             l = tf.nn.dropout(l, keep_prob=self.drops[i])
         self.y = l
         self.y_prob, self.loss = utils.get_loss(self.get_eval_metric(), l, self.y_true)
+        if self.layer_l2 is not None:
+            for i in range(len(self.layer_sizes) - 1):
+                wi = self.vars['w%d' % i]
+                bi = self.vars['b%d' % i]
+                self.loss += self.layer_l2[i] * (tf.nn.l2_loss(wi) + tf.nn.l2_loss(bi))
+        self.optimizer = utils.get_optimizer(self.opt_algo, self.learning_rate, self.loss)
+
+
+class MultiLayerClusterPerceptron(TFClusterClassifier):
+    def __init__(self, name, eval_metric, input_spaces, input_types, num_class,
+                 batch_size=None,
+                 num_round=None,
+                 early_stop_round=None,
+                 verbose=True,
+                 save_log=True,
+                 random_seed=None,
+                 layer_sizes=None,
+                 layer_activates=None,
+                 layer_drops=None,
+                 layer_l2=None,
+                 center_loss=None,
+                 layer_inits=None,
+                 init_path=None,
+                 opt_algo=None, learning_rate=None):
+        TFClusterClassifier.__init__(self, name, eval_metric, input_spaces, input_types, num_class, batch_size,
+                                     num_round, early_stop_round, verbose, save_log, random_seed)
+        self.init_actions = []
+        for i in range(len(layer_sizes) - 1):
+            self.init_actions.append(('w%d' % i, [layer_sizes[i], layer_sizes[i + 1]], layer_inits[i][0], DTYPE))
+            self.init_actions.append(('b%d' % i, [layer_sizes[i + 1]], layer_inits[i][1], DTYPE))
+        self.layer_inits = layer_inits
+        self.init_path = init_path
+        self.layer_sizes = layer_sizes
+        self.layer_activates = layer_activates
+        self.layer_drops = layer_drops
+        self.layer_l2 = layer_l2
+        self.center_loss = center_loss
+        self.opt_algo = opt_algo
+        self.learning_rate = learning_rate
+        self.compile()
+
+    def build_graph(self):
+        w0 = self.vars['w0']
+        b0 = self.vars['b0']
+        l = utils.embed_input_units(self.get_input_types(), self.x, w0, b0)
+        l = utils.activate(l, self.layer_activates[0])
+        l = tf.nn.dropout(l, keep_prob=self.drops[0])
+        for i in range(1, len(self.layer_sizes) - 1):
+            wi = self.vars['w%d' % i]
+            bi = self.vars['b%d' % i]
+            l = utils.activate(tf.matmul(l, wi) + bi, self.layer_activates[i])
+            l = tf.nn.dropout(l, keep_prob=self.drops[i])
+        self.y = l
+        self.y_prob, self.loss = utils.get_loss(self.get_eval_metric(), l, self.y_true)
+        if self.center_loss is not None:
+            self.loss += self.center_loss * tf.nn.softmax_cross_entropy_with_logits(self.y, self.y_center)
         if self.layer_l2 is not None:
             for i in range(len(self.layer_sizes) - 1):
                 wi = self.vars['w%d' % i]

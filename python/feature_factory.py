@@ -136,6 +136,7 @@ fea_active_app_label_category_num_tfidf = feature.multi_feature(name='active_app
 fea_active_app_label_num_tfidf = feature.multi_feature(name='active_app_label_num_tfidf', dtype='f')
 fea_active_app_label_cluster_40_num_tfidf = feature.multi_feature(name='active_app_label_cluster_40_num_tfidf',
                                                                   dtype='f')
+fea_model_cluster_1 = feature.multi_feature(name='model_cluster_1', dtype='f')
 
 """
 embedding features
@@ -220,6 +221,8 @@ fea_concat_16_mlp_3 = feature.multi_feature(name='concat_16_mlp_3', dtype='f')
 fea_concat_20_mlp_for_ensemble = feature.multi_feature(name='concat_20_mlp_for_ensemble', dtype='f')
 fea_concat_21_mlp_for_ensemble = feature.multi_feature(name='concat_21_mlp_for_ensemble', dtype='f')
 fea_ensemble_5 = feature.multi_feature(name='ensemble_5', dtype='f')
+
+fea_concat_6_predict_1 = feature.multi_feature(name='concat_6_predict_1', dtype='f')
 
 
 def make_feature():
@@ -536,6 +539,27 @@ def feature_w2v_embedding(fea_raw, model_w2v, order, name):
     fea_out.dump()
 
 
+def make_feature_model_cluster(name):
+    dict_model_clusters = pkl.load(open('../data/' + name + '.pkl'))
+    device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
+    dict_device_brand_model = pkl.load(open('../data/dict_device_brand_model.pkl', 'rb'))
+    values = []
+    for did in device_id:
+        mid = dict_device_brand_model[did][1]
+        cluster = dict_model_clusters[mid]
+        values.append(cluster)
+    values = np.array(values)
+    indices = np.zeros_like(values, dtype=np.int32) + range(12)
+    fea_tmp = feature.multi_feature(name=name, dtype='f')
+    fea_tmp.set_value(indices=indices, values=values)
+    max_indices = map(feature.get_max, indices)
+    len_indices = map(lambda x: len(x), values)
+    fea_tmp.set_space(max(max_indices) + 1)
+    fea_tmp.set_rank(max(len_indices))
+    fea_tmp.set_size(len(indices))
+    fea_tmp.dump()
+
+
 if __name__ == '__main__':
     print 'processing features...'
 
@@ -569,9 +593,17 @@ if __name__ == '__main__':
     #     plt.hist(sum_values, bins=1000)
     #     plt.show()
 
-    split_dataset('concat_20')
+    # split_dataset('concat_20')
     # for i in range(50):
     #     name = 'concat_6_mlp_%d' % (300 + i)
     #     extract_test_preds(name)
 
     # average_submissions('concat_6_mlp_362', ['../output/concat_6_mlp_%d.submission' % (300 + i) for i in range(50, 60)])
+
+    # concat_feature('model_cluster_1', [fea_device_model,
+    #                                    fea_concat_6_predict_1])
+    # split_dataset('model_cluster_1')
+    # make_feature_model_cluster('model_cluster_1')
+    # concat_feature('concat_1_cluster_1', [fea_model_cluster_1,
+    #                                       fea_concat_1])
+    split_dataset('concat_1_cluster_1', zero_pad=False)

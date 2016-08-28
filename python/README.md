@@ -989,3 +989,63 @@
         submission_2:
             num_round = 28
             score:2.24513
+            
+            
+## 16/8/28
+
+### xepa
+    
+    params = {
+        'layer_sizes': [task.space, 100, task.num_class],
+        'layer_activates': ['relu', None],
+        'layer_drops': [0.5, 1],
+        'layer_l2': [0.0001, 0.0001],
+        'layer_inits': [('res:w0', 'res:b0'), ('res:w1', 'res:b1')],
+        'init_path': '../model/concat_6_mlp_100.bin',
+        'opt_algo': 'adam',
+        'learning_rate': 0.0001,
+        'random_seed': 0x0123,
+    }
+    batch_size = -1
+    num_round = 500
+    early_stop_round = 10
+    
+    0x0123
+    [215]	train_score: 2.161063	valid_score: 2.254976
+    [-1]	train_score: 2.157810	valid_score: 2.254982
+    model dumped at ../model/concat_6_mlp_141.bin
+    
+    0x4567
+    [214]	train_score: 2.161927	valid_score: 2.255016
+    [-1]	train_score: 2.158975	valid_score: 2.255033
+    model dumped at ../model/concat_6_mlp_142.bin
+    
+    0x89AB
+    [233]	train_score: 2.155918	valid_score: 2.254898
+    [-1]	train_score: 2.153363	valid_score: 2.254970
+    model dumped at ../model/concat_6_mlp_143.bin
+    
+    0xCDEF
+    [225]	train_score: 2.157516	valid_score: 2.254989
+    [-1]	train_score: 2.155495	valid_score: 2.255020
+    model dumped at ../model/concat_6_mlp_144.bin
+    
+    0x3210
+    [223]	train_score: 2.157971	valid_score: 2.254946
+    [-1]	train_score: 2.155180	valid_score: 2.254974
+    model dumped at ../model/concat_6_mlp_145.bin
+    
+    0x7654
+    [208]	train_score: 2.162757	valid_score: 2.254969
+    [-1]	train_score: 2.160468	valid_score: 2.255000
+    model dumped at ../model/concat_6_mlp_146.bin
+    
+    0xBA98
+    [202]	train_score: 2.164088	valid_score: 2.255046
+    [-1]	train_score: 2.163134	valid_score: 2.255051
+    model dumped at ../model/concat_6_mlp_147.bin
+    
+    0xFEDC
+    [227]	train_score: 2.157217	valid_score: 2.254903
+    [-1]	train_score: 2.154929	valid_score: 2.254913
+    model dumped at ../model/concat_6_mlp_148.bin

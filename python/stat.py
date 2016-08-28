@@ -6,6 +6,7 @@ from Queue import PriorityQueue
 import numpy as np
 from scipy.sparse import csr_matrix
 
+import feature
 from tf_idf import tf_idf
 
 data_app_events = '../data/raw/app_events.csv'
@@ -691,11 +692,26 @@ def coocur_cluster(path, threshold=0.0):
     pkl.dump(dict_label_cluster, open('../data/dict_label_cluster_500.pkl', 'wb'))
 
 
+def aggregate_model_cluster(name):
+    fea_tmp = feature.multi_feature(name=name, dtype='f')
+    fea_tmp.load()
+    indices, values = fea_tmp.get_value()
+    models = np.reshape(indices[:, 0], [-1])
+    preds = values[:, 1:]
+    model_centers = {}
+    for mid in models:
+        if mid not in model_centers:
+            model_ind = np.where(models == mid)[0]
+            model_centers[mid] = np.mean(preds[model_ind], axis=0)
+    pkl.dump(model_centers, open('../data/' + name + '.pkl', 'wb'))
+
+
 if __name__ == '__main__':
     # build_event_dict()
     # aggregate_label_category()
     # count_app_coocur()
     # count_label_coocur()
-    path = '../data/label_coocur_tfidf.pkl'
-    for t in [0.032]:
-        coocur_cluster(path, t)
+    # path = '../data/label_coocur_tfidf.pkl'
+    # for t in [0.032]:
+    #     coocur_cluster(path, t)
+    aggregate_model_cluster('model_cluster_1')

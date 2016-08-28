@@ -8,7 +8,7 @@ from sklearn.metrics import log_loss
 import feature
 import utils
 from model_impl import GBLinear, GBTree, MultiLayerPerceptron, MultiplexNeuralNetwork, TextConvolutionalNeuralNetwork, \
-    ProductNeuralNetworkI
+    ProductNeuralNetworkI, MultiLayerClusterPerceptron
 
 
 class Task:
@@ -91,6 +91,13 @@ class Task:
         elif self.booster in {'mlp', 'net2net_mlp'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             data = [utils.libsvm_2_feature(indices, values, self.space, self.input_type), labels]
+        elif self.booster in {'mlcp'}:
+            indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
+            centers = values[:, :num_class]
+            indices = indices[:, num_class:] - num_class
+            values = values[:, num_class:]
+            full_data = utils.libsvm_2_feature(indices, values, self.space - num_class, self.input_type)
+            data = [full_data, centers, labels]
         elif self.booster in {'mnn', 'tcnn', 'pnn1'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             split_indices, split_values = utils.split_feature(indices, values, self.sub_spaces)
@@ -130,6 +137,15 @@ class Task:
                                          verbose=verbose,
                                          save_log=save_log,
                                          **params)
+        elif self.booster == 'mlcp':
+            model = MultiLayerClusterPerceptron(self.tag, self.eval_metric, self.space - self.num_class,
+                                                self.input_type, self.num_class,
+                                                batch_size=batch_size,
+                                                num_round=num_round,
+                                                early_stop_round=early_stop_round,
+                                                verbose=verbose,
+                                                save_log=save_log,
+                                                **params)
         elif self.booster == 'mnn':
             model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
                                            self.num_class,
@@ -251,7 +267,8 @@ class Task:
                 utils.make_feature_model_output(self.tag, [pred_k], self.num_class, dump=True)
                 self.upgrade_version()
 
-    def net2net_mlp(self, dtrain=None, dvalid=None, params_1=None, params_2=None, batch_size=None, num_round=None, early_stop_round=None,
+    def net2net_mlp(self, dtrain=None, dvalid=None, params_1=None, params_2=None, batch_size=None, num_round=None,
+                    early_stop_round=None,
                     verbose=True, save_log=True, save_model=False, split_cols=0):
         if dtrain is None:
             dtrain = self.load_data(self.path_train_train)
@@ -263,12 +280,12 @@ class Task:
                                        **params_1)
 
         model_2 = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
-                                     batch_size=batch_size,
-                                     num_round=num_round,
-                                     early_stop_round=early_stop_round,
-                                     verbose=verbose,
-                                     save_log=save_log,
-                                     **params_2)
+                                       batch_size=batch_size,
+                                       num_round=num_round,
+                                       early_stop_round=early_stop_round,
+                                       verbose=verbose,
+                                       save_log=save_log,
+                                       **params_2)
 
         train_split_index = utils.split_data_by_col(dtrain[0], self.space, self.sub_spaces, split_cols)
         dtrain_event_data = dtrain[0][train_split_index[0]]
@@ -307,11 +324,10 @@ class Task:
         return model_2
 
     def predict(self, data, model=None, params=None, batch_size=None):
-        #TODO
+        # TODO
         if model is None:
             model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                          batch_size=batch_size,
                                          **params)
         preds = model.predict(data)
         return preds
-
