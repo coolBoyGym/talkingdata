@@ -1049,3 +1049,22 @@
     [227]	train_score: 2.157217	valid_score: 2.254903
     [-1]	train_score: 2.154929	valid_score: 2.254913
     model dumped at ../model/concat_6_mlp_148.bin
+
+### gym
+
+    concat_7_norm_mlp_2:
+        layer_sizes = [task.space, 100, task.num_class]
+        init_path = '../model/concat_6_mlp_143.bin'
+        layer_drops = [0.2, 1]
+        layer_l2 = [0.0001, 0.0001]
+        opt_algo = 'adam'
+        learning_rate = 1e-6
+        random_seed = 0x89AB
+        best iteration:
+        [681]	loss: 2.212628 	train_score: 2.198552	valid_score: 2.254312
+    
+        layer_drops = [0.4, 1]
+        best iteration:
+        [278]	loss: 2.174715 	train_score: 2.160659	valid_score: 2.254841
+        
+        
