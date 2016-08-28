@@ -1068,3 +1068,30 @@
         [278]	loss: 2.174715 	train_score: 2.160659	valid_score: 2.254841
         
         
+    concat_7_norm_mlp_3:
+        layer_sizes = [task.space, 128, task.num_class]
+        layer_inits = [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')]
+        init_path = '../model/concat_6_mlp_143.bin'
+        layer_drops = [0.5, 1]
+        layer_l2 = [0.0001, 0.0001]
+        opt_algo = 'adam'
+        learning_rate = 1e-5
+        random_seed = 0x89AB
+        batch_size = -1
+        early_stop_round = 20
+        best iteration:
+        [474]	loss: 2.164691 	train_score: 2.150694	valid_score: 2.254168
+        
+    concat_7_norm_mlp_31.submission
+        num_round = 500
+        [499]	loss: 2.184437	train_score: 2.170846
+    
+    concat_7_norm_mlp_32.submission
+        num_round = 600
+        [599]	loss: 2.179643	train_score: 2.165545
+        
+    concat_7_norm_mlp_33.submission
+        num_round = 900
+        [899]	loss: 2.172942	train_score: 2.157660
+        
+        
