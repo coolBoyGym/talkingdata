@@ -1093,5 +1093,19 @@
     concat_7_norm_mlp_33.submission
         num_round = 900
         [899]	loss: 2.172942	train_score: 2.157660
+    
+    concat_7_norm_mlp_34.submission
+        num_round = 1000
+        [999]	loss: 2.171967	train_score: 2.156395	
         
+    concat_7_norm_mlp_35.submission
+        num_round = 1500
+        [1499]	loss: 2.158979	train_score: 2.140908
         
+    concat_7_norm_mlp_36.submission
+        num_round = 1111
+        [1110]	loss: 2.167221	train_score: 2.150921
+        
+    concat_7_norm_mlp_37.submission
+        num_round = 1125
+        [1124]	loss: 2.167855	train_score: 2.151651
