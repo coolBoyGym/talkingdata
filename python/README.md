@@ -1109,3 +1109,48 @@
     concat_7_norm_mlp_37.submission
         num_round = 1125
         [1124]	loss: 2.167855	train_score: 2.151651
+        
+        
+## 16/8/29
+
+### xepa
+    
+    concat_6_mlp_163
+    params = {
+        'layer_sizes': [task.space, 120, task.num_class],
+        'layer_activates': ['relu', None],
+        'layer_drops': [0.5, 1],
+        'layer_l2': [0.0001, 0.0001],
+        'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
+        'init_path': '../model/concat_6_mlp_137.bin',
+        'opt_algo': 'adam',
+        'learning_rate': 1e-4,
+        'random_seed': 0x0123,
+    }
+    batch_size = -1
+    num_round = 50
+    early_stop_round = 10
+    49	2.190068	2.172293
+    
+    concat_6_mlp_164:
+    num_round = 100
+    [99]	loss: 2.176425	train_score: 2.158569
+    
+    
+    concat_6_mlp_165:
+    num_round = 150
+    [149]	loss: 2.162290	train_score: 2.143154
+    2.24096
+    
+    concat_6_mlp_166:
+    num_round = 125
+    [124]	loss: 2.168654	train_score: 2.150265
+    score: 2.24098
+    
+    concat_6_mlp_167:
+    num_round = 140
+    [139]	loss: 2.164003	train_score: 2.145184	
+    
+    concat_6_mlp_168:
+    num_round = 175
+    2.24107

@@ -134,17 +134,16 @@ def wrap_path_log(path_log):
     return path_log
 
 
-def plot_train_valid_score(path_log, x_col=None, train_col=2, valid_col=3):
-    if x_col is None:
-        score = np.loadtxt(wrap_path_log(path_log), delimiter='\t', usecols=[train_col, valid_col])
-        plt.plot(range(len(score)), score[:, 0], color=colors[2])
-        plt.plot(range(len(score)), score[:, 1], color=colors[0])
-        plt.show()
-    else:
-        score = np.loadtxt(wrap_path_log(path_log), delimiter='\t', usecols=[x_col, train_col, valid_col])
-        plt.plot(score[:, 0], score[:, 1], color=colors[2])
-        plt.plot(score[:, 0], score[:, 2], color=colors[0])
-        plt.show()
+def plot_train_valid_score(path_log, loss_col=None, train_col=2, valid_col=3):
+    score = np.loadtxt(wrap_path_log(path_log), delimiter='\t', usecols=[1, 2, 3])
+    if loss_col is not None:
+        plt.plot(range(len(score)), score[:, 0], color=colors[1], label='loss')
+    if train_col is not None:
+        plt.plot(range(len(score)), score[:, 1], color=colors[2], label='train_score')
+    if valid_col is not None:
+        plt.plot(range(len(score)), score[:, 2], color=colors[0], label='valid_score')
+    plt.legend()
+    plt.show()
 
 
 def plot_multi_score(path_logs, plot_train=False, plot_valid=True):
@@ -208,11 +207,9 @@ def draw_two_argument_picture(feature_name, booster_model):
 
 
 if __name__ == '__main__':
-    path_log = '../model/concat_1_mlp_100.log'
-    plot_train_valid_score(path_log, train_col=2, valid_col=3)
+    # path_log = '../model/concat_6_mlp_155.log'
+    # plot_train_valid_score(path_log, loss_col=1)
     # plot_xgb_train_valid_score(path_log)
-    # r = range(1)
-    # r.extend(range(221, 229))
-    # path_logs = ['../model/concat_20_mlp_%d.log' % i for i in range(4, 9)]
-    # plot_concat_score(path_logs)
+    path_logs = ['concat_6_mlp_%d' % i for i in [162, ]]
+    plot_concat_score(path_logs)
     # plot_multi_score(path_logs)

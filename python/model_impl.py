@@ -165,7 +165,7 @@ class TFClassifier(Classifier):
             self.x = utils.init_input_units(self.get_input_spaces(), self.get_input_types())
             self.y_true = tf.placeholder(DTYPE)
             self.drops = tf.placeholder(DTYPE)
-            self.vars = utils.init_var_map(self.init_actions, self.init_path, self.random_seed)
+            self.vars = utils.init_var_map(self.init_actions, self.init_path, random_seed=self.random_seed)
             config = tf.ConfigProto()
             config.gpu_options.allow_growth = True
             self.sess = tf.Session(config=config)
@@ -192,7 +192,7 @@ class TFClassifier(Classifier):
             batch_i = utils.feature_slice_inputs(input_types, csr_mats, i * batch_size, batch_size)
             labels_i = labels[i * batch_size: (i + 1) * batch_size]
             batch_loss, batch_y_prob = self.train_batch(batch_i, labels_i)
-            loss.extend(batch_loss)
+            loss.append(batch_loss)
             y_prob.extend(batch_y_prob)
         return np.array(loss), np.array(y_prob)
 
@@ -282,7 +282,7 @@ class TFClusterClassifier(TFClassifier):
             self.y_true = tf.placeholder(DTYPE)
             self.y_center = tf.placeholder(DTYPE)
             self.drops = tf.placeholder(DTYPE)
-            self.vars = utils.init_var_map(self.init_actions, self.init_path, self.random_seed)
+            self.vars = utils.init_var_map(self.init_actions, self.init_path, random_seed=self.random_seed)
             config = tf.ConfigProto()
             config.gpu_options.allow_growth = True
             self.sess = tf.Session(config=config)
@@ -310,9 +310,10 @@ class TFClusterClassifier(TFClassifier):
             labels_i = labels[i * batch_size: (i + 1) * batch_size]
             centers_i = labels[i * batch_size: (i + 1) * batch_size]
             loss_i, y_prob_i = self.train_batch(batch_i, labels_i, centers_i)
-            loss.extend(loss_i)
+            loss.append(loss_i)
             y_prob.extend(y_prob_i)
         return np.array(loss), np.array(y_prob)
+
 
 # class logistic_regression(tf_classifier):
 #     def __init__(self, name, eval_metric, num_class, input_space, opt_algo, learning_rate, l1_w=0, l2_w=0, l2_b=0):

@@ -274,7 +274,7 @@ def random_repeat_var(x, new_shape, random_seed=None):
         return np.reshape(repeat_x, [-1])
 
 
-def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval=0.01, random_seed=None):
+def init_var_map(init_actions, init_path=None, random_seed=None):
     if init_path is not None:
         load_var_map = pkl.load(open(init_path, 'rb'))
         print 'load variable map from', init_path, load_var_map.keys()
@@ -285,13 +285,13 @@ def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval
         elif init_method == 'one':
             var_map[var_name] = tf.Variable(tf.ones(var_shape, dtype=dtype), dtype=dtype)
         elif init_method == 'normal':
-            var_map[var_name] = tf.Variable(tf.random_normal(var_shape, mean=0.0, stddev=stddev, dtype=dtype),
+            var_map[var_name] = tf.Variable(tf.random_normal(var_shape, mean=0.0, stddev=0.01, dtype=dtype),
                                             dtype=dtype)
         elif init_method == 'tnormal':
-            var_map[var_name] = tf.Variable(tf.truncated_normal(var_shape, mean=0.0, stddev=stddev, dtype=dtype),
+            var_map[var_name] = tf.Variable(tf.truncated_normal(var_shape, mean=0.0, stddev=0.01, dtype=dtype),
                                             dtype=dtype)
         elif init_method == 'uniform':
-            var_map[var_name] = tf.Variable(tf.random_uniform(var_shape, minval=minval, maxval=maxval, dtype=dtype),
+            var_map[var_name] = tf.Variable(tf.random_uniform(var_shape, minval=-0.01, maxval=0.01, dtype=dtype),
                                             dtype=dtype)
         elif isinstance(init_method, int) or isinstance(init_method, float):
             var_map[var_name] = tf.Variable(tf.ones(var_shape, dtype=dtype) * init_method)

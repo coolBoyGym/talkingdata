@@ -223,6 +223,7 @@ fea_concat_21_mlp_for_ensemble = feature.multi_feature(name='concat_21_mlp_for_e
 fea_ensemble_5 = feature.multi_feature(name='ensemble_5', dtype='f')
 
 fea_concat_6_predict_1 = feature.multi_feature(name='concat_6_predict_1', dtype='f')
+fea_concat_6_mlp_143 = feature.multi_feature(name='concat_6_mlp_143', dtype='f')
 
 
 def make_feature():
@@ -600,10 +601,10 @@ if __name__ == '__main__':
 
     # average_submissions('concat_6_mlp_362', ['../output/concat_6_mlp_%d.submission' % (300 + i) for i in range(50, 60)])
 
-    # concat_feature('model_cluster_1', [fea_device_model,
-    #                                    fea_concat_6_predict_1])
+    concat_feature('concat_6_mlp_143_1', [fea_concat_6,
+                                          fea_concat_6_mlp_143])
     # split_dataset('model_cluster_1')
     # make_feature_model_cluster('model_cluster_1')
     # concat_feature('concat_1_cluster_1', [fea_model_cluster_1,
     #                                       fea_concat_1])
-    split_dataset('concat_1_cluster_1', zero_pad=False)
+    split_dataset('concat_6_mlp_143_1', zero_pad=False)
