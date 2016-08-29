@@ -1154,3 +1154,34 @@
     concat_6_mlp_168:
     num_round = 175
     2.24107
+        
+### gym
+
+    concat_7_norm_mlp_3:
+        layer_sizes = [task.space, 128, task.num_class]
+        layer_inits = [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')]
+        init_path = '../model/concat_6_mlp_143.bin'
+        layer_drops = [0.5, 1]
+        layer_l2 = [0.0001, 0.0001]
+        opt_algo = 'adam'
+        learning_rate = 1e-5
+        random_seed = 0x89AB
+        batch_size = -1
+        early_stop_round = 20
+        best iteration:
+        [474]	loss: 2.164040 	train_score: 2.149917	valid_score: 2.254555
+        
+    concat_7_norm_mlp_302.submission   
+        [899]	loss: 2.173916	train_score: 2.158857	
+    
+    concat_7_norm_mlp_303.submission  
+        [1199]	loss: 2.164352	train_score: 2.147757	
+        
+    concat_7_norm_mlp_304.submission     
+        [1299]	loss: 2.163164	train_score: 2.145855	
+        
+    concat_7_norm_mlp_305.submission     
+        [1149]	loss: 2.167131	train_score: 2.150631
+    
+    concat_7_norm_mlp_306.submission
+        [1099]	loss: 2.168356	train_score: 2.152228
