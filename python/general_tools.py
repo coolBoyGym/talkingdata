@@ -208,11 +208,11 @@ def draw_two_argument_picture(feature_name, booster_model):
 
 
 if __name__ == '__main__':
-    # path_log = '../model/concat_20_mlp_0.log'
-    # plot_train_valid_score(path_log, train_col=2, valid_col=3)
+    path_log = '../model/concat_1_mlp_100.log'
+    plot_train_valid_score(path_log, train_col=2, valid_col=3)
     # plot_xgb_train_valid_score(path_log)
     # r = range(1)
     # r.extend(range(221, 229))
-    path_logs = ['concat_20_mnn_%d' % i for i in [12, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]]
-    plot_concat_score(path_logs)
+    # path_logs = ['../model/concat_20_mlp_%d.log' % i for i in range(4, 9)]
+    # plot_concat_score(path_logs)
     # plot_multi_score(path_logs)

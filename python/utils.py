@@ -254,8 +254,10 @@ def extend_var(x, new_shape):
         return np.reshape(extend_x, [-1])
 
 
-def random_repeat_var(x, new_shape):
+def random_repeat_var(x, new_shape, random_seed=None):
     if len(x.shape) == 2:
+        if random_seed is not None:
+            np.random.seed(random_seed)
         x = np.vstack((x, np.zeros([new_shape[0] - x.shape[0], x.shape[1]], dtype=np.float32)))
         repeat_cols = np.random.randint(0, x.shape[1], [new_shape[1] - x.shape[1]])
         repeat_cols = np.hstack((np.arange(x.shape[1]), repeat_cols))
@@ -268,11 +270,11 @@ def random_repeat_var(x, new_shape):
         return x.dot(indices)
     else:
         x = np.reshape(x, [1, x.shape[0]])
-        repeat_x = random_repeat_var(x, [1, new_shape[0]])
+        repeat_x = random_repeat_var(x, [1, new_shape[0]], random_seed)
         return np.reshape(repeat_x, [-1])
 
 
-def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval=0.01):
+def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval=0.01, random_seed=None):
     if init_path is not None:
         load_var_map = pkl.load(open(init_path, 'rb'))
         print 'load variable map from', init_path, load_var_map.keys()
@@ -330,7 +332,7 @@ def init_var_map(init_actions, init_path=None, stddev=0.01, minval=-0.01, maxval
                 load_var_name = var_name
             var_load = load_var_map[load_var_name]
             print 'random repeat', var_load.shape, 'to', var_shape
-            var_map[var_name] = tf.Variable(random_repeat_var(var_load, var_shape), dtype=dtype)
+            var_map[var_name] = tf.Variable(random_repeat_var(var_load, var_shape, random_seed), dtype=dtype)
         else:
             print 'BadParam: init method', init_method
     return var_map

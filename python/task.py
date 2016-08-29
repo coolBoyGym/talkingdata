@@ -2,6 +2,7 @@ import time
 
 import numpy as np
 import xgboost as xgb
+from scipy.sparse import vstack
 from sklearn.cross_validation import KFold
 from sklearn.metrics import log_loss
 
@@ -88,7 +89,7 @@ class Task:
             num_class = self.num_class
         if self.booster in {'gblinear', 'gbtree'}:
             data = xgb.DMatrix(path)
-        elif self.booster in {'mlp', 'net2net_mlp'}:
+        elif self.booster in {'mlp', 'net2net_mlp', 'predict'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             data = [utils.libsvm_2_feature(indices, values, self.space, self.input_type), labels]
         elif self.booster in {'mlcp'}:
@@ -323,11 +324,68 @@ class Task:
             model_2.dump()
         return model_2
 
-    def predict(self, data, model=None, params=None, batch_size=None):
-        # TODO
+    def net2net_mlp_train(self, dtrain=None, dtest=None, params_1=None, params_2=None, batch_size=None, num_round=None,
+                          verbose=True, save_log=True, save_model=False, split_cols=0, save_submission=True):
+        if dtrain is None:
+            dtrain = self.load_data(self.path_train)
+        if dtest is None:
+            dtest = self.load_data(self.path_test)
+        model_1 = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
+                                       batch_size=batch_size,
+                                       **params_1)
+        model_2 = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
+                                       batch_size=batch_size,
+                                       num_round=num_round,
+                                       verbose=verbose,
+                                       save_log=save_log,
+                                       **params_2)
+
+        train_split_index = utils.split_data_by_col(dtrain[0], self.space, self.sub_spaces, split_cols)
+        dtrain_event_data = dtrain[0][train_split_index[0]]
+        dtrain_event_label = dtrain[1][train_split_index[0]]
+        dtrain_event = [dtrain_event_data, dtrain_event_label]
+        dtrain_no_event_data = dtrain[0][train_split_index[1]]
+
+        test_split_index = utils.split_data_by_col(dtest[0], self.space, self.sub_spaces, split_cols)
+        dtest_event_data = dtest[0][test_split_index[0]]
+        dtest_event_label = dtest[1][test_split_index[0]]
+        dtest_event = [dtest_event_data, dtest_event_label]
+        dtest_no_event_data = dtest[0][test_split_index[1]]
+
+        start_time = time.time()
+        model_2.train(dtrain_event)
+        print 'time elapsed: %f' % (time.time() - start_time)
+
+        if save_model:
+            model_2.dump()
+        if save_submission:
+            test_pred_1 = model_1.predict(dtest_no_event_data)
+            test_pred_2 = model_2.predict(dtest_event_data)
+            test_pred = np.zeros([self.test_size, self.num_class], dtype=np.float32)
+            test_pred[test_split_index[0]] = test_pred_2
+            test_pred[test_split_index[1]] = test_pred_1
+            print test_pred.shape
+            print test_pred_1.shape
+            print test_pred_2.shape
+
+            utils.make_submission(self.path_submission, test_pred)
+
+
+
+
+    def predict(self, data=None, model=None, params=None, batch_size=None, save_feature=False):
+        if data is None:
+            dtrain = self.load_data(self.path_train_train)
+            dvalid = self.load_data(self.path_train_valid)
+            dtest = self.load_data(self.path_test)
+            data = vstack((dtrain[0], dvalid[0], dtest[0]))
         if model is None:
             model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                          batch_size=batch_size,
                                          **params)
         preds = model.predict(data)
+
+        if save_feature:
+            utils.make_feature_model_output(self.tag, [preds], self.num_class)
+
         return preds

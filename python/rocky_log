@@ -214,4 +214,43 @@ concat_6_net2net
     在上面模型基础上adam，（0.0001,64）        [217]	train_score: 1.698932	valid_score: 1.951654       concat_6_net2net_mlp_11.bin
 
 
+concat_1
+    layer_l2 = [0.0001, 0.0001] (0.2, 64) batch_size = 1000     [283]	train_score: 2.369955	valid_score: 2.387958
+    layer_l2 = [0.0001, 0.0001] (0.1, 64) batch_size = 1000     [574]	train_score: 2.367736	valid_score: 2.387548       concat_1_mlp_100.bin
+    layer_l2 = [0.0001, 0.0001] (0.2, 128)batch_size = 1024     [243]	train_score: 2.367487	valid_score: 2.388407
+    layer_l2 = [0.0001, 0.0001] (0.2, 64) batch_size = 1000     [537]	train_score: 2.370447	valid_score: 2.389186
 
+
+
+    [228]	train_score: 2.363045	valid_score: 2.387705
+    concat_1_mlp_2.bin  layer_l2 = [0.0001, 0.0001]  (64, 0.0001, -1) [320]	train_score: 2.359724	valid_score: 2.387345    score:2.38510
+                                                                      [350] score: 2.38504
+                                                                      concat_1_mlp_1001.bin
+
+
+    concat_6_mlp_143.bin  layer_l2 = [0.0001, 0.0001] (128, 0.00001, -1)    concat_6_net2net_mlp_1000.bin
+
+    [196]	train_score: 1.668376	valid_score: 1.943452
+    [225]	loss: 1.683151 	train_score: 1.670080	valid_score: 1.942579
+
+    [281]	loss: 1.678444 	train_score: 1.665124	valid_score: 1.943029
+best iteration:
+[262]	train_score: 1.665451	valid_score: 1.942998
+[-1]	train_score: 1.665124	valid_score: 1.943029
+training time elapsed: 239.330602
+final train_score: 2.12850044731 final valid_score: 2.25332626642
+model dumped at ../model/concat_7_norm_net2net_mlp_1000.bin
+
+layer_sizes = [task.space, 128, task.num_class]
+    layer_activates = ['relu', None]
+    layer_inits = [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')]
+    init_path = '../model/concat_6_mlp_143.bin'
+    layer_drops = [0.5, 1]
+    layer_l2 = [0.00001, 0.00001]
+    opt_algo = 'adam'
+    learning_rate = 0.00001
+    batch_size = -1
+    num_round = 3000
+    early_stop_round = 20
+
+    [134]	train_score: 1.675315	valid_score: 1.942419

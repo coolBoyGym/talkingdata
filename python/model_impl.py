@@ -165,7 +165,7 @@ class TFClassifier(Classifier):
             self.x = utils.init_input_units(self.get_input_spaces(), self.get_input_types())
             self.y_true = tf.placeholder(DTYPE)
             self.drops = tf.placeholder(DTYPE)
-            self.vars = utils.init_var_map(self.init_actions, self.init_path)
+            self.vars = utils.init_var_map(self.init_actions, self.init_path, self.random_seed)
             config = tf.ConfigProto()
             config.gpu_options.allow_growth = True
             self.sess = tf.Session(config=config)
@@ -282,7 +282,7 @@ class TFClusterClassifier(TFClassifier):
             self.y_true = tf.placeholder(DTYPE)
             self.y_center = tf.placeholder(DTYPE)
             self.drops = tf.placeholder(DTYPE)
-            self.vars = utils.init_var_map(self.init_actions, self.init_path)
+            self.vars = utils.init_var_map(self.init_actions, self.init_path, self.random_seed)
             config = tf.ConfigProto()
             config.gpu_options.allow_growth = True
             self.sess = tf.Session(config=config)
