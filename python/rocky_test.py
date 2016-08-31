@@ -3,7 +3,7 @@ import feature
 
 dataset = 'concat_6'
 booster = 'net2net_mlp'
-version = 1005
+version = 1008
 
 task = Task(dataset, booster, version)
 if booster is 'gblinear':
@@ -37,7 +37,7 @@ elif booster == 'mlp':
     layer_activates = ['relu', None]
     layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
     # layer_inits = [('normal', 'zero'), ('normal', 'zero')]
-    init_path = '../model/concat_1_mlp_2.bin'
+    init_path = '../model/concat_6_mlp_143.bin'
     # init_path = None
     layer_drops = [0.5, 1]
     layer_l2 = [0.0001, 0.0001]
@@ -106,7 +106,7 @@ elif booster == 'net2net_mlp':
     layer_sizes = [task.space, 64, task.num_class]
     layer_activates = ['relu', None]
     layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
-    init_path = '../model/concat_1_mlp_100.bin'
+    init_path = '../model/concat_1_mlp_1001.bin'
     layer_drops = [0.5, 1]
     layer_l2 = [0.0001, 0.0001]
     opt_algo = 'gd'
@@ -124,14 +124,14 @@ elif booster == 'net2net_mlp':
 
     layer_sizes = [task.space, 128, task.num_class]
     layer_activates = ['relu', None]
-    layer_inits = [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')]
-    init_path = '../model/concat_6_mlp_143.bin'
+    layer_inits = [('net2:w0', 'net2:b0'), ('res:w1', 'res:b1')]
+    init_path = '../model/concat_6_mlp_100.bin'
     layer_drops = [0.5, 1]
-    layer_l2 = [0, 0]
+    layer_l2 = [0.0001, 0.0001]
     opt_algo = 'adam'
     learning_rate = 0.00001
     batch_size = -1
-    num_round = 3000
+    num_round = 1400
     early_stop_round = 20
     params_2 = {
         'layer_sizes': layer_sizes,
@@ -144,11 +144,11 @@ elif booster == 'net2net_mlp':
         'learning_rate': learning_rate,
         # 'random_seed': 0xFFFF
     }
-    task.net2net_mlp(params_1=params_1, params_2=params_2, batch_size=batch_size, num_round=num_round,
-                     early_stop_round=early_stop_round,
-                     verbose=True, save_log=True, save_model=True, split_cols=2)
-    # task.net2net_mlp_train(params_1=params_1, params_2=params_2, batch_size=batch_size, num_round=num_round, verbose=True,
-    #                        save_model=True, split_cols=2, save_submission=True)
+    # task.net2net_mlp(params_1=params_1, params_2=params_2, batch_size=batch_size, num_round=num_round,
+    #                  early_stop_round=early_stop_round,
+    #                  verbose=True, save_log=True, save_model=True, split_cols=2)
+    task.net2net_mlp_train(params_1=params_1, params_2=params_2, batch_size=batch_size, num_round=num_round, verbose=True,
+                           save_model=True, split_cols=2, save_submission=True)
 
 elif booster == 'mnn':
     layer_sizes = [task.sub_spaces, [32] * len(task.sub_spaces), task.num_class]

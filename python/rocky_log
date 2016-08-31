@@ -254,3 +254,5 @@ layer_sizes = [task.space, 128, task.num_class]
     early_stop_round = 20
 
     [134]	train_score: 1.675315	valid_score: 1.942419
+
+    33436 55443 22113 44336 3343666 5544363
