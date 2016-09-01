@@ -164,7 +164,7 @@ elif booster == 'mnn':
 elif booster == 'embedding':
     model_path = '../model/device_model_multi_layer_perceptron_1.bin'
     # feature_to_predict = 'phone_brand'
-    fea_tmp = feature.multi_feature(name=dataset, dtype='f')
+    fea_tmp = feature.MultiFeature(name=dataset, dtype='f')
     fea_tmp.load()
     data = fea_tmp.get_value()
 

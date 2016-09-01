@@ -693,7 +693,7 @@ def coocur_cluster(path, threshold=0.0):
 
 
 def aggregate_model_cluster(name):
-    fea_tmp = feature.multi_feature(name=name, dtype='f')
+    fea_tmp = feature.MultiFeature(name=name, dtype='f')
     fea_tmp.load()
     indices, values = fea_tmp.get_value()
     models = np.reshape(indices[:, 0], [-1])

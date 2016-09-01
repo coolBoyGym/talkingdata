@@ -3,22 +3,6 @@ from datetime import datetime
 import numpy as np
 
 
-# def num_proc():
-#     return [0] * 10, range(10)
-#
-#
-# def one_hot_proc():
-#     return range(10), [1] * 10
-#
-#
-# def multi_proc():
-#     return [range(x) for x in range(1, 11)], [[1] * x for x in range(1, 11)]
-#
-#
-# def seq_proc():
-#     return None, None
-
-
 def phone_brand_proc(device_id, dict_device_brand_model):
     indices = map(lambda d: dict_device_brand_model[d][0], device_id)
     indices = np.array(indices)
@@ -192,6 +176,7 @@ def installed_app_label_freq_proc(device_id, dict_device_event, dict_app_event, 
         values.append(map(lambda x: tmp[x] * 1.0 / total_freq, sorted_tmp))
     return np.array(indices), np.array(values)
 
+
 def installed_app_label_num_proc(device_id, dict_device_event, dict_app_event, dict_app_label):
     indices = []
     values = []
@@ -216,6 +201,7 @@ def installed_app_label_num_proc(device_id, dict_device_event, dict_app_event, d
         indices.append(sorted_tmp)
         values.append(map(lambda x: tmp[x], sorted_tmp))
     return np.array(indices), np.array(values)
+
 
 def active_app_label_freq_proc(device_id, dict_device_event, dict_app_event, dict_app_label):
     indices = []
@@ -242,6 +228,7 @@ def active_app_label_freq_proc(device_id, dict_device_event, dict_app_event, dic
         values.append(map(lambda x: tmp[x] * 1.0 / total_freq, sorted_tmp))
     return np.array(indices), np.array(values)
 
+
 def active_app_label_num_proc(device_id, dict_device_event, dict_app_event, dict_app_label):
     indices = []
     values = []
@@ -266,6 +253,7 @@ def active_app_label_num_proc(device_id, dict_device_event, dict_app_event, dict
         indices.append(sorted_tmp)
         values.append(map(lambda x: tmp[x], sorted_tmp))
     return np.array(indices), np.array(values)
+
 
 def active_app_label_cluster_40_proc(device_id, dict_device_event, dict_app_event, dict_app_label,
                                      dict_label_cluster_40):
@@ -318,12 +306,13 @@ def active_app_label_cluster_40_num_proc(device_id, dict_device_event, dict_app_
                             tmp[lid_cluster] += 1
                         else:
                             tmp[lid_cluster] = 1
-                        # tmp.add(lid_cluster)
+                            # tmp.add(lid_cluster)
         sorted_tmp = sorted(tmp.keys())
         # total_num = sum(tmp.values())
         indices.append(sorted_tmp)
         values.append(map(lambda x: tmp[x], sorted_tmp))
     return np.array(indices), np.array(values)
+
 
 def active_app_label_cluster_100_proc(device_id, dict_device_event, dict_app_event, dict_app_label,
                                       dict_label_cluster_100):
@@ -436,7 +425,7 @@ def active_app_label_category_num_proc(device_id, dict_device_event, dict_app_ev
                             tmp[lid_group] += 1
                         else:
                             tmp[lid_group] = 1
-                        # tmp.add(lid_group)
+                            # tmp.add(lid_group)
         sorted_tmp = sorted(tmp.keys())
         indices.append(sorted_tmp)
         values.append(map(lambda x: tmp[x], sorted_tmp))
@@ -505,7 +494,7 @@ def active_app_label_each_hour_category_num_proc(device_id, dict_device_event, d
                             tmp[label_hour_index] += 1
                         else:
                             tmp[label_hour_index] = 1
-                        # tmp.add(label_hour_index)
+                            # tmp.add(label_hour_index)
         sorted_tmp = sorted(tmp.keys())
         # total_num = sum(tmp.values())
         indices.append(sorted_tmp)
@@ -597,6 +586,7 @@ def change_hour_2_its_group(x):
         return 3
     else:
         return 4
+
 
 def device_event_num_proc(device_id, dict_device_event):
     values = []
@@ -969,4 +959,3 @@ def event_installed_app_norm_proc(indices, values):
     for v in values:
         norm_values.append(np.float64(v) / len(v))
     return indices, np.array(norm_values)
-

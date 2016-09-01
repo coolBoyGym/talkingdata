@@ -9,6 +9,30 @@ import feature
 DTYPE = tf.float32
 
 
+def str_2_value(str_value):
+    try:
+        return int(str_value)
+    except ValueError:
+        return float(str_value)
+
+
+def general_max(x):
+    tx = type(x).__name__
+    if 'set' in tx or 'list' in tx or 'array' in tx:
+        if len(x) > 0:
+            return max(x)
+    else:
+        return x
+
+
+def wrap_array(x):
+    tx = type(x).__name__
+    if 'set' in tx or 'list' in tx or 'array' in tx:
+        return x
+    else:
+        return [x]
+
+
 def make_submission(path_submission, test_pred):
     test_device_id = np.loadtxt('../data/raw/gender_age_test.csv', skiprows=1, dtype=np.int64)
     with open(path_submission, 'w') as fout:
@@ -18,11 +42,10 @@ def make_submission(path_submission, test_pred):
     print 'output submission file', path_submission
 
 
-def make_feature_model_output(name, pred_list, num_class, dump=True):
-    values = np.vstack(pred_list)
-    indices = np.zeros_like(values, dtype=np.int64) + range(num_class)
-    fea_pred = feature.multi_feature(name=name, dtype='f', space=num_class, rank=num_class, size=len(indices))
-    fea_pred.set_value(indices, values)
+def make_feature_model_output(name, preds, num_class, dump=True):
+    indices = np.zeros_like(preds, dtype=np.int64) + range(num_class)
+    fea_pred = feature.MultiFeature(name=name, dtype='f', space=num_class, rank=num_class, size=len(indices))
+    fea_pred.set_value(indices, preds)
     if dump:
         fea_pred.dump()
     return fea_pred
@@ -93,60 +116,27 @@ def csr_slice(csr_mats, begin, size):
 
 
 def csr_2_coo(csr_mats):
-    if not check_type(csr_mats, 'list'):
-        coo_mat = csr_mats.tocoo()
-        indices = np.transpose(np.vstack((coo_mat.row, coo_mat.col)))
-        values = coo_mat.data
-        shape = csr_mats.shape
-        return indices, values, shape
-    else:
-        indices = []
-        values = []
-        shapes = []
-        for i in range(len(csr_mats)):
-            indices_i, values_i, shape_i = csr_2_coo(csr_mats[i])
-            indices.append(indices_i)
-            values.append(values_i)
-            shapes.append(shape_i)
-        return indices, values, shapes
+    coo_mat = csr_mats.tocoo()
+    indices = np.transpose(np.vstack((coo_mat.row, coo_mat.col)))
+    values = coo_mat.data
+    shape = csr_mats.shape
+    return indices, values, shape
 
 
 def coo_2_csr(coo_indices, coo_values, coo_shapes):
-    if not check_type(coo_indices, 'list'):
-        coo_mat = coo_matrix((coo_values, (coo_indices[:, 0], coo_indices[:, 1])), shape=coo_shapes)
-        return coo_mat.tocsr()
-    else:
-        csr_mats = []
-        for i in range(len(coo_indices)):
-            csr_i = coo_2_csr(coo_indices[i], coo_values[i], coo_shapes[i])
-            csr_mats.append(csr_i)
-        return csr_mats
-
-
-def csr_slice_coo(csr_mats, begin, size):
-    if not check_type(csr_mats, 'list'):
-        csr_slc = csr_slice(csr_mats, begin, size)
-        coo_slc = csr_slc.tocoo()
-        indices = np.transpose(np.vstack((coo_slc.row, coo_slc.col)))
-        values = coo_slc.data
-        shape = csr_slc.shape
-        return indices, values, shape
-    else:
-        indices = []
-        values = []
-        shapes = []
-        for i in range(len(csr_mats)):
-            indices_i, values_i, shape_i = csr_slice_coo(csr_mats[i], begin, size)
-            indices.append(indices_i)
-            values.append(values_i)
-            shapes.append(shape_i)
-        return indices, values, shapes
+    coo_mat = coo_matrix((coo_values, (coo_indices[:, 0], coo_indices[:, 1])), shape=coo_shapes)
+    return coo_mat.tocsr()
 
 
 def feature_slice_inputs(input_types, csr_data, begin, size):
     if check_type(input_types, 'str'):
         if input_types == 'sparse':
-            return csr_slice_coo(csr_data, begin, size)
+            csr_slc = csr_slice(csr_data, begin, size)
+            coo_slc = csr_slc.tocoo()
+            indices = np.transpose(np.vstack((coo_slc.row, coo_slc.col)))
+            values = coo_slc.data
+            shape = csr_slc.shape
+            return indices, values, shape
         else:
             if size == -1:
                 return csr_data[begin:]
@@ -225,6 +215,28 @@ def coo_2_libsvm(coo_indices, coo_values, coo_shape, reorder=False):
         indices.append([])
         values.append([])
     return np.array(indices), np.array(values)
+
+
+def csr_2_feature(name, csr_mat, reorder=False):
+    indices = csr_mat.indices
+    indptr = csr_mat.indptr
+    values = csr_mat.data
+    libsvm_indices = []
+    libsvm_values = []
+    for i in range(csr_mat.shape[0]):
+        libsvm_indices.append(indices[indptr[i]:indptr[i + 1]])
+        libsvm_values.append(values[indptr[i]:indptr[i + 1]])
+    libsvm_indices, libsvm_values = np.array(libsvm_indices), np.array(libsvm_values)
+    fea_csr = feature.MultiFeature(name=name, dtype='f')
+    fea_csr.set_value(indices=libsvm_indices, values=libsvm_values)
+    max_indices = map(utils.general_max, libsvm_indices)
+    len_indices = map(lambda x: len(x), libsvm_values)
+    fea_csr.set_space(max(max_indices) + 1)
+    fea_csr.set_rank(max(len_indices))
+    fea_csr.set_size(len(libsvm_indices))
+    if reorder:
+        fea_csr.reorder()
+    fea_csr.dump()
 
 
 def check_early_stop(valid_scores, early_stop_round, mode, early_stop_precision=0.0001):
@@ -417,10 +429,6 @@ def get_optimizer(opt_algo, learning_rate, loss):
         return tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
 
 
-def get_l1_loss(weights):
-    return tf.reduce_sum(tf.abs(weights))
-
-
 def activate(weights, activation_function):
     if activation_function == 'sigmoid':
         return tf.nn.sigmoid(weights)
@@ -501,7 +509,7 @@ def read_feature(fin, batch_size, num_class):
         tmp_y[int(fields[0])] = 1
         labels.append(tmp_y)
         tmp_i = map(lambda x: int(x.split(':')[0]), fields[1:])
-        tmp_v = map(lambda x: feature.str_2_value(x.split(':')[1]), fields[1:])
+        tmp_v = map(lambda x: str_2_value(x.split(':')[1]), fields[1:])
         indices.append(tmp_i)
         values.append(tmp_v)
     indices = np.array(indices)

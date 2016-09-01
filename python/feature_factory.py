@@ -77,157 +77,157 @@ def gather_event_id():
     np.savetxt('../feature/event_id', event_data, header='%d,%d' % (train_size, test_size), fmt='%d,%d,%d')
 
 
-fea_phone_brand_embedding = feature.multi_feature(name='phone_brand_embedding_1', dtype='f')
-fea_device_model_embedding = feature.multi_feature(name='device_model_embedding_1', dtype='f')
-fea_installed_app_embedding = feature.multi_feature(name='installed_app_embedding_1', dtype='f')
-fea_installed_app_label_embedding = feature.multi_feature(name='installed_app_label_embedding_1', dtype='f')
+fea_phone_brand_embedding = feature.MultiFeature(name='phone_brand_embedding_1', dtype='f')
+fea_device_model_embedding = feature.MultiFeature(name='device_model_embedding_1', dtype='f')
+fea_installed_app_embedding = feature.MultiFeature(name='installed_app_embedding_1', dtype='f')
+fea_installed_app_label_embedding = feature.MultiFeature(name='installed_app_label_embedding_1', dtype='f')
 
-fea_phone_brand = feature.one_hot_feature(name='phone_brand', dtype='d')
-fea_device_model = feature.one_hot_feature(name='device_model', dtype='d')
+fea_phone_brand = feature.OneHotFeature(name='phone_brand', dtype='d')
+fea_device_model = feature.OneHotFeature(name='device_model', dtype='d')
 
-fea_installed_app = feature.multi_feature(name='installed_app', dtype='d')
-fea_active_app = feature.multi_feature(name='active_app', dtype='d')
-fea_installed_app_label = feature.multi_feature(name='installed_app_label', dtype='d')
-fea_installed_app_label_num = feature.multi_feature(name='installed_app_label_num', dtype='d')
-fea_active_app_label = feature.multi_feature(name='active_app_label', dtype='d')
-fea_active_app_label_num = feature.multi_feature(name='active_app_label_num', dtype='d')
-fea_device_long_lat = feature.multi_feature(name='device_long_lat', dtype='f')
-fea_device_event_num = feature.num_feature(name='device_event_num', dtype='d')
-fea_device_day_event_num = feature.multi_feature(name='device_day_event_num', dtype='d')
-fea_device_hour_event_num = feature.multi_feature(name='device_hour_event_num', dtype='d')
-fea_device_day_hour_event_num = feature.multi_feature(name='device_day_hour_event_num', dtype='d')
-fea_device_weekday_event_num = feature.multi_feature(name='device_weekday_event_num', dtype='d')
+fea_installed_app = feature.MultiFeature(name='installed_app', dtype='d')
+fea_active_app = feature.MultiFeature(name='active_app', dtype='d')
+fea_installed_app_label = feature.MultiFeature(name='installed_app_label', dtype='d')
+fea_installed_app_label_num = feature.MultiFeature(name='installed_app_label_num', dtype='d')
+fea_active_app_label = feature.MultiFeature(name='active_app_label', dtype='d')
+fea_active_app_label_num = feature.MultiFeature(name='active_app_label_num', dtype='d')
+fea_device_long_lat = feature.MultiFeature(name='device_long_lat', dtype='f')
+fea_device_event_num = feature.NumFeature(name='device_event_num', dtype='d')
+fea_device_day_event_num = feature.MultiFeature(name='device_day_event_num', dtype='d')
+fea_device_hour_event_num = feature.MultiFeature(name='device_hour_event_num', dtype='d')
+fea_device_day_hour_event_num = feature.MultiFeature(name='device_day_hour_event_num', dtype='d')
+fea_device_weekday_event_num = feature.MultiFeature(name='device_weekday_event_num', dtype='d')
 
-fea_installed_app_freq = feature.multi_feature(name='installed_app_freq', dtype='f')
-fea_active_app_freq = feature.multi_feature(name='active_app_freq', dtype='f')
-fea_installed_app_label_freq = feature.multi_feature(name='installed_app_label_freq', dtype='f')
-fea_active_app_label_freq = feature.multi_feature(name='active_app_label_freq', dtype='f')
-fea_device_long_lat_norm = feature.multi_feature(name='device_long_lat_norm', dtype='f')
-fea_device_event_num_norm = feature.num_feature(name='device_event_num_norm', dtype='f')
-fea_device_day_event_num_norm = feature.multi_feature(name='device_day_event_num_norm', dtype='f')
-fea_device_day_event_num_freq = feature.multi_feature(name='device_day_event_num_freq', dtype='f')
-fea_device_hour_event_num_norm = feature.multi_feature(name='device_hour_event_num_norm', dtype='f')
-fea_device_hour_event_num_freq = feature.multi_feature(name='device_hour_event_num_freq', dtype='f')
-fea_device_day_hour_event_num_norm = feature.multi_feature(name='device_day_hour_event_num_norm', dtype='f')
-fea_device_weekday_event_num_norm = feature.multi_feature(name='device_weekday_event_num_norm', dtype='f')
-fea_device_weekday_event_num_freq = feature.multi_feature(name='device_weekday_event_num_freq', dtype='f')
+fea_installed_app_freq = feature.MultiFeature(name='installed_app_freq', dtype='f')
+fea_active_app_freq = feature.MultiFeature(name='active_app_freq', dtype='f')
+fea_installed_app_label_freq = feature.MultiFeature(name='installed_app_label_freq', dtype='f')
+fea_active_app_label_freq = feature.MultiFeature(name='active_app_label_freq', dtype='f')
+fea_device_long_lat_norm = feature.MultiFeature(name='device_long_lat_norm', dtype='f')
+fea_device_event_num_norm = feature.NumFeature(name='device_event_num_norm', dtype='f')
+fea_device_day_event_num_norm = feature.MultiFeature(name='device_day_event_num_norm', dtype='f')
+fea_device_day_event_num_freq = feature.MultiFeature(name='device_day_event_num_freq', dtype='f')
+fea_device_hour_event_num_norm = feature.MultiFeature(name='device_hour_event_num_norm', dtype='f')
+fea_device_hour_event_num_freq = feature.MultiFeature(name='device_hour_event_num_freq', dtype='f')
+fea_device_day_hour_event_num_norm = feature.MultiFeature(name='device_day_hour_event_num_norm', dtype='f')
+fea_device_weekday_event_num_norm = feature.MultiFeature(name='device_weekday_event_num_norm', dtype='f')
+fea_device_weekday_event_num_freq = feature.MultiFeature(name='device_weekday_event_num_freq', dtype='f')
 
-fea_installed_app_tfidf = feature.multi_feature(name='installed_app_tfidf', dtype='f')
-fea_installed_app_label_tfidf = feature.multi_feature(name='installed_app_label_tfidf', dtype='f')
+fea_installed_app_tfidf = feature.MultiFeature(name='installed_app_tfidf', dtype='f')
+fea_installed_app_label_tfidf = feature.MultiFeature(name='installed_app_label_tfidf', dtype='f')
 
 # new features about app label category
-fea_active_app_label_category = feature.multi_feature(name='active_app_label_category', dtype='d')
-fea_active_app_label_category_num = feature.multi_feature(name='active_app_label_category_num', dtype='d')
-fea_active_app_label_diff_hour_category = feature.multi_feature(name='active_app_label_diff_hour_category', dtype='d')
-fea_active_app_label_diff_hour_category_num = feature.multi_feature(name='active_app_label_diff_hour_category_num',
-                                                                    dtype='d')
-fea_active_app_label_each_hour_category = feature.multi_feature(name='active_app_label_each_hour_category', dtype='d')
-fea_active_app_label_each_hour_category_num = feature.multi_feature(name='active_app_label_each_hour_category_num',
-                                                                    dtype='d')
+fea_active_app_label_category = feature.MultiFeature(name='active_app_label_category', dtype='d')
+fea_active_app_label_category_num = feature.MultiFeature(name='active_app_label_category_num', dtype='d')
+fea_active_app_label_diff_hour_category = feature.MultiFeature(name='active_app_label_diff_hour_category', dtype='d')
+fea_active_app_label_diff_hour_category_num = feature.MultiFeature(name='active_app_label_diff_hour_category_num',
+                                                                   dtype='d')
+fea_active_app_label_each_hour_category = feature.MultiFeature(name='active_app_label_each_hour_category', dtype='d')
+fea_active_app_label_each_hour_category_num = feature.MultiFeature(name='active_app_label_each_hour_category_num',
+                                                                   dtype='d')
 
 # new features about app label cluster
-fea_active_app_label_cluster_40 = feature.multi_feature(name='active_app_label_cluster_40', dtype='d')
-fea_active_app_label_cluster_100 = feature.multi_feature(name='active_app_label_cluster_100', dtype='d')
-fea_active_app_label_cluster_270 = feature.multi_feature(name='active_app_label_cluster_270', dtype='d')
-fea_active_app_label_cluster_40_num = feature.multi_feature(name='active_app_label_cluster_40_num', dtype='d')
+fea_active_app_label_cluster_40 = feature.MultiFeature(name='active_app_label_cluster_40', dtype='d')
+fea_active_app_label_cluster_100 = feature.MultiFeature(name='active_app_label_cluster_100', dtype='d')
+fea_active_app_label_cluster_270 = feature.MultiFeature(name='active_app_label_cluster_270', dtype='d')
+fea_active_app_label_cluster_40_num = feature.MultiFeature(name='active_app_label_cluster_40_num', dtype='d')
 
 # new feature about tf-idf
-fea_active_app_label_category_num_tfidf = feature.multi_feature(name='active_app_label_category_num_tfidf', dtype='f')
-fea_active_app_label_num_tfidf = feature.multi_feature(name='active_app_label_num_tfidf', dtype='f')
-fea_active_app_label_cluster_40_num_tfidf = feature.multi_feature(name='active_app_label_cluster_40_num_tfidf',
-                                                                  dtype='f')
-fea_model_cluster_1 = feature.multi_feature(name='model_cluster_1', dtype='f')
+fea_active_app_label_category_num_tfidf = feature.MultiFeature(name='active_app_label_category_num_tfidf', dtype='f')
+fea_active_app_label_num_tfidf = feature.MultiFeature(name='active_app_label_num_tfidf', dtype='f')
+fea_active_app_label_cluster_40_num_tfidf = feature.MultiFeature(name='active_app_label_cluster_40_num_tfidf',
+                                                                 dtype='f')
+fea_model_cluster_1 = feature.MultiFeature(name='model_cluster_1', dtype='f')
 
 """
 embedding features
 """
 
-fea_installed_app_w2v_8 = feature.multi_feature(name='installed_app_w2v_8', dtype='f')
-fea_installed_app_label_w2v_8 = feature.multi_feature(name='installed_app_label_w2v_8', dtype='f')
-fea_installed_app_w2v_16 = feature.multi_feature(name='installed_app_w2v_16', dtype='f')
-fea_installed_app_label_w2v_16 = feature.multi_feature(name='installed_app_label_w2v_16', dtype='f')
-fea_installed_app_w2v_32 = feature.multi_feature(name='installed_app_w2v_32', dtype='f')
-fea_installed_app_label_w2v_32 = feature.multi_feature(name='installed_app_label_w2v_32', dtype='f')
-fea_installed_app_w2v_64 = feature.multi_feature(name='installed_app_w2v_64', dtype='f')
-fea_installed_app_label_w2v_64 = feature.multi_feature(name='installed_app_label_w2v_64', dtype='f')
-fea_installed_app_w2v_128 = feature.multi_feature(name='installed_app_w2v_128', dtype='f')
-fea_installed_app_label_w2v_128 = feature.multi_feature(name='installed_app_label_w2v_128', dtype='f')
+fea_installed_app_w2v_8 = feature.MultiFeature(name='installed_app_w2v_8', dtype='f')
+fea_installed_app_label_w2v_8 = feature.MultiFeature(name='installed_app_label_w2v_8', dtype='f')
+fea_installed_app_w2v_16 = feature.MultiFeature(name='installed_app_w2v_16', dtype='f')
+fea_installed_app_label_w2v_16 = feature.MultiFeature(name='installed_app_label_w2v_16', dtype='f')
+fea_installed_app_w2v_32 = feature.MultiFeature(name='installed_app_w2v_32', dtype='f')
+fea_installed_app_label_w2v_32 = feature.MultiFeature(name='installed_app_label_w2v_32', dtype='f')
+fea_installed_app_w2v_64 = feature.MultiFeature(name='installed_app_w2v_64', dtype='f')
+fea_installed_app_label_w2v_64 = feature.MultiFeature(name='installed_app_label_w2v_64', dtype='f')
+fea_installed_app_w2v_128 = feature.MultiFeature(name='installed_app_w2v_128', dtype='f')
+fea_installed_app_label_w2v_128 = feature.MultiFeature(name='installed_app_label_w2v_128', dtype='f')
 
 """
 event features
 """
-fea_event_time = feature.multi_feature(name='event_time', dtype='d')
-fea_event_longitude = feature.num_feature(name='event_longitude', dtype='f')
-fea_event_longitude_norm = feature.num_feature(name='event_longitude_norm', dtype='f')
-fea_event_latitude = feature.num_feature(name='event_latitude', dtype='f')
-fea_event_latitude_norm = feature.num_feature(name='event_latitude_norm', dtype='f')
-fea_event_phone_brand = feature.one_hot_feature(name='event_phone_brand', dtype='d')
-fea_event_installed_app = feature.multi_feature(name='event_installed_app', dtype='d')
-fea_event_installed_app_norm = feature.multi_feature(name='event_installed_app_norm', dtype='f')
+fea_event_time = feature.MultiFeature(name='event_time', dtype='d')
+fea_event_longitude = feature.NumFeature(name='event_longitude', dtype='f')
+fea_event_longitude_norm = feature.NumFeature(name='event_longitude_norm', dtype='f')
+fea_event_latitude = feature.NumFeature(name='event_latitude', dtype='f')
+fea_event_latitude_norm = feature.NumFeature(name='event_latitude_norm', dtype='f')
+fea_event_phone_brand = feature.OneHotFeature(name='event_phone_brand', dtype='d')
+fea_event_installed_app = feature.MultiFeature(name='event_installed_app', dtype='d')
+fea_event_installed_app_norm = feature.MultiFeature(name='event_installed_app_norm', dtype='f')
 
 """
 concat features
 """
-fea_concat_1 = feature.multi_feature(name='concat_1', dtype='f')
-fea_concat_1_norm = feature.multi_feature(name='concat_1_norm', dtype='f')
-fea_concat_2 = feature.multi_feature(name='concat_2', dtype='f')
-fea_concat_2_norm = feature.multi_feature(name='concat_2_norm', dtype='f')
-fea_concat_3 = feature.multi_feature(name='concat_3', dtype='f')
-fea_concat_3_norm = feature.multi_feature(name='concat_3_norm', dtype='f')
-fea_concat_4 = feature.multi_feature(name='concat_4', dtype='f')
-fea_concat_4_norm = feature.multi_feature(name='concat_4_norm', dtype='f')
-fea_concat_5 = feature.multi_feature(name='concat_5', dtype='f')
-fea_concat_5_norm = feature.multi_feature(name='concat_5_norm', dtype='f')
-fea_concat_6 = feature.multi_feature(name='concat_6', dtype='d')
-fea_concat_6_norm = feature.multi_feature(name='concat_6_norm', dtype='f')
-fea_concat_7 = feature.multi_feature(name='concat_7', dtype='d')
-fea_concat_7_norm = feature.multi_feature(name='concat_7_norm', dtype='f')
-fea_concat_8 = feature.multi_feature(name='concat_8', dtype='d')
-fea_concat_8_norm = feature.multi_feature(name='concat_8_norm', dtype='f')
-fea_concat_9 = feature.multi_feature(name='concat_9', dtype='d')
-fea_concat_9_norm = feature.multi_feature(name='concat_9_norm', dtype='f')
-fea_ensemble_test = feature.multi_feature(name='ensmeble_test', dtype='f')
+fea_concat_1 = feature.MultiFeature(name='concat_1', dtype='f')
+fea_concat_1_norm = feature.MultiFeature(name='concat_1_norm', dtype='f')
+fea_concat_2 = feature.MultiFeature(name='concat_2', dtype='f')
+fea_concat_2_norm = feature.MultiFeature(name='concat_2_norm', dtype='f')
+fea_concat_3 = feature.MultiFeature(name='concat_3', dtype='f')
+fea_concat_3_norm = feature.MultiFeature(name='concat_3_norm', dtype='f')
+fea_concat_4 = feature.MultiFeature(name='concat_4', dtype='f')
+fea_concat_4_norm = feature.MultiFeature(name='concat_4_norm', dtype='f')
+fea_concat_5 = feature.MultiFeature(name='concat_5', dtype='f')
+fea_concat_5_norm = feature.MultiFeature(name='concat_5_norm', dtype='f')
+fea_concat_6 = feature.MultiFeature(name='concat_6', dtype='d')
+fea_concat_6_norm = feature.MultiFeature(name='concat_6_norm', dtype='f')
+fea_concat_7 = feature.MultiFeature(name='concat_7', dtype='d')
+fea_concat_7_norm = feature.MultiFeature(name='concat_7_norm', dtype='f')
+fea_concat_8 = feature.MultiFeature(name='concat_8', dtype='d')
+fea_concat_8_norm = feature.MultiFeature(name='concat_8_norm', dtype='f')
+fea_concat_9 = feature.MultiFeature(name='concat_9', dtype='d')
+fea_concat_9_norm = feature.MultiFeature(name='concat_9_norm', dtype='f')
+fea_ensemble_test = feature.MultiFeature(name='ensmeble_test', dtype='f')
 
 """
 model outputs, for ensemble use
 """
-fea_concat_1_gblinear_1 = feature.multi_feature(name='concat_1_gblinear_1', dtype='f')
-fea_concat_1_gbtree_1 = feature.multi_feature(name='concat_1_gbtree_1', dtype='f')
-fea_concat_2_gblinear_1 = feature.multi_feature(name='concat_2_gblinear_1', dtype='f')
-fea_concat_2_gbtree_1 = feature.multi_feature(name='concat_2_gbtree_1', dtype='f')
-fea_concat_2_norm_gblinear_1 = feature.multi_feature(name='concat_2_norm_gblinear_1', dtype='f')
-fea_concat_2_norm_gbtree_1 = feature.multi_feature(name='concat_2_norm_gbtree_1', dtype='f')
-fea_concat_3_gblinear_1 = feature.multi_feature(name='concat_3_gblinear_1', dtype='f')
-fea_concat_3_gbtree_1 = feature.multi_feature(name='concat_3_gbtree_1', dtype='f')
-fea_concat_3_norm_gblinear_1 = feature.multi_feature(name='concat_3_norm_gblinear_1', dtype='f')
-fea_concat_3_norm_gbtree_1 = feature.multi_feature(name='concat_3_norm_gbtree_1', dtype='f')
-fea_concat_4_gblinear_1 = feature.multi_feature(name='concat_4_gblinear_1', dtype='f')
-fea_concat_4_gbtree_1 = feature.multi_feature(name='concat_4_gbtree_1', dtype='f')
-fea_concat_4_norm_gblinear_1 = feature.multi_feature(name='concat_4_norm_gblinear_1', dtype='f')
-fea_concat_4_norm_gbtree_1 = feature.multi_feature(name='concat_4_norm_gbtree_1', dtype='f')
-fea_concat_5_gblinear_1 = feature.multi_feature(name='concat_5_gblinear_1', dtype='f')
-fea_concat_5_gbtree_1 = feature.multi_feature(name='concat_5_gbtree_1', dtype='f')
-fea_concat_5_norm_gblinear_1 = feature.multi_feature(name='concat_5_norm_gblinear_1', dtype='f')
-fea_concat_5_norm_gbtree_1 = feature.multi_feature(name='concat_5_norm_gbtree_1', dtype='f')
-fea_concat_6_gbtree_1 = feature.multi_feature(name='concat_6_gbtree_1', dtype='f')
-fea_concat_6_embedding_64_mlp_for_ensemble = feature.multi_feature(name='concat_6_embedding_64_mlp_for_ensemble',
-                                                                   dtype='f')
-fea_concat_6_mlp_136 = feature.multi_feature(name='concat_6_mlp_136', dtype='f')
-fea_concat_6_mlp_for_ensemble = feature.multi_feature(name='concat_6_mlp_for_ensemble', dtype='f')
-fea_concat_6_tfidf_gbtree_1 = feature.multi_feature(name='concat_6_tfidf_gbtree_1', dtype='f')
-fea_concat_7_norm_for_ensemble = feature.multi_feature(name='concat_7_norm_for_ensemble', dtype='f')
-fea_concat_15_mlp_6 = feature.multi_feature(name='concat_15_mlp_6', dtype='f')
-fea_concat_16_mlp_3 = feature.multi_feature(name='concat_16_mlp_3', dtype='f')
-fea_concat_20_mlp_for_ensemble = feature.multi_feature(name='concat_20_mlp_for_ensemble', dtype='f')
-fea_concat_21_mlp_for_ensemble = feature.multi_feature(name='concat_21_mlp_for_ensemble', dtype='f')
-fea_ensemble_5 = feature.multi_feature(name='ensemble_5', dtype='f')
+fea_concat_1_gblinear_1 = feature.MultiFeature(name='concat_1_gblinear_1', dtype='f')
+fea_concat_1_gbtree_1 = feature.MultiFeature(name='concat_1_gbtree_1', dtype='f')
+fea_concat_2_gblinear_1 = feature.MultiFeature(name='concat_2_gblinear_1', dtype='f')
+fea_concat_2_gbtree_1 = feature.MultiFeature(name='concat_2_gbtree_1', dtype='f')
+fea_concat_2_norm_gblinear_1 = feature.MultiFeature(name='concat_2_norm_gblinear_1', dtype='f')
+fea_concat_2_norm_gbtree_1 = feature.MultiFeature(name='concat_2_norm_gbtree_1', dtype='f')
+fea_concat_3_gblinear_1 = feature.MultiFeature(name='concat_3_gblinear_1', dtype='f')
+fea_concat_3_gbtree_1 = feature.MultiFeature(name='concat_3_gbtree_1', dtype='f')
+fea_concat_3_norm_gblinear_1 = feature.MultiFeature(name='concat_3_norm_gblinear_1', dtype='f')
+fea_concat_3_norm_gbtree_1 = feature.MultiFeature(name='concat_3_norm_gbtree_1', dtype='f')
+fea_concat_4_gblinear_1 = feature.MultiFeature(name='concat_4_gblinear_1', dtype='f')
+fea_concat_4_gbtree_1 = feature.MultiFeature(name='concat_4_gbtree_1', dtype='f')
+fea_concat_4_norm_gblinear_1 = feature.MultiFeature(name='concat_4_norm_gblinear_1', dtype='f')
+fea_concat_4_norm_gbtree_1 = feature.MultiFeature(name='concat_4_norm_gbtree_1', dtype='f')
+fea_concat_5_gblinear_1 = feature.MultiFeature(name='concat_5_gblinear_1', dtype='f')
+fea_concat_5_gbtree_1 = feature.MultiFeature(name='concat_5_gbtree_1', dtype='f')
+fea_concat_5_norm_gblinear_1 = feature.MultiFeature(name='concat_5_norm_gblinear_1', dtype='f')
+fea_concat_5_norm_gbtree_1 = feature.MultiFeature(name='concat_5_norm_gbtree_1', dtype='f')
+fea_concat_6_gbtree_1 = feature.MultiFeature(name='concat_6_gbtree_1', dtype='f')
+fea_concat_6_embedding_64_mlp_for_ensemble = feature.MultiFeature(name='concat_6_embedding_64_mlp_for_ensemble',
+                                                                  dtype='f')
+fea_concat_6_mlp_136 = feature.MultiFeature(name='concat_6_mlp_136', dtype='f')
+fea_concat_6_mlp_for_ensemble = feature.MultiFeature(name='concat_6_mlp_for_ensemble', dtype='f')
+fea_concat_6_tfidf_gbtree_1 = feature.MultiFeature(name='concat_6_tfidf_gbtree_1', dtype='f')
+fea_concat_7_norm_for_ensemble = feature.MultiFeature(name='concat_7_norm_for_ensemble', dtype='f')
+fea_concat_15_mlp_6 = feature.MultiFeature(name='concat_15_mlp_6', dtype='f')
+fea_concat_16_mlp_3 = feature.MultiFeature(name='concat_16_mlp_3', dtype='f')
+fea_concat_20_mlp_for_ensemble = feature.MultiFeature(name='concat_20_mlp_for_ensemble', dtype='f')
+fea_concat_21_mlp_for_ensemble = feature.MultiFeature(name='concat_21_mlp_for_ensemble', dtype='f')
+fea_ensemble_5 = feature.MultiFeature(name='ensemble_5', dtype='f')
 
-fea_concat_6_predict_1 = feature.multi_feature(name='concat_6_predict_1', dtype='f')
-fea_concat_6_mlp_143 = feature.multi_feature(name='concat_6_mlp_143', dtype='f')
+fea_concat_6_predict_1 = feature.MultiFeature(name='concat_6_predict_1', dtype='f')
+fea_concat_6_mlp_143 = feature.MultiFeature(name='concat_6_mlp_143', dtype='f')
 
-fea_concat_1_gbtree_1 = feature.multi_feature(name='concat_1_gbtree_1', dtype='f')
-fea_concat_1_gblinear_1 = feature.multi_feature(name='concat_1_gblinear_1', dtype='f')
-fea_concat_1_mlp_100 = feature.multi_feature(name='concat_1_mlp_1', dtype='f')
+fea_concat_1_gbtree_1 = feature.MultiFeature(name='concat_1_gbtree_1', dtype='f')
+fea_concat_1_gblinear_1 = feature.MultiFeature(name='concat_1_gblinear_1', dtype='f')
+fea_concat_1_mlp_100 = feature.MultiFeature(name='concat_1_mlp_1', dtype='f')
 
 
 def make_feature():
@@ -247,12 +247,6 @@ def make_feature():
     # dict_label_cluster_100 = pkl.load(open('../data/dict_label_cluster_100.pkl', 'rb'))
     # dict_label_cluster_270 = pkl.load(open('../data/dict_label_cluster_270.pkl', 'rb'))
 
-    # for i in range(3):
-    #     print dict_device_event[i]
-    #     print "\nA new one!\n"
-    #
-    # exit(0)
-
     # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
 
     print 'finish in %d sec' % (time.time() - start_time)
@@ -271,7 +265,7 @@ def ensemble_concat_feature(name, fea_list):
         spaces.append(fea.get_space())
     print 'spaces', str(spaces)
 
-    fea_concat = feature.multi_feature(name=name)
+    fea_concat = feature.MultiFeature(name=name)
 
     collect_indices = []
     collect_values = []
@@ -289,8 +283,8 @@ def ensemble_concat_feature(name, fea_list):
         tmp_indices = []
         tmp_values = []
         for j in range(len(fea_list)):
-            tmp_indices.extend(feature.get_array(collect_indices[j][i]))
-            tmp_values.extend(feature.get_array(collect_values[j][i]))
+            tmp_indices.extend(utils.wrap_array(collect_indices[j][i]))
+            tmp_values.extend(utils.wrap_array(collect_values[j][i]))
         concat_indices.append(np.array(tmp_indices))
         concat_values.append(tmp_values)
 
@@ -298,7 +292,7 @@ def ensemble_concat_feature(name, fea_list):
     concat_values = np.array(concat_values)
 
     fea_concat.set_value(indices=concat_indices, values=concat_values)
-    max_indices = map(feature.get_max, concat_indices)
+    max_indices = map(utils.general_max, concat_indices)
     len_indices = map(lambda x: len(x), concat_values)
     fea_concat.set_space(max(max_indices) + 1)
     fea_concat.set_rank(max(len_indices))
@@ -322,7 +316,7 @@ def concat_feature(name, fea_list):
     print 'finish in %d sec' % (time.time() - start_time)
     print 'spaces', str(spaces)
 
-    fea_concat = feature.multi_feature(name=name)
+    fea_concat = feature.MultiFeature(name=name)
 
     collect_indices = []
     collect_values = []
@@ -340,8 +334,8 @@ def concat_feature(name, fea_list):
         tmp_indices = []
         tmp_values = []
         for j in range(len(fea_list)):
-            tmp_indices.extend(feature.get_array(collect_indices[j][i]))
-            tmp_values.extend(feature.get_array(collect_values[j][i]))
+            tmp_indices.extend(utils.wrap_array(collect_indices[j][i]))
+            tmp_values.extend(utils.wrap_array(collect_values[j][i]))
         concat_indices.append(np.array(tmp_indices))
         concat_values.append(tmp_values)
 
@@ -352,35 +346,13 @@ def concat_feature(name, fea_list):
     print concat_values
 
     fea_concat.set_value(indices=concat_indices, values=concat_values)
-    max_indices = map(feature.get_max, concat_indices)
+    max_indices = map(utils.general_max, concat_indices)
     len_indices = map(lambda x: len(x), concat_values)
     fea_concat.set_space(max(max_indices) + 1)
     fea_concat.set_rank(max(len_indices))
     fea_concat.set_size(len(concat_indices))
 
     fea_concat.dump(extra=extra)
-
-
-def csr_2_feature(name, csr_mat, reorder=False):
-    indices = csr_mat.indices
-    indptr = csr_mat.indptr
-    values = csr_mat.data
-    libsvm_indices = []
-    libsvm_values = []
-    for i in range(csr_mat.shape[0]):
-        libsvm_indices.append(indices[indptr[i]:indptr[i + 1]])
-        libsvm_values.append(values[indptr[i]:indptr[i + 1]])
-    libsvm_indices, libsvm_values = np.array(libsvm_indices), np.array(libsvm_values)
-    fea_csr = feature.multi_feature(name=name, dtype='f')
-    fea_csr.set_value(indices=libsvm_indices, values=libsvm_values)
-    max_indices = map(feature.get_max, libsvm_indices)
-    len_indices = map(lambda x: len(x), libsvm_values)
-    fea_csr.set_space(max(max_indices) + 1)
-    fea_csr.set_rank(max(len_indices))
-    fea_csr.set_size(len(libsvm_indices))
-    if reorder:
-        fea_csr.reorder()
-    fea_csr.dump()
 
 
 def padding_zero(line, space):
@@ -463,53 +435,18 @@ def average_submissions(name, path_submissions):
 
 def load_sparse_csr(filename):
     loader = np.load(filename)
-    return csr_matrix((loader['data'], loader['indices'], loader['indptr']),
-                      shape=loader['shape'])
-
-
-def process_keras_data(keras_data_name):
-    train_data_csr = load_sparse_csr('../data/' + keras_data_name + '_train_csr.npz')
-    test_data_csr = load_sparse_csr('../data/' + keras_data_name + '_test_csr.npz')
-    train_indices, train_values = utils.csr_2_libsvm(train_data_csr)
-    test_indices, test_values = utils.csr_2_libsvm(test_data_csr)
-    train_device_id = np.loadtxt(data_gender_age_train, delimiter=',', skiprows=1, usecols=[0], dtype=np.int64)
-    dict_device_id = pkl.load(open('../data/dict_id_device.pkl'))
-    dict_device_train = {}
-    for i in range(len(train_device_id)):
-        device_id = train_device_id[i]
-        did = dict_device_id[device_id]
-        dict_device_train[did] = (train_indices[i], train_values[i])
-    device_id = np.loadtxt('../feature/device_id', delimiter=',', skiprows=1, usecols=[0])
-    fea_indices = []
-    fea_values = []
-    for i in range(len(train_device_id)):
-        did = device_id[i]
-        fea_indices.append(dict_device_train[did][0])
-        fea_values.append(np.int64(dict_device_train[did][1]))
-    for i in range(len(train_device_id), len(device_id)):
-        fea_indices.append(test_indices[i - len(train_device_id)])
-        fea_values.append(np.int64(test_values[i - len(train_device_id)]))
-    fea_indices = np.array(fea_indices)
-    fea_values = np.array(fea_values)
-    fea_tmp = feature.multi_feature(name=keras_data_name, dtype='d')
-    fea_tmp.set_value(indices=fea_indices, values=fea_values)
-    max_indices = map(feature.get_max, fea_indices)
-    len_indices = map(lambda x: len(x), fea_values)
-    fea_tmp.set_space(max(max_indices) + 1)
-    fea_tmp.set_rank(max(len_indices))
-    fea_tmp.set_size(len(fea_indices))
-    fea_tmp.dump()
+    return csr_matrix((loader['data'], loader['indices'], loader['indptr']), shape=loader['shape'])
 
 
 def feature_tfidf(name):
-    fea_tmp = feature.multi_feature(name=name, dtype='f')
+    fea_tmp = feature.MultiFeature(name=name, dtype='f')
     fea_tmp.load()
     feature_indices, feature_values = fea_tmp.get_value()
     feature_space = fea_tmp.get_space()
     csr_fea = utils.libsvm_2_csr(feature_indices, feature_values, feature_space)
     csr_tfidf = tf_idf.tf_idf(csr_fea)
     name_out = name + '_tfidf'
-    csr_2_feature(name_out, csr_tfidf, reorder=True)
+    utils.csr_2_feature(name_out, csr_tfidf, reorder=True)
 
 
 def feature_w2v_embedding(fea_raw, model_w2v, order, name):
@@ -534,35 +471,14 @@ def feature_w2v_embedding(fea_raw, model_w2v, order, name):
             values.append([])
     indices = np.array(indices)
     values = np.array(values)
-    fea_out = feature.multi_feature(name=name, dtype='f')
+    fea_out = feature.MultiFeature(name=name, dtype='f')
     fea_out.set_value(indices=indices, values=values)
-    max_indices = map(feature.get_max, indices)
+    max_indices = map(utils.general_max, indices)
     len_indices = map(lambda x: len(x), values)
     fea_out.set_space(max(max_indices) + 1)
     fea_out.set_rank(max(len_indices))
     fea_out.set_size(len(indices))
     fea_out.dump()
-
-
-def make_feature_model_cluster(name):
-    dict_model_clusters = pkl.load(open('../data/' + name + '.pkl'))
-    device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
-    dict_device_brand_model = pkl.load(open('../data/dict_device_brand_model.pkl', 'rb'))
-    values = []
-    for did in device_id:
-        mid = dict_device_brand_model[did][1]
-        cluster = dict_model_clusters[mid]
-        values.append(cluster)
-    values = np.array(values)
-    indices = np.zeros_like(values, dtype=np.int32) + range(12)
-    fea_tmp = feature.multi_feature(name=name, dtype='f')
-    fea_tmp.set_value(indices=indices, values=values)
-    max_indices = map(feature.get_max, indices)
-    len_indices = map(lambda x: len(x), values)
-    fea_tmp.set_space(max(max_indices) + 1)
-    fea_tmp.set_rank(max(len_indices))
-    fea_tmp.set_size(len(indices))
-    fea_tmp.dump()
 
 
 if __name__ == '__main__':

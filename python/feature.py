@@ -1,42 +1,11 @@
 import numpy as np
 
 import feature_impl
+import utils
 
 
-def str_2_value(str_value):
-    try:
-        return int(str_value)
-    except ValueError:
-        return float(str_value)
-
-
-def get_max(x):
-    tx = type(x).__name__
-    if 'set' in tx or 'list' in tx or 'array' in tx:
-        if len(x) > 0:
-            return max(x)
-    else:
-        return x
-
-
-def get_array(x):
-    tx = type(x).__name__
-    if 'set' in tx or 'list' in tx or 'array' in tx:
-        return x
-    else:
-        return [x]
-
-
-class feature:
+class Feature:
     def __init__(self, name=None, ftype=None, dtype=None, space=None, rank=None, size=None):
-        """
-        :param name: identifier, string
-        :param ftype: feature type, string, could be num | one_hot | multi | seq
-        :param dtype: data type, 'f' for np.float64, 'd' for np.int64
-        :param space: dimension of feature space, int
-        :param rank: num of non-zero values, int
-        :param size: data size, int
-        """
         self.__name = name
         self.__ftype = ftype
         self.__dtype = dtype
@@ -153,7 +122,7 @@ class feature:
                 spaces = []
                 ranks = []
                 for fn in fea_names:
-                    fea_tmp = feature(name=fn)
+                    fea_tmp = Feature(name=fn)
                     fea_tmp.load_meta()
                     spaces.append(fea_tmp.get_space())
                     ranks.append(fea_tmp.get_rank())
@@ -164,84 +133,84 @@ class feature:
         return False
 
 
-class num_feature(feature):
+class NumFeature(Feature):
     def __init__(self, name=None, ftype='num', dtype=None, space=1, rank=1, size=None):
-        feature.__init__(self, name, ftype, dtype, space, rank, size)
+        Feature.__init__(self, name, ftype, dtype, space, rank, size)
 
     def load(self):
-        feature.load_meta(self)
+        Feature.load_meta(self)
         with open('../feature/' + self.get_name(), 'r') as fin:
             next(fin)
             data = [line.strip() for line in fin]
-            values = map(str_2_value, data)
+            values = map(utils.str_2_value, data)
             values = np.array(values)
             indices = np.zeros_like(values, dtype=np.int64)
             self.set_value(indices=indices, values=values)
 
     def dump(self, extra=None):
-        feature.dump(self, extra)
+        Feature.dump(self, extra)
         with open('../feature/' + self.get_name(), 'a') as fout:
             _, values = self.get_value()
             for i in range(len(values)):
                 fout.write(str(values[i]))
 
     def process(self, **argv):
-        feature.process(self, **argv)
+        Feature.process(self, **argv)
         self.set_space(1)
         self.set_rank(1)
         self.set_size(len(self.get_value()[0]))
 
 
-class one_hot_feature(feature):
+class OneHotFeature(Feature):
     def __init__(self, name=None, ftype='one_hot', dtype=None, space=None, rank=1, size=None):
-        feature.__init__(self, name, ftype, dtype, space, rank, size)
+        Feature.__init__(self, name, ftype, dtype, space, rank, size)
 
     def load(self):
-        feature.load_meta(self)
+        Feature.load_meta(self)
         with open('../feature/' + self.get_name(), 'r') as fin:
             next(fin)
             data = [line.strip().split(':') for line in fin]
-            indices = map(str_2_value, map(lambda x: x[0], data))
-            values = map(str_2_value, map(lambda x: x[1], data))
+            indices = map(utils.str_2_value, map(lambda x: x[0], data))
+            values = map(utils.str_2_value, map(lambda x: x[1], data))
             indices = np.array(indices)
             values = np.array(values)
             self.set_value(indices=indices, values=values)
 
     def dump(self, extra=None):
-        feature.dump(self, extra)
+        Feature.dump(self, extra)
         with open('../feature/' + self.get_name(), 'a') as fout:
             indices, values = self.get_value()
             for i in range(len(indices)):
                 fout.write(str(indices[i]) + ':' + str(values[i]) + '\n')
 
     def process(self, **argv):
-        feature.process(self, **argv)
+        Feature.process(self, **argv)
         indices, _ = self.get_value()
         self.set_space(np.max(indices) + 1)
         self.set_rank(1)
         self.set_size(len(indices))
 
 
-class multi_feature(feature):
+class MultiFeature(Feature):
     def __init__(self, name=None, ftype='multi', dtype=None, space=None, rank=None, size=None):
-        feature.__init__(self, name, ftype, dtype, space, rank, size)
+        Feature.__init__(self, name, ftype, dtype, space, rank, size)
 
     def load(self):
-        feature.load_meta(self)
+        Feature.load_meta(self)
         with open('../feature/' + self.get_name(), 'r') as fin:
             next(fin)
             indices = []
             values = []
             for line in fin:
                 entry = map(lambda x: x.split(':'), line.strip().split())
-                indices.append(np.array(map(str_2_value, map(lambda x: x[0], entry))))
-                values.append(map(str_2_value, map(lambda x: x[1], entry)))
+                indices.append(np.array(map(utils.str_2_value, map(lambda x: x[0], entry))))
+                values.append(map(utils.str_2_value, map(lambda x: x[1], entry)))
         indices = np.array(indices)
         values = np.array(values)
         self.set_value(indices=indices, values=values)
 
     def dump(self, extra=None):
-        feature.dump(self, extra)
+        Feature.dump(self, extra)
         with open('../feature/' + self.get_name(), 'a') as fout:
             indices, values = self.get_value()
             for i in range(len(indices)):
@@ -252,9 +221,9 @@ class multi_feature(feature):
                 fout.write(line + '\n')
 
     def process(self, **argv):
-        feature.process(self, **argv)
+        Feature.process(self, **argv)
         indices, _ = self.get_value()
-        max_indices = map(get_max, indices)
+        max_indices = map(utils.general_max, indices)
         len_indices = map(lambda x: len(x), indices)
         self.set_space(max(max_indices) + 1)
         self.set_rank(max(len_indices))
@@ -271,12 +240,12 @@ class multi_feature(feature):
         self.set_value(indices=indices, values=values)
 
 
-class seq_feature(feature):
+class SeqFeature(Feature):
     def __init__(self, name=None, ftype='seq', dtype=None, space=None, rank=None, size=None):
-        feature.__init__(self, name, ftype, dtype, space, rank, size)
+        Feature.__init__(self, name, ftype, dtype, space, rank, size)
 
     def load(self):
-        feature.load_meta(self)
+        Feature.load_meta(self)
 
     def dump(self, extra=None):
-        feature.dump(self, extra)
+        Feature.dump(self, extra)
