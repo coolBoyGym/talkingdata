@@ -1117,6 +1117,9 @@
 
 ### xepa
     
+    concat_6_mlp_137
+    443	2.159947	2.159923	2.254529
+    
     concat_6_mlp_163
     params = {
         'layer_sizes': [task.space, 120, task.num_class],
@@ -1156,6 +1159,13 @@
     concat_6_mlp_168:
     num_round = 175
     2.24107
+    
+    concat_6_mlp_169:
+    449	2.172454	2.154156	2.254002
+    
+    concat_6_mlp_170:
+    num_round = 450
+    [449]	loss: 2.190362	train_score: 2.172497	
         
 ### gym
 
