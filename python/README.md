@@ -1186,4 +1186,73 @@
     concat_7_norm_mlp_306.submission
         [1099]	loss: 2.168356	train_score: 2.152228
     
+
+## 16/8/31
+
+### gym
+    
+    concat_7_norm_net2net_mlp_1003:
+    layer_sizes = [task.space, 128, task.num_class]
+    layer_activates = ['relu', None]
+    layer_inits = [('net2:w0', 'net2:b0'), ('res:w1', 'res:b1')]
+    init_path = '../model/concat_6_mlp_100.bin'
+    layer_drops = [0.5, 1]
+    layer_l2 = [0.0001, 0.0001]
+    opt_algo = 'adam'
+    learning_rate = 0.00005
+    batch_size = -1
+    num_round = 2000
+    early_stop_round = 20
+    [293]	loss: 1.728420 	train_score: 1.715787	valid_score: 1.943762
+    final train_score: 2.141415503 final valid_score: 2.25358473689
+    
+    concat_7_norm_net2net_mlp_10004:
+    [299]	loss: 1.756161	train_score: 1.743273
+    
+    
+    concat_7_norm_net2net_mlp_1004:
+    layer_sizes = [task.space, 128, task.num_class]
+    layer_activates = ['relu', None]
+    layer_inits = [('net2:w0', 'net2:b0'), ('res:w1', 'res:b1')]
+    init_path = '../model/concat_6_mlp_100.bin'
+    layer_drops = [0.5, 1]
+    layer_l2 = [0.0001, 0.0001]
+    opt_algo = 'adam'
+    learning_rate = 0.00001
+    batch_size = -1
+    num_round = 2000
+    early_stop_round = 20
+    [1392]	loss: 1.732618 	train_score: 1.720378	valid_score: 1.943924
+    final train_score: 2.14682684797 final valid_score: 2.25360564875
+    
+    
+    
+    concat_7_norm_net2net_mlp_1001:
+    layer_sizes = [task.space, 128, task.num_class]
+    layer_activates = ['relu', None]
+    layer_inits = [('net2:w0', 'net2:b0'), ('res:w1', 'res:b1')]
+    init_path = '../model/concat_6_mlp_100.bin'
+    layer_drops = [0.5, 1]
+    layer_l2 = [0.0001, 0.0001]
+    opt_algo = 'adam'
+    learning_rate = 0.0001
+    batch_size = -1
+    num_round = 2000
+    early_stop_round = 20
+    best iteration:
+    [153]	loss: 1.723677 	train_score: 1.710838	valid_score: 1.943549
+    final train_score: 2.13612675922 final valid_score: 2.25361586924
+    
+    concat_7_norm_net2net_mlp_10001:
+    [159]	loss: 1.750367	train_score: 1.737057
+    
+    concat_7_norm_net2net_mlp_10002:
+    [179]	loss: 1.728591	train_score: 1.713888	
+    score:2.23853
+    
+    concat_7_norm_net2net_mlp_10003:
+    [189]	loss: 1.720827	train_score: 1.705369	
+    score:2.23850
+    
+    
     
