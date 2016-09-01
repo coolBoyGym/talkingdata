@@ -1348,5 +1348,36 @@
     [143]	loss: 1.732394 	train_score: 1.720115	valid_score: 1.943184
     
     
+## 16/9/1
+
+### xepa
     
+    concat_21_net2net_mlp_1069
+        params_1 = {
+            'layer_sizes': [task.space, 64, task.num_class],
+            'layer_activates': ['relu', None],
+            'layer_drops': [0.5, 1],
+            'layer_l2': None,
+            'layer_inits': [('res:w0', 'res:b0'), ('res:w1', 'res:b1')],
+            'init_path': '../model/concat_1_mlp_1001.bin',
+            'opt_algo': 'gd',
+            'learning_rate': 0,
+        }
     
+        params_2 = {
+            'layer_sizes': [task.space, 128, task.num_class],
+            'layer_activates': ['relu', None],
+            'layer_drops': [0.5, 1],
+            'layer_l2': [0.0001, 0.0001],
+            'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
+            'init_path': '../model/concat_6_mlp_100.bin',
+            'opt_algo': 'adam',
+            'learning_rate': 1e-5,
+            'random_seed': 0x0123
+        }
+    
+        batch_size = 1000
+        num_round = 290
+    
+        269	1.722414	1.712202	1.940631
+        score: 2.23734

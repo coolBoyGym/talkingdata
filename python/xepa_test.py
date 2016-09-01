@@ -4,7 +4,7 @@ from task import Task
 
 dataset = 'concat_21'
 booster = 'net2net_mlp'
-version = 1017
+version = 1069
 
 task = Task(dataset, booster, version)
 if booster is 'gblinear':
@@ -146,7 +146,7 @@ elif booster == 'net2net_mlp':
         'layer_drops': [0.5, 1],
         'layer_l2': None,
         'layer_inits': [('res:w0', 'res:b0'), ('res:w1', 'res:b1')],
-        'init_path': '../model/concat_1_mlp_100.bin',
+        'init_path': '../model/concat_1_mlp_1001.bin',
         'opt_algo': 'gd',
         'learning_rate': 0,
     }
@@ -157,23 +157,21 @@ elif booster == 'net2net_mlp':
         'layer_drops': [0.5, 1],
         'layer_l2': [0.0001, 0.0001],
         'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
-        'init_path': None,
+        'init_path': '../model/concat_6_mlp_100.bin',
         'opt_algo': 'adam',
-        'learning_rate': 1e-4,
-        'random_seed': None
+        'learning_rate': 1e-5,
+        'random_seed': 0x0123
     }
 
-    batch_size = -1
-    num_round = 3000
+    batch_size = 1000
+    num_round = 290
     early_stop_round = 20
 
-    for i, sd in enumerate([0, 0x0123, 0x4567, 0x89AB, 0xCDEF, 0xFFFF]):
-        params_2['random_seed'] = sd
-        print params_2['random_seed']
-        params_2['init_path'] = '../model/concat_21_net2net_mlp_%d.bin' % (1011 + i)
-        print params_2['init_path']
-        task.net2net_mlp(params_1=params_1, params_2=params_2, batch_size=batch_size, num_round=num_round,
-                         early_stop_round=early_stop_round, verbose=True, save_log=True, save_model=True, split_cols=2)
-        task.upgrade_version()
-        # task.net2net_mlp_train(params_1=params_1, params_2=params_2, batch_size=batch_size, num_round=num_round,
-        #                        verbose=True, save_model=True, split_cols=2, save_submission=True)
+    # for sd in [0, 0x0123, 0x4567, 0x89AB, 0xCDEF, 0xFFFF]:
+    #     params_2['random_seed'] = sd
+    #     print params_2['random_seed']
+    # task.net2net_mlp(params_1=params_1, params_2=params_2, batch_size=batch_size, num_round=num_round,
+    #                  early_stop_round=early_stop_round, verbose=True, save_log=True, save_model=True, split_cols=2)
+    # task.upgrade_version()
+    task.net2net_mlp_train(params_1=params_1, params_2=params_2, batch_size=batch_size, num_round=num_round,
+                           verbose=True, save_model=True, split_cols=2, save_submission=True)

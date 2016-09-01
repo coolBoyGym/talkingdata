@@ -207,10 +207,11 @@ def draw_two_argument_picture(feature_name, booster_model):
 
 
 if __name__ == '__main__':
-    # path_log = '../model/concat_6_mlp_155.log'
+    # path_log = '../model/concat_21_net2net_mlp_1066.log'
     # plot_train_valid_score(path_log, loss_col=1)
     # plot_xgb_train_valid_score(path_log)
     # 170 lr: 0.1
-    path_logs = ['concat_21_net2net_mlp_%d' % i for i in [1000, 1005, 1006, 1007, 1008, 1009, 1011, 1012, 1013, 1014, 1015, 1016]]
+    # path_logs = ['concat_21_net2net_mlp_%d' % i for i in [1033, 1034, 1035, 1036, 1037, 1038]]
+    path_logs = ['concat_21_net2net_mlp_%d' % i for i in [1044, 1045, 1046, 1047, 1058, 1059, 1060, 1061, 1062, 1063, 1064, 1065, 1066]]
     plot_concat_score(path_logs)
     # plot_multi_score(path_logs)
