@@ -225,6 +225,10 @@ fea_ensemble_5 = feature.multi_feature(name='ensemble_5', dtype='f')
 fea_concat_6_predict_1 = feature.multi_feature(name='concat_6_predict_1', dtype='f')
 fea_concat_6_mlp_143 = feature.multi_feature(name='concat_6_mlp_143', dtype='f')
 
+fea_concat_1_gbtree_1 = feature.multi_feature(name='concat_1_gbtree_1', dtype='f')
+fea_concat_1_gblinear_1 = feature.multi_feature(name='concat_1_gblinear_1', dtype='f')
+fea_concat_1_mlp_100 = feature.multi_feature(name='concat_1_mlp_1', dtype='f')
+
 
 def make_feature():
     print 'loading data...'
@@ -601,10 +605,12 @@ if __name__ == '__main__':
 
     # average_submissions('concat_6_mlp_362', ['../output/concat_6_mlp_%d.submission' % (300 + i) for i in range(50, 60)])
 
-    concat_feature('concat_6_mlp_143_1', [fea_concat_6,
-                                          fea_concat_6_mlp_143])
+    # concat_feature('concat_1_ensemble', [fea_concat_1,
+    #                                      fea_concat_1_mlp_100,
+    #                                      fea_concat_1_gblinear_1,
+    #                                      fea_concat_1_gbtree_1])
     # split_dataset('model_cluster_1')
     # make_feature_model_cluster('model_cluster_1')
     # concat_feature('concat_1_cluster_1', [fea_model_cluster_1,
     #                                       fea_concat_1])
-    split_dataset('concat_6_mlp_143_1', zero_pad=False)
+    split_dataset('concat_1_ensemble_mlp_1', zero_pad=False)

@@ -3,8 +3,6 @@ import math
 import numpy as np
 from scipy.sparse import csr_matrix
 
-import train_impl as ti
-
 
 def normalized_by_row_sum(mat):
     major_axis = 1 if len(mat.shape) == 2 else 0
@@ -51,14 +49,6 @@ def _idf(count_mat):
     feature, occurrence = _counting_occurrence(features)
     init_element = [math.log(float(total_doc_count) / occ) for occ in occurrence]
     return csr_matrix((init_element, (feature, feature)), shape=(count_mat.shape[1], count_mat.shape[1]))
-
-
-if __name__ == '__main__':
-    fin = open('../feature/active_app_label_diff_hour_category_num', 'r')
-    train_indices, train_values, train_shape, train_labels = ti.read_csr_feature(fin, -1)
-    Xtrain = csr_matrix((train_values, (train_indices[:, 0], train_indices[:, 1])), shape=train_shape)
-
-
 
 # element = np.array([1., 1., 1., 4., 1., 1.])
 # row_index = np.array([0, 1, 1, 1, 2, 2])

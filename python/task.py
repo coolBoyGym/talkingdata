@@ -5,7 +5,7 @@ import xgboost as xgb
 from scipy.sparse import vstack
 from sklearn.cross_validation import KFold
 from sklearn.metrics import log_loss
-
+import pandas as pd
 import feature
 import utils
 from model_impl import GBLinear, GBTree, MultiLayerPerceptron, MultiplexNeuralNetwork, TextConvolutionalNeuralNetwork, \
@@ -196,7 +196,9 @@ class Task:
                 train_pred = model.predict(dtrain[0])
                 valid_pred = model.predict(dvalid[0])
                 test_pred = model.predict(dtest[0])
-            utils.make_feature_model_output(self.tag, [train_pred, valid_pred, test_pred], self.num_class)
+                print log_loss(dtrain[-1], train_pred)
+                print log_loss(dvalid[-1], valid_pred)
+            utils.make_feature_model_output(self.tag, [valid_pred, train_pred, test_pred], self.num_class)
         return model
 
     def train(self, dtrain=None, dtest=None, params=None, batch_size=None, num_round=None, verbose=True,
@@ -380,6 +382,78 @@ class Task:
             print test_pred_2.shape
 
             utils.make_submission(self.path_submission, test_pred)
+
+
+    def fea_net_mlp(self, fea_name, dtrain=None, dvalid=None, params_2=None, batch_size=None,num_round=None,
+                    early_stop_round=None, verbose=True, save_log=True, save_model=False, split_cols=0):
+        # fea_task = Task(fea_name, 'mlp', 0)
+        # fea_dtrain = fea_task.load_data(fea_task.path_train_train)
+        # fea_train_data, fea_train_label = fea_dtrain
+
+        fea_path_train = '../input/' + fea_name + '.train'
+        fea_path_test = '../input/' + fea_name + '.test'
+        fea_path_train_train = fea_path_train + '.train'
+        fea_path_train_valid = fea_path_train + '.valid'
+
+        indices, values, labels = utils.read_feature(open(fea_path_train_train), batch_size, self.num_class)
+        fea_train = utils.libsvm_2_feature(indices, values, 12, 'dense')
+        indices, values, labels = utils.read_feature(open(fea_path_train_valid), batch_size, self.num_class)
+        fea_valid = utils.libsvm_2_feature(indices, values, 12, 'dense')
+
+        if dtrain is None:
+            dtrain = self.load_data(self.path_train_train)
+        if dvalid is None:
+            dvalid = self.load_data(self.path_train_valid)
+
+        model_2 = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
+                                       batch_size=batch_size,
+                                       num_round=num_round,
+                                       early_stop_round=early_stop_round,
+                                       verbose=verbose,
+                                       save_log=save_log,
+                                       **params_2)
+
+        train_split_index = utils.split_data_by_col(dtrain[0], self.space, self.sub_spaces, split_cols)
+        dtrain_event_data = dtrain[0][train_split_index[0]]
+        dtrain_event_label = dtrain[1][train_split_index[0]]
+        dtrain_event = [dtrain_event_data, dtrain_event_label]
+        dtrain_no_event_data = dtrain[0][train_split_index[1]]
+
+        valid_split_index = utils.split_data_by_col(dvalid[0], self.space, self.sub_spaces, split_cols)
+        dvalid_event_data = dvalid[0][valid_split_index[0]]
+        dvalid_event_label = dvalid[1][valid_split_index[0]]
+        dvalid_event = [dvalid_event_data, dvalid_event_label]
+        dvalid_no_event_data = dvalid[0][valid_split_index[1]]
+
+        start_time = time.time()
+        model_2.train(dtrain_event, dvalid_event)
+        print 'training time elapsed: %f' % (time.time() - start_time)
+
+        train_pred_1 = fea_train[train_split_index[1]]
+        train_pred_2 = model_2.predict(dtrain_event_data)
+        train_pred = np.zeros([self.train_size, self.num_class])
+        train_pred[train_split_index[0]] = train_pred_2
+        train_pred[train_split_index[1]] = train_pred_1
+        train_score = log_loss(dtrain[-1], train_pred)
+
+        valid_pred_1 = fea_valid[valid_split_index[1]]
+        valid_pred_2 = model_2.predict(dvalid_event_data)
+        valid_pred = np.zeros([self.valid_size, self.num_class])
+        valid_pred[valid_split_index[0]] = valid_pred_2
+        valid_pred[valid_split_index[1]] = valid_pred_1
+        valid_score = log_loss(dvalid[-1], valid_pred)
+
+        print "final train_score:", train_score, "final valid_score:", valid_score
+
+        if save_model:
+            model_2.dump()
+        return model_2
+
+    def sub_net_mlp(self, sub_file, ):
+        sub = pd.read_csv(sub_file)
+        sub = sub.values[:, 1:]
+
+
 
     def predict(self, data=None, model=None, params=None, batch_size=None, save_feature=False):
         if data is None:
