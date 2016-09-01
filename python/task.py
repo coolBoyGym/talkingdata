@@ -9,7 +9,7 @@ from sklearn.metrics import log_loss
 import feature
 import utils
 from model_impl import GBLinear, GBTree, MultiLayerPerceptron, MultiplexNeuralNetwork, TextConvolutionalNeuralNetwork, \
-    ProductNeuralNetworkI, MultiLayerClusterPerceptron
+    ProductNeuralNetworkI, MultiLayerClusterPerceptron, ProductNeuralNetworkISimple
 
 
 class Task:
@@ -99,7 +99,7 @@ class Task:
             values = values[:, num_class:]
             full_data = utils.libsvm_2_feature(indices, values, self.space - num_class, self.input_type)
             data = [full_data, centers, labels]
-        elif self.booster in {'mnn', 'tcnn', 'pnn1'}:
+        elif self.booster in {'mnn', 'tcnn', 'pnn1', 'pnn1s'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             split_indices, split_values = utils.split_feature(indices, values, self.sub_spaces)
             features = utils.libsvm_2_feature(split_indices, split_values, self.sub_spaces, self.sub_input_types)
@@ -174,6 +174,12 @@ class Task:
                                           verbose=verbose,
                                           save_log=save_log,
                                           **params)
+        elif self.booster == 'pnn1s':
+            model = ProductNeuralNetworkISimple(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
+                                                self.num_class,
+                                                batch_size=batch_size, num_round=num_round,
+                                                early_stop_round=early_stop_round, verbose=verbose, save_log=save_log,
+                                                **params)
 
         start_time = time.time()
         model.train(dtrain, dvalid)
@@ -182,9 +188,14 @@ class Task:
         if save_model:
             model.dump()
         if save_feature:
-            train_pred = model.predict(dtrain[0])
-            valid_pred = model.predict(dvalid[0])
-            test_pred = model.predict(dtest[0])
+            if self.booster in {'gbtree', 'gblinear'}:
+                train_pred = model.predict(dtrain)
+                valid_pred = model.predict(dvalid)
+                test_pred = model.predict(dtest)
+            else:
+                train_pred = model.predict(dtrain[0])
+                valid_pred = model.predict(dvalid[0])
+                test_pred = model.predict(dtest[0])
             utils.make_feature_model_output(self.tag, [train_pred, valid_pred, test_pred], self.num_class)
         return model
 
@@ -369,9 +380,6 @@ class Task:
             print test_pred_2.shape
 
             utils.make_submission(self.path_submission, test_pred)
-
-
-
 
     def predict(self, data=None, model=None, params=None, batch_size=None, save_feature=False):
         if data is None:
