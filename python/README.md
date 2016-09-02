@@ -113,6 +113,7 @@
     concat_23_tfidf, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_num_tfidf,fea_active_app_label_num_tfidf,]
     
     concat_24', [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_device_day_event_num_new,fea_device_hour_event_num,fea_device_weekday_event_num]
+
 ### ensemble features
 
     emsemble_1, multi, 42215, 5890
@@ -1368,7 +1369,6 @@
     concat_98_net2net_mlp_100.submission:   [279]	loss: 1.722527	train_score: 1.716836	
     concat_98_net2net_mlp_101.submission    [289]	loss: 1.715111	train_score: 1.708996   score:2.23747 
     
-    
     ####################################################################
     
     concat_21_net2net_mlp_1:
@@ -1412,3 +1412,64 @@
     concat_21_new_net2net_mlp_3:
     'layer_sizes': [task.space, 116, task.num_class]
     [254]	loss: 1.728945 	train_score: 1.719010	valid_score: 1.941433
+    
+    ####################################################################
+    
+    concat_25_net2net_mlp_1:
+    params_2 = {
+        'layer_sizes': [task.space, 128, task.num_class],
+        'layer_activates': ['relu', None],
+        'layer_drops': [0.5, 1],
+        'layer_l2': [0.0001, 0.0001],
+        'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
+        'init_path': '../model/concat_6_mlp_100.bin',
+        'opt_algo': 'adam',
+        'learning_rate': 1e-5,
+        'random_seed': 0x0123
+    }
+    batch_size = 1000
+    [269]	loss: 1.725056 	train_score: 1.714850	valid_score: 1.940963
+    final train_score: 2.14008006837 final valid_score: 2.25274294055
+    
+    #############################
+    
+    concat_25_100_net2net_mlp_1:
+    [269]	loss: 1.723045 	train_score: 1.712836	valid_score: 1.941065
+    final train_score: 2.13940197749 final valid_score: 2.2527842268
+    
+    #############################
+    
+    concat_25_tfidf_net2net_mlp_1:
+    [269]	loss: 1.725690 	train_score: 1.715477	valid_score: 1.941280
+    final train_score: 2.1403496188 final valid_score: 2.2528410597
+    
+    ##############################
+    
+    concat_25_diff_net2net_mlp_1:
+    [242]	loss: 1.733782 	train_score: 1.724386	valid_score: 1.939530
+    final train_score: 2.14350960806 final valid_score: 2.25228614139
+    
+    ##############################
+    
+    concat_25_diff_each_net2net_mlp_1:
+    [200]	loss: 1.737199 	train_score: 1.728920	valid_score: 1.939866
+    final train_score: 2.14583831266 final valid_score: 2.25238817572
+    
+    ##############################
+    
+    concat_25_each_net2net_mlp_1:
+    [206]	loss: 1.739076 	train_score: 1.730639	valid_score: 1.938934
+    concat_25_each_net2net_mlp_1001.submission      [219]	loss: 1.740224	train_score: 1.736015   
+    concat_25_each_net2net_mlp_1002.submission      [229]	loss: 1.732696	train_score: 1.728831	scored 2.23828
+    
+    ##############################
+    
+    concat_25_each_num_net2net_mlp_1:
+    [82]	loss: 1.815359 	train_score: 1.808619	valid_score: 1.953733   
+    final train_score: 2.16927509519 final valid_score: 2.25677855175
+    
+    ##############################
+    
+    concat_25_each_freq_net2net_mlp_1:
+    [269]	loss: 1.722302 	train_score: 1.711961	valid_score: 1.940403
+    final train_score: 2.1391011657 final valid_score: 2.25256728358
