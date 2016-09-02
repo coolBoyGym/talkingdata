@@ -105,7 +105,14 @@
     concat_6_ooee_64,[fea_phone_brand,fea_device_model,fea_installed_app_embedding,fea_installed_app_label_embedding])
     
     concat_71, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_label_category_num_tfidf]
+    
+    concat_23, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app,fea_active_app_label,]
 
+    concat_23_freq, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_freq,fea_active_app_label_freq,]
+
+    concat_23_tfidf, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_num_tfidf,fea_active_app_label_num_tfidf,]
+    
+    concat_24', [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_device_day_event_num_new,fea_device_hour_event_num,fea_device_weekday_event_num]
 ### ensemble features
 
     emsemble_1, multi, 42215, 5890
@@ -983,16 +990,9 @@
         batch_size = 1000
         [25]	loss: 2.090874 	train_score: 2.071044	valid_score: 2.254539
         
-        submission_1:
-            num_round = 25
-            [24]	loss: 2.116322	train_score: 2.096564
-            score:2.24347
-            
-        submission_2:
-            num_round = 28
-            score:2.24513
-            
-            
+        submission_1:   [24]	loss: 2.116322	train_score: 2.096564   score:2.24347
+        submission_2:   num_round = 28                                  score:2.24513
+               
 ## 16/8/28
 
 ### xepa
@@ -1084,34 +1084,13 @@
         best iteration:
         [474]	loss: 2.164691 	train_score: 2.150694	valid_score: 2.254168
         
-    concat_7_norm_mlp_31.submission
-        num_round = 500
-        [499]	loss: 2.184437	train_score: 2.170846
-    
-    concat_7_norm_mlp_32.submission
-        num_round = 600
-        [599]	loss: 2.179643	train_score: 2.165545
-        
-    concat_7_norm_mlp_33.submission
-        num_round = 900
-        [899]	loss: 2.172942	train_score: 2.157660
-    
-    concat_7_norm_mlp_34.submission
-        num_round = 1000
-        [999]	loss: 2.171967	train_score: 2.156395	
-        
-    concat_7_norm_mlp_35.submission
-        num_round = 1500
-        [1499]	loss: 2.158979	train_score: 2.140908
-        
-    concat_7_norm_mlp_36.submission
-        num_round = 1111
-        [1110]	loss: 2.167221	train_score: 2.150921
-        
-    concat_7_norm_mlp_37.submission
-        num_round = 1125
-        [1124]	loss: 2.167855	train_score: 2.151651
-        
+    concat_7_norm_mlp_31.submission     [499]	loss: 2.184437	train_score: 2.170846
+    concat_7_norm_mlp_32.submission     [599]	loss: 2.179643	train_score: 2.165545
+    concat_7_norm_mlp_33.submission     [899]	loss: 2.172942	train_score: 2.157660
+    concat_7_norm_mlp_34.submission     [999]	loss: 2.171967	train_score: 2.156395	
+    concat_7_norm_mlp_35.submission     [1499]	loss: 2.158979	train_score: 2.140908
+    concat_7_norm_mlp_36.submission     [1110]	loss: 2.167221	train_score: 2.150921
+    concat_7_norm_mlp_37.submission     [1124]	loss: 2.167855	train_score: 2.151651
         
 ## 16/8/29
 
@@ -1183,99 +1162,44 @@
         best iteration:
         [474]	loss: 2.164040 	train_score: 2.149917	valid_score: 2.254555
         
-    concat_7_norm_mlp_302.submission   
-        [899]	loss: 2.173916	train_score: 2.158857	
-    
-    concat_7_norm_mlp_303.submission  
-        [1199]	loss: 2.164352	train_score: 2.147757	
-        
-    concat_7_norm_mlp_304.submission     
-        [1299]	loss: 2.163164	train_score: 2.145855	
-        
-    concat_7_norm_mlp_305.submission     
-        [1149]	loss: 2.167131	train_score: 2.150631
-    
-    concat_7_norm_mlp_306.submission
-        [1099]	loss: 2.168356	train_score: 2.152228
-    
+    concat_7_norm_mlp_302.submission        [899]	loss: 2.173916	train_score: 2.158857	
+    concat_7_norm_mlp_303.submission        [1199]	loss: 2.164352	train_score: 2.147757	
+    concat_7_norm_mlp_304.submission        [1299]	loss: 2.163164	train_score: 2.145855	
+    concat_7_norm_mlp_305.submission        [1149]	loss: 2.167131	train_score: 2.150631
+    concat_7_norm_mlp_306.submission        [1099]	loss: 2.168356	train_score: 2.152228
 
 ## 16/8/31
 
 ### gym
     
-    concat_7_norm_net2net_mlp_1003:
-    layer_sizes = [task.space, 128, task.num_class]
-    layer_activates = ['relu', None]
-    layer_inits = [('net2:w0', 'net2:b0'), ('res:w1', 'res:b1')]
-    init_path = '../model/concat_6_mlp_100.bin'
-    layer_drops = [0.5, 1]
-    layer_l2 = [0.0001, 0.0001]
-    opt_algo = 'adam'
-    learning_rate = 0.00005
-    batch_size = -1
-    num_round = 2000
-    early_stop_round = 20
-    [293]	loss: 1.728420 	train_score: 1.715787	valid_score: 1.943762
-    final train_score: 2.141415503 final valid_score: 2.25358473689
-    
-    concat_7_norm_net2net_mlp_10004:
-    [299]	loss: 1.756161	train_score: 1.743273
-    
-    concat_7_norm_net2net_mlp_10005:
-    [379]	loss: 1.717827	train_score: 1.702113	
-    score:2.23855
-    
-     concat_7_norm_net2net_mlp_10006:
-    [349]	loss: 1.732737	train_score: 1.718151	
-    score:2.23859
-    
-    concat_7_norm_net2net_mlp_10007:
-    [350]	loss: 1.731667	train_score: 1.717046	
-    
-    concat_7_norm_net2net_mlp_10008:
-    [352]	loss: 1.731262	train_score: 1.716567
-    
-    concat_7_norm_net2net_mlp_10009:
-    [351]	loss: 1.730523	train_score: 1.715865	
-    score:2.23858
-    
-    
-    concat_7_norm_net2net_mlp_1004:
-    layer_sizes = [task.space, 128, task.num_class]
-    layer_activates = ['relu', None]
-    layer_inits = [('net2:w0', 'net2:b0'), ('res:w1', 'res:b1')]
-    init_path = '../model/concat_6_mlp_100.bin'
-    layer_drops = [0.5, 1]
-    layer_l2 = [0.0001, 0.0001]
-    opt_algo = 'adam'
-    learning_rate = 0.00001
-    batch_size = -1
-    num_round = 2000
-    early_stop_round = 20
-    [1392]	loss: 1.732618 	train_score: 1.720378	valid_score: 1.943924
-    final train_score: 2.14682684797 final valid_score: 2.25360564875
-    
-    
-    
     concat_7_norm_net2net_mlp_1001:
     layer_sizes = [task.space, 128, task.num_class]
-    layer_activates = ['relu', None]
-    layer_inits = [('net2:w0', 'net2:b0'), ('res:w1', 'res:b1')]
-    init_path = '../model/concat_6_mlp_100.bin'
     layer_drops = [0.5, 1]
     layer_l2 = [0.0001, 0.0001]
     opt_algo = 'adam'
     learning_rate = 0.0001
     batch_size = -1
-    num_round = 2000
     early_stop_round = 20
-    best iteration:
     [153]	loss: 1.723677 	train_score: 1.710838	valid_score: 1.943549
-    final train_score: 2.13612675922 final valid_score: 2.25361586924
     
     concat_7_norm_net2net_mlp_10001.submission:     [159]	loss: 1.750367	train_score: 1.737057
     concat_7_norm_net2net_mlp_10002.submission:     [179]	loss: 1.728591	train_score: 1.713888	score:2.23853
     concat_7_norm_net2net_mlp_10003.submission:     [189]	loss: 1.720827	train_score: 1.705369	score:2.23850
+    
+    concat_7_norm_net2net_mlp_1003:
+    learning_rate = 0.00005
+    [293]	loss: 1.728420 	train_score: 1.715787	valid_score: 1.943762
+    
+    concat_7_norm_net2net_mlp_10004.submission:     [299]	loss: 1.756161	train_score: 1.743273 
+    concat_7_norm_net2net_mlp_10005.submission:     [379]	loss: 1.717827	train_score: 1.702113	score:2.23855
+    concat_7_norm_net2net_mlp_10006.submission:     [349]	loss: 1.732737	train_score: 1.718151	score:2.23859
+    concat_7_norm_net2net_mlp_10007.submission:     [350]	loss: 1.731667	train_score: 1.717046	
+    concat_7_norm_net2net_mlp_10008.submission:     [352]	loss: 1.731262	train_score: 1.716567
+    concat_7_norm_net2net_mlp_10009.submission:     [351]	loss: 1.730523	train_score: 1.715865	score:2.23858
+    
+    concat_7_norm_net2net_mlp_1004:
+    learning_rate = 0.00001
+    [1392]	loss: 1.732618 	train_score: 1.720378	valid_score: 1.943924
     
     
 ## 16/9/1
@@ -1294,37 +1218,41 @@
     batch_size = -1
     num_round = 2000
     early_stop_round = 20
+    random_seed = 0xFFFF
     best iteration:
     [153]	loss: 1.723152 	train_score: 1.710305	valid_score: 1.943456
     final train_score: 2.13593308401 final valid_score: 2.25358913296
     
     concat_71_net2net_mlp_103:
     layer_sizes = [task.space, 116, task.num_class]
-    random_seed = 0xFFFF
     [152]	loss: 1.721749 	train_score: 1.708980	valid_score: 1.943065
-    final train_score: 2.1372953267 final valid_score: 2.25344687878
     
     concat_71_net2net_mlp_1001.submission   [159]	loss: 1.756132	train_score: 1.742871	
     concat_71_net2net_mlp_1002.submission   [199]	loss: 1.716101	train_score: 1.700226	
     concat_71_net2net_mlp_1003.submission   [189]	loss: 1.723934	train_score: 1.708764   score:2.23831
     
+    concat_71_net2net_mlp_102:
+    layer_sizes = [task.space, 112, task.num_class]
+    [143]	loss: 1.734905 	train_score: 1.722607	valid_score: 1.943078
+    
+    concat_71_net2net_mlp_110:
+    layer_sizes = [task.space, 124, task.num_class]
+    [143]	loss: 1.732394 	train_score: 1.720115	valid_score: 1.943184
     
     concat_71_net2net_mlp_131:
-    layer_sizes = [task.space, 116, task.num_class]
-    random_seed = 0xFFFF
     layer_drops = [0.4, 1]
     [165]	loss: 1.748037 	train_score: 1.735663	valid_score: 1.942983
     final train_score: 2.14040380616 final valid_score: 2.25334380414
     
     concat_71_net2net_mlp_140:
-    layer_sizes = [task.space, 116, task.num_class]
-    random_seed = 0xFFFF
     layer_drops = [0.43, 1]
+    layer_sizes = [task.space, 116, task.num_class]
     [165]	loss: 1.736320 	train_score: 1.723601	valid_score: 1.942905
-    
+    final train_score: 2.13794178685 final valid_score: 2.25335460668
     concat_71_net2net_mlp_1401.submission   [189]	loss: 1.744763	train_score: 1.730593   score:2.23845
     concat_71_net2net_mlp_1402.submission   [199]	loss: 1.741138	train_score: 1.726356   score:2.23838
     concat_71_net2net_mlp_1403.submission   [209]	loss: 1.730293	train_score: 1.714875   score:2.23830
+    concat_71_net2net_mlp_1404.submission   [229]	loss: 1.716029	train_score: 1.699254   score:2.23829
     
     concat_71_net2net_mlp_141:
     layer_drops = [0.46, 1]
@@ -1333,20 +1261,7 @@
     concat_71_net2net_mlp_142:
     layer_drops = [0.48, 1]
     [152]	loss: 1.727966 	train_score: 1.715396	valid_score: 1.942992
-    
-    concat_71_net2net_mlp_102:
-    layer_sizes = [task.space, 112, task.num_class]
-    [143]	loss: 1.734905 	train_score: 1.722607	valid_score: 1.943078
-    final train_score: 2.14079582777 final valid_score: 2.25342308297
-    
-    concat_71_net2net_mlp_106:
-    layer_sizes = [task.space, 114, task.num_class]
-    [151]	loss: 1.723969 	train_score: 1.711253	valid_score: 1.943199
-    
-    concat_71_net2net_mlp_110:
-    layer_sizes = [task.space, 124, task.num_class]
-    [143]	loss: 1.732394 	train_score: 1.720115	valid_score: 1.943184
-    
+
     
 ## 16/9/1
 
@@ -1381,3 +1296,119 @@
     
         269	1.722414	1.712202	1.940631
         score: 2.23734
+        
+     
+## 16/9/2
+
+### gym 
+
+    concat_99_net2net_mlp_2:
+    layer_sizes = [task.space, 128, task.num_class]
+    layer_activates = ['relu', None]
+    layer_inits = [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')]
+    init_path = '../model/concat_6_mlp_100.bin'
+    layer_drops = [0.4, 1]
+    layer_l2 = [0.0001, 0.0001]
+    opt_algo = 'adam'
+    learning_rate = 1e-5
+    batch_size = 1000
+    num_round = 2000
+    early_stop_round = 20
+    'random_seed': 0xFFFF
+    [309]	loss: 1.739877 	train_score: 1.729924	valid_score: 1.941113
+    
+    concat_99_net2net_mlp_10:
+    'random_seed': 0x0123
+    layer_drops = [0.5, 1]
+    [269]	loss: 1.727663 	train_score: 1.717527	valid_score: 1.940512
+    
+    concat_99_net2net_mlp_1002.submission   [289]	loss: 1.718551	train_score: 1.712578   scored 2.28697
+    concat_99_net2net_mlp_1003.submission   [279]	loss: 1.726285	train_score: 1.720646   scored 2.28703
+    
+    concat_99_net2net_mlp_15:
+    'random_seed': 0x0123
+    layer_drops = [0.4, 1]
+    [326]	loss: 1.736316 	train_score: 1.725670	valid_score: 1.940349
+    
+    concat_99_net2net_mlp_16:
+    'random_seed': 0x0123
+    layer_drops = [0.43, 1]
+    [315]	loss: 1.721411 	train_score: 1.710938	valid_score: 1.940332
+    
+    concat_99_net2net_mlp_18:
+    'random_seed': 0x0123
+    layer_drops = [0.45, 1]
+    [315]	loss: 1.713375 	train_score: 1.702619	valid_score: 1.940393
+    
+    concat_99_net2net_mlp_1001.submission   [329]	loss: 1.712787	train_score: 1.706696	score:2.28689
+    
+    concat_99_net2net_mlp_19:
+    'random_seed': 0x0123
+    layer_drops = [0.47, 1]
+    [289]	loss: 1.724820 	train_score: 1.714457	valid_score: 1.940471
+    
+    ####################################################################
+    
+    concat_98_net2net_mlp_1:
+    params_2 = {
+        'layer_sizes': [task.space, 128, task.num_class],
+        'layer_activates': ['relu', None],
+        'layer_drops': [0.5, 1],
+        'layer_l2': [0.0001, 0.0001],
+        'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
+        'init_path': '../model/concat_6_mlp_100.bin',
+        'opt_algo': 'adam',
+        'learning_rate': 1e-5,
+        'random_seed': 0x0123
+    }
+    batch_size = 1000
+    [269]	loss: 1.722989 	train_score: 1.712769	valid_score: 1.941018
+    final train_score: 2.13940759809 final valid_score: 2.2527772269
+    
+    concat_98_net2net_mlp_100.submission:   [279]	loss: 1.722527	train_score: 1.716836	
+    concat_98_net2net_mlp_101.submission    [289]	loss: 1.715111	train_score: 1.708996   score:2.23747 
+    
+    
+    ####################################################################
+    
+    concat_21_net2net_mlp_1:
+    params_2 = {
+        'layer_sizes': [task.space, 128, task.num_class],
+        'layer_activates': ['relu', None],
+        'layer_drops': [0.5, 1],
+        'layer_l2': [0.0001, 0.0001],
+        'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
+        'init_path': '../model/concat_6_mlp_100.bin',
+        'opt_algo': 'adam',
+        'learning_rate': 1e-5,
+        'random_seed': 0x0123
+    }
+    batch_size = 1000
+    [269]	loss: 1.722414 	train_score: 1.712202	valid_score: 1.940631
+    final train_score: 2.13917025592 final valid_score: 2.25265064897
+    
+    ####################################################################
+    
+    concat_21_new_net2net_mlp_1:
+    params_2 = {
+        'layer_sizes': [task.space, 128, task.num_class],
+        'layer_activates': ['relu', None],
+        'layer_drops': [0.5, 1],
+        'layer_l2': [0.0001, 0.0001],
+        'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
+        'init_path': '../model/concat_6_mlp_100.bin',
+        'opt_algo': 'adam',
+        'learning_rate': 1e-5,
+        'random_seed': 0x0123
+    }
+    batch_size = 1000
+    [269]	loss: 1.722525 	train_score: 1.712317	valid_score: 1.940624
+    final train_score: 2.13921211475 final valid_score: 2.25264669763
+    
+    concat_21_new_net2net_mlp_2:
+    'layer_sizes': [task.space, 100, task.num_class]
+    [267]	loss: 1.724907 	train_score: 1.715026	valid_score: 1.942293
+    
+    concat_21_new_net2net_mlp_3:
+    'layer_sizes': [task.space, 116, task.num_class]
+    [254]	loss: 1.728945 	train_score: 1.719010	valid_score: 1.941433
