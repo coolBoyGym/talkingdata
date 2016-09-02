@@ -229,7 +229,7 @@ def csr_2_feature(name, csr_mat, reorder=False):
     libsvm_indices, libsvm_values = np.array(libsvm_indices), np.array(libsvm_values)
     fea_csr = feature.MultiFeature(name=name, dtype='f')
     fea_csr.set_value(indices=libsvm_indices, values=libsvm_values)
-    max_indices = map(utils.general_max, libsvm_indices)
+    max_indices = map(general_max, libsvm_indices)
     len_indices = map(lambda x: len(x), libsvm_values)
     fea_csr.set_space(max(max_indices) + 1)
     fea_csr.set_rank(max(len_indices))

@@ -85,6 +85,30 @@ def installed_app_freq_proc(device_id, dict_device_event, dict_app_event):
     return np.array(indices), np.array(values)
 
 
+def active_app_num_proc(device_id, dict_device_event, dict_app_event):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = {}
+        for e in events:
+            eid = e[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][1]:
+                    if aid in tmp:
+                        tmp[aid] += 1
+                    else:
+                        tmp[aid] = 1
+        sorted_aid = sorted(tmp)
+        indices.append(sorted_aid)
+        values.append(map(lambda x: tmp[x], sorted_aid))
+    return np.array(indices), np.array(values)
+
+
 def active_app_freq_proc(device_id, dict_device_event, dict_app_event):
     indices = []
     values = []
