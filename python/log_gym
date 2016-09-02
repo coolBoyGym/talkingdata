@@ -135,3 +135,10 @@ dict_device_event中数据的格式为： [(3164698, '2016-05-06 23:47:05', 0.0,
 
 训练停止时如果曲线末端呈现出抖动的状态 可以降低learning rate继续训练 但注意要逐步降低 不断优化 而不能一下子降到底
 
+
+2016.9.1 Thu
+
+在使用net2net进行训练时 以valid上的得分为标准 valid上的提升才是真正的提升
+drop layer_sizes learning_rate batch_size 都是可以调的参数
+
+
