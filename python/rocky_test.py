@@ -35,16 +35,16 @@ elif booster == 'gbtree':
 elif booster == 'mlp':
     layer_sizes = [task.space, 64, task.num_class]
     layer_activates = ['relu', None]
-    layer_inits = [('res:w0', 'res:b0'), ('res:w1', 'res:b1')]
+    layer_inits = [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')]
     # layer_inits = [('normal', 'zero'), ('normal', 'zero')]
-    init_path = '../model/concat_1_ensemble_mlp_1.bin'
+    init_path = '../model/concat_1_mlp_1.bin'
     # init_path = None
     layer_drops = [0.5, 1]
     layer_l2 = [0.0001, 0.0001]
-    opt_algo = 'gd'
-    learning_rate = 0
+    opt_algo = 'adam'
+    learning_rate = 1e-4
     batch_size = -1
-    num_round = 1
+    num_round = 2000
     early_stop_round = 20
 
     params = {
@@ -56,6 +56,7 @@ elif booster == 'mlp':
         'init_path': init_path,
         'opt_algo': opt_algo,
         'learning_rate': learning_rate,
+        'random_seed': 0
     }
     #
     # layer_sizes = [task.space, 64, 128, task.num_class]
@@ -75,8 +76,13 @@ elif booster == 'mlp':
     #     'learning_rate': learning_rate,
     # }
 
+    # for sd in [0, 0x0123, 0x4567, 0x89AB, 0xCDEF, 0xFFFF]:
+    #     params['random_seed'] = sd
+    #     print sd
     task.tune(params=params, batch_size=batch_size, num_round=num_round, early_stop_round=early_stop_round,
               verbose=True, save_log=True, save_model=True, dtest=None, save_feature=True)
+    task.upgrade_version()
+
     # task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_model=True,
     #            save_submission=True)
 
@@ -130,7 +136,7 @@ elif booster == 'net2net_mlp':
     layer_l2 = [0.0001, 0.0001]
     opt_algo = 'adam'
     learning_rate = 0.00001
-    batch_size = -1
+    batch_size = 1000
     num_round = 3000
     early_stop_round = 20
     params_2 = {
@@ -150,8 +156,8 @@ elif booster == 'net2net_mlp':
     # task.net2net_mlp_train(params_1=params_1, params_2=params_2, batch_size=batch_size, num_round=num_round, verbose=True,
     #                        save_model=True, split_cols=2, save_submission=True)
     task.fea_net_mlp(fea_name='concat_1_ensemble_mlp_1', params_2=params_2, batch_size=batch_size, num_round=num_round,
-                                       early_stop_round=early_stop_round,
-                                       verbose=True, save_log=True, save_model=True, split_cols=2)
+                     early_stop_round=early_stop_round,
+                     verbose=True, save_log=True, save_model=True, split_cols=2)
 
 elif booster == 'mnn':
     layer_sizes = [task.sub_spaces, [32] * len(task.sub_spaces), task.num_class]

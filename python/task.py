@@ -1,5 +1,5 @@
 import time
-
+import pandas as pd
 import numpy as np
 import xgboost as xgb
 from scipy.sparse import vstack
@@ -352,9 +352,9 @@ class Task:
         fea_path_train_train = fea_path_train + '.train'
         fea_path_train_valid = fea_path_train + '.valid'
 
-        indices, values, labels = utils.read_feature(open(fea_path_train_train), batch_size, self.num_class)
+        indices, values, labels = utils.read_feature(open(fea_path_train_train), -1, self.num_class)
         fea_train = utils.libsvm_2_feature(indices, values, 12, 'dense')
-        indices, values, labels = utils.read_feature(open(fea_path_train_valid), batch_size, self.num_class)
+        indices, values, labels = utils.read_feature(open(fea_path_train_valid), -1, self.num_class)
         fea_valid = utils.libsvm_2_feature(indices, values, 12, 'dense')
 
         if dtrain is None:
@@ -405,6 +405,52 @@ class Task:
         if save_model:
             model_2.dump()
         return model_2
+
+
+    def sub_net_mlp(self, sub_file, dtrain=None, dtest=None, params_2=None, batch_size=None, num_round=None,
+                    verbose=True, save_log=True, save_model=False, split_cols=0, save_submission=True):
+        sub = pd.read_csv(sub_file)
+        sub = sub.values[:, 1:]
+        if dtrain is None:
+            dtrain = self.load_data(self.path_train)
+        if dtest is None:
+            dtest = self.load_data(self.path_test)
+        model_2 = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
+                                       batch_size=batch_size,
+                                       num_round=num_round,
+                                       verbose=verbose,
+                                       save_log=save_log,
+                                       **params_2)
+        train_split_index = utils.split_data_by_col(dtrain[0], self.space, self.sub_spaces, split_cols)
+        dtrain_event_data = dtrain[0][train_split_index[0]]
+        dtrain_event_label = dtrain[1][train_split_index[0]]
+        dtrain_event = [dtrain_event_data, dtrain_event_label]
+        dtrain_no_event_data = dtrain[0][train_split_index[1]]
+
+        test_split_index = utils.split_data_by_col(dtest[0], self.space, self.sub_spaces, split_cols)
+        dtest_event_data = dtest[0][test_split_index[0]]
+        dtest_event_label = dtest[1][test_split_index[0]]
+        dtest_event = [dtest_event_data, dtest_event_label]
+        dtest_no_event_data = dtest[0][test_split_index[1]]
+
+        start_time = time.time()
+        model_2.train(dtrain_event)
+        print 'time elapsed: %f' % (time.time() - start_time)
+
+        if save_model:
+            model_2.dump()
+        if save_submission:
+            test_pred_1 = sub[test_split_index[1]]
+            test_pred_2 = model_2.predict(dtest_event_data)
+            test_pred = np.zeros([self.test_size, self.num_class], dtype=np.float32)
+            test_pred[test_split_index[0]] = test_pred_2
+            test_pred[test_split_index[1]] = test_pred_1
+            print test_pred.shape
+            print test_pred_1.shape
+            print test_pred_2.shape
+
+            utils.make_submission(self.path_submission, test_pred)
+
 
     def predict(self, data=None, model=None, params=None, batch_size=None, save_feature=False):
         if data is None:
