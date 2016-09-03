@@ -1297,8 +1297,35 @@
         269	1.722414	1.712202	1.940631
         score: 2.23734
         
-     
+        
 ## 16/9/2
+
+### xepa
+        params_2 = {
+            'layer_sizes': [task.space, 128, task.num_class],
+            'layer_activates': ['relu', None],
+            'layer_drops': [0.5, 1],
+            'layer_l2': [0.0001, 0.0001],
+            'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
+            'init_path': '../model/concat_6_mlp_100.bin',
+            'opt_algo': 'adam',
+            'learning_rate': 1e-5,
+            'random_seed': 0x0123
+        }
+        batch_size = 1000
+        num_round = 2000
+        early_stop_round = 20
+    concat_23_mlp_30:
+        [193]	train_score: 1.706871	valid_score: 1.940306
+        final train_score: 2.13749245701 final valid_score: 2.25251861504
+        
+    concat_23_freq_mlp_31:
+        [242]	train_score: 1.707667	valid_score: 1.939663
+        final train_score: 2.13771065742 final valid_score: 2.25231841966
+        
+    concat_23_tfidf_mlp_32:
+        [229]	train_score: 1.706540	valid_score: 1.941141
+        final train_score: 2.13833565533 final valid_score: 2.25278725578
 
 ### gym 
 

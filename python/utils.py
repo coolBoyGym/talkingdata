@@ -532,3 +532,17 @@ def split_data_by_col(data, spaces, sub_spaces, split_cols):
         return np.array(ids_1), np.array(ids_2)
     else:
         return split_data_by_col(data[split_cols], spaces[split_cols], [spaces[split_cols]], 0)
+
+
+def split_data(data, ind_list):
+    data_list = []
+    for i in range(len(ind_list)):
+        data_list.append([data[0][ind_list[i]], data[1][ind_list[i]]])
+    return data_list
+
+
+def merge_predict(data_list, model_list, ind_list, shape):
+    preds = np.zeros(shape)
+    for i in range(len(data_list)):
+        preds[ind_list[i]] = model_list[i].predict(data_list[i][0])
+    return preds

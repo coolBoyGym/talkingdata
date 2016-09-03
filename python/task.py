@@ -1,6 +1,7 @@
 import time
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 import xgboost as xgb
 from scipy.sparse import vstack
 from sklearn.cross_validation import KFold
@@ -240,12 +241,14 @@ class Task:
                 self.upgrade_version()
 
     def net2net_mlp(self, dtrain=None, dvalid=None, params_1=None, params_2=None, batch_size=None, num_round=None,
-                    early_stop_round=None,
-                    verbose=True, save_log=True, save_model=False, split_cols=0):
+                    early_stop_round=None, verbose=True, save_log=True, save_model=False, split_cols=0, dtest=None,
+                    save_feature=False):
         if dtrain is None:
             dtrain = self.load_data(self.path_train_train)
         if dvalid is None:
             dvalid = self.load_data(self.path_train_valid)
+        if dtest is None and save_feature:
+            dtest = self.load_data(self.path_test)
 
         model_1 = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                        batch_size=batch_size,
@@ -260,39 +263,34 @@ class Task:
                                        **params_2)
 
         train_split_index = utils.split_data_by_col(dtrain[0], self.space, self.sub_spaces, split_cols)
-        dtrain_event_data = dtrain[0][train_split_index[0]]
-        dtrain_event_label = dtrain[1][train_split_index[0]]
-        dtrain_event = [dtrain_event_data, dtrain_event_label]
-        dtrain_no_event_data = dtrain[0][train_split_index[1]]
+        dtrain_event, dtrain_no_event = utils.split_data(dtrain, train_split_index)
 
         valid_split_index = utils.split_data_by_col(dvalid[0], self.space, self.sub_spaces, split_cols)
-        dvalid_event_data = dvalid[0][valid_split_index[0]]
-        dvalid_event_label = dvalid[1][valid_split_index[0]]
-        dvalid_event = [dvalid_event_data, dvalid_event_label]
-        dvalid_no_event_data = dvalid[0][valid_split_index[1]]
+        dvalid_event, dvalid_no_event = utils.split_data(dvalid, valid_split_index)
 
         start_time = time.time()
         model_2.train(dtrain_event, dvalid_event)
         print 'training time elapsed: %f' % (time.time() - start_time)
 
-        train_pred_1 = model_1.predict(dtrain_no_event_data)
-        train_pred_2 = model_2.predict(dtrain_event_data)
-        train_pred = np.zeros([self.train_size, self.num_class])
-        train_pred[train_split_index[0]] = train_pred_2
-        train_pred[train_split_index[1]] = train_pred_1
+        train_pred = utils.merge_predict([dtrain_event, dtrain_no_event], [model_2, model_1], train_split_index,
+                                         [self.train_size, self.num_class])
         train_score = log_loss(dtrain[-1], train_pred)
 
-        valid_pred_1 = model_1.predict(dvalid_no_event_data)
-        valid_pred_2 = model_2.predict(dvalid_event_data)
-        valid_pred = np.zeros([self.valid_size, self.num_class])
-        valid_pred[valid_split_index[0]] = valid_pred_2
-        valid_pred[valid_split_index[1]] = valid_pred_1
+        valid_pred = utils.merge_predict([dvalid_event, dvalid_no_event], [model_2, model_1], valid_split_index,
+                                         [self.valid_size, self.num_class])
         valid_score = log_loss(dvalid[-1], valid_pred)
 
         print "final train_score:", train_score, "final valid_score:", valid_score
 
         if save_model:
             model_2.dump()
+        if save_feature:
+            test_split_index = utils.split_data_by_col(dtest[0], self.space, self.sub_spaces, split_cols)
+            dtest_event, dtest_no_event = utils.split_data(dtest, test_split_index)
+            test_pred = utils.merge_predict([dtest_event, dtest_no_event], [model_2, model_1], test_split_index,
+                                            [self.test_size, self.num_class])
+            preds = np.vstack((valid_pred, train_pred, test_pred))
+            utils.make_feature_model_output(self.tag, preds, self.num_class)
         return model_2
 
     def net2net_mlp_train(self, dtrain=None, dtest=None, params_1=None, params_2=None, batch_size=None, num_round=None,
@@ -406,7 +404,6 @@ class Task:
             model_2.dump()
         return model_2
 
-
     def sub_net_mlp(self, sub_file, dtrain=None, dtest=None, params_2=None, batch_size=None, num_round=None,
                     verbose=True, save_log=True, save_model=False, split_cols=0, save_submission=True):
         sub = pd.read_csv(sub_file)
@@ -450,7 +447,6 @@ class Task:
             print test_pred_2.shape
 
             utils.make_submission(self.path_submission, test_pred)
-
 
     def predict(self, data=None, model=None, params=None, batch_size=None, save_feature=False):
         if data is None:
