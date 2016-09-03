@@ -529,6 +529,42 @@ def active_app_label_each_hour_category_num_proc(device_id, dict_device_event, d
     return np.array(indices), np.array(values)
 
 
+def active_app_label_each_hour_category_freq_proc(device_id, dict_device_event, dict_app_event, dict_app_label,
+                                                  dict_label_category_group):
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = {}
+        for e in events:
+            eid = e[0]
+            # event_hour: the accurate part of hour when this event happen
+            event_hour = get_time(e[1], ['hour'])[0]
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][1]:
+                    for lid in dict_app_label[aid]:
+                        lid_group = dict_label_category_group[lid]
+                        label_hour_index = event_hour * 19 + lid_group
+                        if label_hour_index in tmp:
+                            tmp[label_hour_index] += 1
+                        else:
+                            tmp[label_hour_index] = 1
+                            # tmp.add(label_hour_index)
+
+        sorted_tmp = sorted(tmp.keys())
+        total_num = sum(tmp.values())
+        indices.append(sorted_tmp)
+        values.append(map(lambda x: tmp[x] * 1.0 / total_num, sorted_tmp))
+        # indices.append(sorted(tmp))
+        # values.append([1] * len(tmp))
+
+    return np.array(indices), np.array(values)
+
+
 def active_app_label_diff_hour_category_proc(device_id, dict_device_event, dict_app_event, dict_app_label,
                                              dict_label_category_group):
     # N hour parts * 19 group numbers
@@ -593,6 +629,42 @@ def active_app_label_diff_hour_category_num_proc(device_id, dict_device_event, d
         sorted_tmp = sorted(tmp.keys())
         indices.append(sorted_tmp)
         values.append(map(lambda x: tmp[x], sorted_tmp))
+
+    return np.array(indices), np.array(values)
+
+
+def active_app_label_diff_hour_category_freq_proc(device_id, dict_device_event, dict_app_event, dict_app_label,
+                                                  dict_label_category_group):
+    # N hour parts * 19 group numbers
+    indices = []
+    values = []
+    for did in device_id:
+        if did not in dict_device_event:
+            indices.append([])
+            values.append([])
+            continue
+        events = dict_device_event[did]
+        tmp = {}
+        for e in events:
+            eid = e[0]
+            # event_hour: the accurate part of hour when this event happen
+            event_hour = change_hour_2_its_group(get_time(e[1], ['hour'])[0])
+            if eid in dict_app_event:
+                for aid in dict_app_event[eid][1]:
+                    for lid in dict_app_label[aid]:
+                        lid_group = dict_label_category_group[lid]
+                        label_hour_index = event_hour * 19 + lid_group
+                        if label_hour_index in tmp:
+                            tmp[label_hour_index] += 1
+                        else:
+                            tmp[label_hour_index] = 1
+        # sorted_tmp = sorted(tmp.keys())
+        # indices.append(sorted_tmp)
+        # values.append(map(lambda x: tmp[x], sorted_tmp))
+        sorted_tmp = sorted(tmp.keys())
+        total_num = sum(tmp.values())
+        indices.append(sorted_tmp)
+        values.append(map(lambda x: tmp[x] * 1.0 / total_num, sorted_tmp))
 
     return np.array(indices), np.array(values)
 
