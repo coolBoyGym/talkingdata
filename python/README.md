@@ -1357,9 +1357,15 @@
         [193]	train_score: 1.706871	valid_score: 1.940306
         final train_score: 2.13749245701 final valid_score: 2.25251861504
         
-    concat_23_freq_mlp_31:
-        [242]	train_score: 1.707667	valid_score: 1.939663
+    concat_23_freq_mlp_39:
+        [242]	1.717914	1.707667	1.939663
         final train_score: 2.13771065742 final valid_score: 2.25231841966
+
+    concat_23_freq_net2net_mlp_43
+    [259]	loss: 1.717354	train_score: 1.710415	
+    batch_size = 1000
+    num_round = 260
+    score: 2.23690
         
     concat_23_tfidf_mlp_32:
         [229]	train_score: 1.706540	valid_score: 1.941141
