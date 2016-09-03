@@ -529,4 +529,4 @@ if __name__ == '__main__':
     # make_feature_model_cluster('model_cluster_1')
     # concat_feature('concat_1_cluster_1', [fea_model_cluster_1,
     #                                       fea_concat_1])
-    split_dataset('concat_1_ensemble_mlp_1', zero_pad=False)
+    split_dataset('concat_1_mlp_100')

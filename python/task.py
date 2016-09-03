@@ -89,10 +89,10 @@ class Task:
             num_class = self.num_class
         if self.booster in {'gblinear', 'gbtree'}:
             data = xgb.DMatrix(path)
-        elif self.booster in {'mlp', 'net2net_mlp', 'predict'}:
+        elif self.booster in {'mlp', 'net2net_mlp', 'predict', 'none'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             data = [utils.libsvm_2_feature(indices, values, self.space, self.input_type), labels]
-        elif self.booster in {'mnn'}:
+        elif self.booster in {'mnn', 'net2net_mnn'}:
             indices, values, labels = utils.read_feature(open(path), batch_size, num_class)
             split_indices, split_values = utils.split_feature(indices, values, self.sub_spaces)
             features = utils.libsvm_2_feature(split_indices, split_values, self.sub_spaces, self.sub_input_types)
@@ -100,7 +100,8 @@ class Task:
         print 'load data', path, time.time() - start_time
         return data
 
-    def tune(self, dtrain=None, dvalid=None, params=None, batch_size=None, num_round=None, early_stop_round=None,
+    def tune(self, dtrain=None, dvalid=None, params=None, batch_size=None, num_round=None,
+             early_stop_round=None,
              verbose=True, save_log=True, save_model=False, dtest=None, save_feature=False):
         if dtrain is None:
             dtrain = self.load_data(self.path_train_train)
@@ -123,7 +124,7 @@ class Task:
                            early_stop_round=early_stop_round,
                            verbose=verbose,
                            **params)
-        elif self.booster == 'mlp':
+        elif self.booster == 'mlp' or self.booster == 'net2net_mlp':
             model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                          batch_size=batch_size,
                                          num_round=num_round,
@@ -131,7 +132,7 @@ class Task:
                                          verbose=verbose,
                                          save_log=save_log,
                                          **params)
-        elif self.booster == 'mnn':
+        elif self.booster == 'mnn' or self.booster == 'net2net_mnn':
             model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
                                            self.num_class,
                                            batch_size=batch_size,
@@ -164,7 +165,7 @@ class Task:
               save_log=True, save_model=False, save_submission=True):
         if dtrain is None:
             dtrain = self.load_data(self.path_train)
-        if dtest is None:
+        if dtest is None and save_submission:
             dtest = self.load_data(self.path_test)
         if self.booster == 'gblinear':
             print 'param [batch_size] will not be used'
@@ -178,14 +179,14 @@ class Task:
                            num_round=num_round,
                            verbose=verbose,
                            **params)
-        elif self.booster == 'mlp':
+        elif self.booster == 'mlp' or self.booster == 'net2net_mlp':
             model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                          batch_size=batch_size,
                                          num_round=num_round,
                                          verbose=verbose,
                                          save_log=save_log,
                                          **params)
-        elif self.booster == 'mnn':
+        elif self.booster == 'mnn' or self.booster == 'net2net_mnn':
             model = MultiplexNeuralNetwork(self.tag, self.eval_metric, self.sub_spaces, self.sub_input_types,
                                            self.num_class,
                                            batch_size=batch_size,
@@ -203,6 +204,7 @@ class Task:
         if save_submission:
             test_pred = model.predict(dtest[0])
             utils.make_submission(self.path_submission, test_pred)
+        return model
 
     def predict_mlpmodel(self, data=None, params=None, batch_size=None):
         data = utils.libsvm_2_csr(data[0], data[1], self.space)
@@ -224,7 +226,7 @@ class Task:
             for train_indices, valid_indices in kf:
                 X_train, y_train = train_data[train_indices], train_labels[train_indices]
                 X_valid, y_valid = train_data[valid_indices], train_labels[valid_indices]
-                model_i = self.tune([X_train, y_train], [X_valid, y_valid],
+                model_i = self.tune(dtrain=[X_train, y_train], dvalid=[X_valid, y_valid],
                                     params=params,
                                     batch_size=batch_size,
                                     num_round=num_round,
@@ -446,6 +448,74 @@ class Task:
             print test_pred_1.shape
             print test_pred_2.shape
 
+            utils.make_submission(self.path_submission, test_pred)
+
+    def split_data_event(self, data, split_col, space=None, sub_spaces=None):
+        if space is None:
+            space = self.space
+        if sub_spaces is None:
+            sub_spaces = self.sub_spaces
+        split_index = utils.split_data_by_col(data[0], space, sub_spaces, split_col)
+        data_event, data_no_event = utils.split_data(data, split_index)
+        return split_index, data_event, data_no_event
+
+    def net2net_tune(self, fea_name, split_cols, dtrain=None, dvalid=None, params=None, batch_size=None,
+                     num_round=None, early_stop_round=None, verbose=True, save_log=True, save_model=False, dtest=None,
+                     save_feature=False):
+        if dtrain is None:
+            dtrain = self.load_data(self.path_train_train)
+        if dvalid is None:
+            dvalid = self.load_data(self.path_train_valid)
+        if dtest is None and save_feature:
+            dtest = self.load_data(self.path_test)
+
+        train_split_index, dtrain_event, dtrain_no_event = self.split_data_event(dtrain, split_cols)
+        valid_split_index, dvalid_event, dvalid_no_event = self.split_data_event(dvalid, split_cols)
+
+        model = self.tune(dtrain=dtrain_event, dvalid=dvalid_event, params=params,
+                          batch_size=batch_size,
+                          num_round=num_round, early_stop_round=early_stop_round, verbose=verbose, save_log=save_log,
+                          save_model=save_model, dtest=None, save_feature=False)
+
+        train_pred = np.zeros([self.train_size, self.num_class])
+        train_pred[train_split_index[0]] = model.predict(dtrain_event[0])
+        valid_pred = np.zeros([self.valid_size, self.num_class])
+        valid_pred[valid_split_index[0]] = model.predict(dvalid_event[0])
+
+        if save_feature:
+            test_split_index, dtest_event, dtest_no_event = self.split_data_event(dtest, split_cols)
+            test_pred = np.zeros([self.test_size, self.num_class])
+            test_pred[test_split_index[0]] = model.predict(dtest_event[0])
+            preds = np.vstack((valid_pred, train_pred, test_pred))
+            utils.make_feature_model_output(self.tag, preds, self.num_class)
+
+        fea_task = Task(fea_name, 'none', 0)
+        fea_dtrain = fea_task.load_data(fea_task.path_train_train, -1, self.num_class)
+        train_pred[train_split_index[1]] = fea_dtrain[0][train_split_index[1]]
+        final_train_score = log_loss(dtrain[-1], train_pred)
+        fea_dvalid = fea_task.load_data(fea_task.path_train_valid, -1, self.num_class)
+        valid_pred[valid_split_index[1]] = fea_dvalid[0][valid_split_index[1]]
+        final_valid_score = log_loss(dvalid[-1], valid_pred)
+        print 'final train score:', final_train_score, 'final valid score:', final_valid_score
+
+    def net2net_train(self, sub_file, split_cols, dtrain=None, dtest=None, params=None, batch_size=None, num_round=None,
+                      verbose=True, save_log=True, save_model=False, save_submission=True):
+        if dtrain is None:
+            dtrain = self.load_data(self.path_train)
+        if dtest is None and save_submission:
+            dtest = self.load_data(self.path_test)
+
+        train_split_index, dtrain_event, dtrain_no_event = self.split_data_event(dtrain, split_cols)
+
+        model = self.train(dtrain_event, None, params=params, batch_size=batch_size, num_round=num_round,
+                           verbose=verbose, save_log=save_log, save_model=save_model, save_submission=False)
+
+        sub = pd.read_csv(sub_file)
+        sub = sub.values[:, 1:]
+        if save_submission:
+            test_split_index, dtest_event, dtest_no_event = self.split_data_event(dtest, split_cols)
+            test_pred = sub
+            test_pred[test_split_index[0]] = model.predict(dtest_event[0])
             utils.make_submission(self.path_submission, test_pred)
 
     def predict(self, data=None, model=None, params=None, batch_size=None, save_feature=False):
