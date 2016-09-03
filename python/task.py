@@ -522,7 +522,14 @@ class Task:
             test_pred[test_split_index[0]] = model.predict(dtest_event[0])
             utils.make_submission(self.path_submission, test_pred)
 
-    def net2net_predict(self, data=None, params=None, batch_size=None):
+    def net2net_predict(self, split_col=None, data=None, params=None, batch_size=None, space=None, sub_spaces=None):
+        if space is None:
+            space = self.space
+        if sub_spaces is None:
+            if self.sub_spaces is not None:
+                sub_spaces = self.sub_spaces
+            else:
+                sub_spaces = [self.space]
         if data is None:
             fea_tmp = feature.MultiFeature(name=self.dataset, dtype='f')
             fea_tmp.load()
@@ -531,7 +538,7 @@ class Task:
             data = [data, np.zeros([data.shape[0]])]
         model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
                                      batch_size=batch_size, **params)
-        split_index, data_event, data_no_event = self.split_data_event(data, 0, self.space, [self.space])
+        split_index, data_event, data_no_event = self.split_data_event(data, split_col, space, sub_spaces)
         preds = np.zeros([data[0].shape[0], self.num_class], dtype=np.float32)
         preds[split_index[0]] = model.predict(data_event[0])
         utils.make_feature_model_output(self.tag, preds, self.num_class, remove_zero=True)

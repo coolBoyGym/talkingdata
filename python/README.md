@@ -1613,6 +1613,54 @@
     [242]	loss: 1.713794 	train_score: 1.703515	valid_score: 1.939061
     final train_score: 2.13623129534 final valid_score: 2.25215242903
     
+    concat_100_net2net_mlp_2:
+    'layer_sizes': [task.space, 156, task.num_class]
+    [249]	loss: 1.699428 	train_score: 1.688936	valid_score: 1.939088
+    
+    concat_100_net2net_mlp_4
+    'layer_sizes': [task.space, 100, task.num_class]
+    [250]	loss: 1.712580 	train_score: 1.702103	valid_score: 1.940905
+    
+    concat_100_net2net_mlp_5:
+    'layer_sizes': [task.space, 138, task.num_class]
+    [245]	loss: 1.709259 	train_score: 1.698646	valid_score: 1.938850
+    final train score: 2.13485115053 final valid score: 2.25204861062
+    
+    concat_100_net2net_mlp_1001.submission  [259]	loss: 1.708829	train_score: 1.702048   score:
+    
+    concat_100_net2net_mlp_16:
+    'layer_sizes': [task.space, 138, task.num_class]
+    batch_size = 100
+    [72]	loss: 1.722687 	train_score: 1.713813	valid_score: 1.938894
+    
+    concat_100_net2net_mlp_6:
+    'layer_sizes': [task.space, 196, task.num_class]
+    [227]	loss: 1.712713 	train_score: 1.702459	valid_score: 1.939465
+    final train score: 2.13705078007 final valid score: 2.25220326806
+    
+    #####################################
+    
+    concat_100_net2net_mlp_10:
+    'learning_rate': 1e-4
+    'layer_sizes': [task.space, 138, task.num_class]
+    'random_seed': 0x0123
+    [22]	loss: 1.725678 	train_score: 1.716080	valid_score: 1.938660
+    
+    concat_100_net2net_mlp_11:
+    'learning_rate': 1e-4
+    'layer_sizes': [task.space, 138, task.num_class]
+    'random_seed': 0xFFFF
+    [20]	loss: 1.737591 	train_score: 1.728754	valid_score: 1.939854
+    
+    concat_100_net2net_mlp_12:
+    'learning_rate': 1e-4
+    'layer_sizes': [task.space, 138, task.num_class]
+    'random_seed': 0x4567
+    [22]	loss: 1.721664 	train_score: 1.711972	valid_score: 1.939608
+    
+    ######################################
+    
+    
     
     
     

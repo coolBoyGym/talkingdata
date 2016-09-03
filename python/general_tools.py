@@ -58,11 +58,28 @@ def plot_xgb_train_valid_score(path_log):
     plt.show()
 
 
+def manage_feature_file():
+    with open('../feature/device_day_event_num', 'r') as fin:
+        with open('../feature/device_day_event_num_new', 'wb') as fout:
+            next(fin)
+            for line in fin:
+                l = line.strip().split(' ')
+                flag = (l[0] == '')
+                if flag is True:
+                    fout.write(line)
+                else:
+                    for i in range(len(l)):
+                        s = l[i].split(':')
+                        if int(s[0]) <= 7:
+                            fout.write(l[i] + ' ')
+                    fout.write('\n')
+
+
 if __name__ == '__main__':
-    path_log = '../model/concat_23_freq_net2net_mnn_0.log'
-    plot_train_valid_score(path_log, loss_col=1)
+    # path_log = '../model/concat_7_norm_mlp_34.log'
+    # plot_train_valid_score(path_log, train_col=1, valid_col=2)
     # plot_xgb_train_valid_score(path_log)
-    # 170 lr: 0.1
-    # path_logs = ['concat_23_freq_net2net_mlp_%d' % i for i in [31, 34, 35, 36, 37, 38,]]
-    # plot_concat_score(path_logs)
+    path_logs = ['../model/concat_100_net2net_mlp_%d.log' % i for i in [5]]
+    plot_concat_score(path_logs)
     # plot_multi_score(path_logs)
+    # manage_feature_file()
