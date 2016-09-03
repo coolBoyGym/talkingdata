@@ -42,8 +42,25 @@ def make_submission(path_submission, test_pred):
     print 'output submission file', path_submission
 
 
-def make_feature_model_output(name, preds, num_class, dump=True):
+def remove_zero_feature(indices, values, threshold=1e-15):
+    pos_indices = []
+    pos_values = []
+    for i in range(len(indices)):
+        tmp_indices = []
+        tmp_values = []
+        for j in range(len(indices[i])):
+            if values[i][j] > threshold:
+                tmp_indices.append(j)
+                tmp_values.append(values[i][j])
+        pos_indices.append(tmp_indices)
+        pos_values.append(tmp_values)
+    return np.array(pos_indices), np.array(pos_values)
+
+
+def make_feature_model_output(name, preds, num_class, dump=True, remove_zero=False):
     indices = np.zeros_like(preds, dtype=np.int64) + range(num_class)
+    if remove_zero:
+        indices, preds = remove_zero_feature(indices, preds)
     fea_pred = feature.MultiFeature(name=name, dtype='f', space=num_class, rank=num_class, size=len(indices))
     fea_pred.set_value(indices, preds)
     if dump:

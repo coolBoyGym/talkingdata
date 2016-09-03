@@ -206,14 +206,6 @@ class Task:
             utils.make_submission(self.path_submission, test_pred)
         return model
 
-    def predict_mlpmodel(self, data=None, params=None, batch_size=None):
-        data = utils.libsvm_2_csr(data[0], data[1], self.space)
-        model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
-                                     batch_size=batch_size,
-                                     **params)
-        data_pred = model.predict(data)
-        utils.make_feature_model_output(self.tag, [data_pred], self.num_class)
-
     def kfold(self, n_fold=5, n_repeat=10, dtrain=None, dtest=None, params=None, batch_size=None, num_round=None,
               early_stop_round=None, verbose=True):
         if dtrain is None:
@@ -239,7 +231,7 @@ class Task:
                 train_pred = model_i.predict(dtrain[0])
                 test_pred = model_i.predict(dtest[0])
                 pred_k = np.vstack((train_pred, test_pred))
-                utils.make_feature_model_output(self.tag, [pred_k], self.num_class)
+                utils.make_feature_model_output(self.tag, pred_k, self.num_class)
                 self.upgrade_version()
 
     def net2net_mlp(self, dtrain=None, dvalid=None, params_1=None, params_2=None, batch_size=None, num_round=None,
@@ -388,14 +380,14 @@ class Task:
 
         train_pred_1 = fea_train[train_split_index[1]]
         train_pred_2 = model_2.predict(dtrain_event_data)
-        train_pred = np.zeros([self.train_size, self.num_class])
+        train_pred = np.zeros([self.train_size, self.num_class], dtype=np.float32)
         train_pred[train_split_index[0]] = train_pred_2
         train_pred[train_split_index[1]] = train_pred_1
         train_score = log_loss(dtrain[-1], train_pred)
 
         valid_pred_1 = fea_valid[valid_split_index[1]]
         valid_pred_2 = model_2.predict(dvalid_event_data)
-        valid_pred = np.zeros([self.valid_size, self.num_class])
+        valid_pred = np.zeros([self.valid_size, self.num_class], dtype=np.float32)
         valid_pred[valid_split_index[0]] = valid_pred_2
         valid_pred[valid_split_index[1]] = valid_pred_1
         valid_score = log_loss(dvalid[-1], valid_pred)
@@ -462,7 +454,7 @@ class Task:
         data_event, data_no_event = utils.split_data(data, split_index)
         return split_index, data_event, data_no_event
 
-    def net2net_tune(self, fea_name, split_cols, dtrain=None, dvalid=None, params=None, batch_size=None,
+    def net2net_tune(self, fea_name=None, split_cols=None, dtrain=None, dvalid=None, params=None, batch_size=None,
                      num_round=None, early_stop_round=None, verbose=True, save_log=True, save_model=False, dtest=None,
                      save_feature=False):
         if dtrain is None:
@@ -480,26 +472,27 @@ class Task:
                           num_round=num_round, early_stop_round=early_stop_round, verbose=verbose, save_log=save_log,
                           save_model=save_model, dtest=None, save_feature=False)
 
-        train_pred = np.zeros([self.train_size, self.num_class])
+        train_pred = np.zeros([self.train_size, self.num_class], dtype=np.float32)
         train_pred[train_split_index[0]] = model.predict(dtrain_event[0])
-        valid_pred = np.zeros([self.valid_size, self.num_class])
+        valid_pred = np.zeros([self.valid_size, self.num_class], dtype=np.float32)
         valid_pred[valid_split_index[0]] = model.predict(dvalid_event[0])
 
         if save_feature:
             test_split_index, dtest_event, dtest_no_event = self.split_data_event(dtest, split_cols)
-            test_pred = np.zeros([self.test_size, self.num_class])
+            test_pred = np.zeros([self.test_size, self.num_class], dtype=np.float32)
             test_pred[test_split_index[0]] = model.predict(dtest_event[0])
             preds = np.vstack((valid_pred, train_pred, test_pred))
-            utils.make_feature_model_output(self.tag, preds, self.num_class)
+            utils.make_feature_model_output(self.tag, preds, self.num_class, remove_zero=True)
 
-        fea_task = Task(fea_name, 'none', 0)
-        fea_dtrain = fea_task.load_data(fea_task.path_train_train, -1, self.num_class)
-        train_pred[train_split_index[1]] = fea_dtrain[0][train_split_index[1]]
-        final_train_score = log_loss(dtrain[-1], train_pred)
-        fea_dvalid = fea_task.load_data(fea_task.path_train_valid, -1, self.num_class)
-        valid_pred[valid_split_index[1]] = fea_dvalid[0][valid_split_index[1]]
-        final_valid_score = log_loss(dvalid[-1], valid_pred)
-        print 'final train score:', final_train_score, 'final valid score:', final_valid_score
+        if fea_name is not None:
+            fea_task = Task(fea_name, 'none', 0)
+            fea_dtrain = fea_task.load_data(fea_task.path_train_train, -1, self.num_class)
+            train_pred[train_split_index[1]] = fea_dtrain[0][train_split_index[1]]
+            final_train_score = log_loss(dtrain[-1], train_pred)
+            fea_dvalid = fea_task.load_data(fea_task.path_train_valid, -1, self.num_class)
+            valid_pred[valid_split_index[1]] = fea_dvalid[0][valid_split_index[1]]
+            final_valid_score = log_loss(dvalid[-1], valid_pred)
+            print 'final train score:', final_train_score, 'final valid score:', final_valid_score
 
     def net2net_train(self, sub_file, split_cols, dtrain=None, dtest=None, params=None, batch_size=None, num_round=None,
                       verbose=True, save_log=True, save_model=False, save_submission=True):
@@ -521,6 +514,28 @@ class Task:
             test_pred[test_split_index[0]] = model.predict(dtest_event[0])
             utils.make_submission(self.path_submission, test_pred)
 
+    def net2net_predict(self, data=None, params=None, batch_size=None):
+        if data is None:
+            fea_tmp = feature.MultiFeature(name=self.dataset, dtype='f')
+            fea_tmp.load()
+            data = fea_tmp.get_value()
+            data = utils.libsvm_2_csr(data[0], data[1], self.space)
+            data = [data, np.zeros([data.shape[0]])]
+        model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
+                                     batch_size=batch_size, **params)
+        split_index, data_event, data_no_event = self.split_data_event(data, 0, self.space, [self.space])
+        preds = np.zeros([data[0].shape[0], self.num_class], dtype=np.float32)
+        preds[split_index[0]] = model.predict(data_event[0])
+        utils.make_feature_model_output(self.tag, preds, self.num_class, remove_zero=True)
+
+    def predict_mlpmodel(self, data=None, params=None, batch_size=None):
+        data = utils.libsvm_2_csr(data[0], data[1], self.space)
+        model = MultiLayerPerceptron(self.tag, self.eval_metric, self.space, self.input_type, self.num_class,
+                                     batch_size=batch_size,
+                                     **params)
+        data_pred = model.predict(data)
+        utils.make_feature_model_output(self.tag, data_pred, self.num_class)
+
     def predict(self, data=None, model=None, params=None, batch_size=None, save_feature=False):
         if data is None:
             dtrain = self.load_data(self.path_train_train)
@@ -534,6 +549,6 @@ class Task:
         preds = model.predict(data)
 
         if save_feature:
-            utils.make_feature_model_output(self.tag, [preds], self.num_class)
+            utils.make_feature_model_output(self.tag, preds, self.num_class)
 
         return preds
