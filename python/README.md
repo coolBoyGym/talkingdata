@@ -112,7 +112,44 @@
 
     concat_23_tfidf, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_num_tfidf,fea_active_app_label_num_tfidf,]
     
-    concat_24', [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_device_day_event_num_new,fea_device_hour_event_num,fea_device_weekday_event_num]
+    concat_24, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_device_day_event_num_new,fea_device_hour_event_num,fea_device_weekday_event_num]
+    
+    concat_25, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_label_category,fea_active_app_label_cluster_40]
+    
+    concat_98, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_active_app_label_cluster_40,fea_active_app_label_category_num_tfidf,fea_device_day_event_num_freq,fea_device_hour_event_num_freq,fea_device_weekday_event_num_freq,fea_device_long_lat_norm,])
+
+    concat_21_new, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label_freq,fea_device_day_event_num_freq_new, fea_device_hour_event_num_freq,fea_device_weekday_event_num_freq,fea_device_long_lat_norm,fea_active_app_label_category,fea_active_app_label_cluster_40])
+
+    concat_24_freq, [fea_phone_brand, fea_device_model, fea_installed_app,fea_installed_app_label, fea_device_long_lat_norm,fea_device_day_event_num_freq_new,fea_device_hour_event_num_freq, fea_device_weekday_event_num_freq])
+
+    concat_25, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_label_category,fea_active_app_label_cluster_40,])
+
+    concat_25_tfidf, [fea_phone_brand, fea_device_model, fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_label_category_num_tfidf,fea_active_app_label_cluster_40_num_tfidf])
+
+    concat_25_diff, [fea_phone_brand,fea_device_model,fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_label_category,fea_active_app_label_cluster_40,fea_active_app_label_diff_hour_category])
+
+    concat_25_diff_freq, [fea_phone_brand, fea_device_model, fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_label_category, fea_active_app_label_cluster_40,fea_active_app_label_diff_hour_category_freq,])
+
+    concat_25_each, [fea_phone_brand, fea_device_model, fea_installed_app, fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_label_category, fea_active_app_label_cluster_40,fea_active_app_label_each_hour_category])
+
+    concat_25_diff_each, [fea_phone_brand, fea_device_model, fea_installed_app,fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_label_category, fea_active_app_label_cluster_40,fea_active_app_label_diff_hour_category,fea_active_app_label_each_hour_category])
+
+    concat_25_100, [fea_phone_brand, fea_device_model, fea_installed_app, fea_installed_app_label,fea_device_long_lat_norm,fea_active_app_label_category, fea_active_app_label_cluster_100,])
+
+    concat_25_each_freq, [fea_phone_brand, fea_device_model, fea_installed_app,fea_installed_app_label, fea_device_long_lat_norm,fea_active_app_label_category, fea_active_app_label_cluster_40,fea_active_app_label_each_hour_category_freq])
+    
+    concat_25_no_app, [fea_phone_brand,fea_device_model,fea_installed_app_label,fea_device_long_lat_norm, fea_active_app_label_category,fea_active_app_label_cluster_40,fea_active_app_label_diff_hour_category])
+
+    concat_6_no_app, [fea_phone_brand, fea_device_model, fea_installed_app_label])
+    
+    concat_6_freq, [fea_phone_brand, fea_device_model, fea_installed_app_freq, fea_installed_app_label_freq]
+    
+    
+    concat_100, [fea_phone_brand, fea_device_model, fea_installed_app, fea_installed_app_label,
+                  fea_device_long_lat_norm, fea_active_app_freq, fea_active_app_label_freq,
+                  fea_active_app_label_category, fea_active_app_label_cluster_40,
+                  fea_active_app_label_diff_hour_category_freq,
+                  fea_device_day_event_num_freq, fea_device_hour_event_num_freq, fea_device_weekday_event_num_freq]
 
 ### ensemble features
 
@@ -1329,7 +1366,8 @@
         final train_score: 2.13833565533 final valid_score: 2.25278725578
 
 ### gym 
-
+    
+    concat_99 is a wrong frature
     concat_99_net2net_mlp_2:
     layer_sizes = [task.space, 128, task.num_class]
     layer_activates = ['relu', None]
@@ -1344,36 +1382,6 @@
     early_stop_round = 20
     'random_seed': 0xFFFF
     [309]	loss: 1.739877 	train_score: 1.729924	valid_score: 1.941113
-    
-    concat_99_net2net_mlp_10:
-    'random_seed': 0x0123
-    layer_drops = [0.5, 1]
-    [269]	loss: 1.727663 	train_score: 1.717527	valid_score: 1.940512
-    
-    concat_99_net2net_mlp_1002.submission   [289]	loss: 1.718551	train_score: 1.712578   scored 2.28697
-    concat_99_net2net_mlp_1003.submission   [279]	loss: 1.726285	train_score: 1.720646   scored 2.28703
-    
-    concat_99_net2net_mlp_15:
-    'random_seed': 0x0123
-    layer_drops = [0.4, 1]
-    [326]	loss: 1.736316 	train_score: 1.725670	valid_score: 1.940349
-    
-    concat_99_net2net_mlp_16:
-    'random_seed': 0x0123
-    layer_drops = [0.43, 1]
-    [315]	loss: 1.721411 	train_score: 1.710938	valid_score: 1.940332
-    
-    concat_99_net2net_mlp_18:
-    'random_seed': 0x0123
-    layer_drops = [0.45, 1]
-    [315]	loss: 1.713375 	train_score: 1.702619	valid_score: 1.940393
-    
-    concat_99_net2net_mlp_1001.submission   [329]	loss: 1.712787	train_score: 1.706696	score:2.28689
-    
-    concat_99_net2net_mlp_19:
-    'random_seed': 0x0123
-    layer_drops = [0.47, 1]
-    [289]	loss: 1.724820 	train_score: 1.714457	valid_score: 1.940471
     
     ####################################################################
     
@@ -1457,6 +1465,7 @@
     batch_size = 1000
     [269]	loss: 1.725056 	train_score: 1.714850	valid_score: 1.940963
     final train_score: 2.14008006837 final valid_score: 2.25274294055
+    concat_25_net2net_mlp_1001.submission   [289]	loss: 1.717291	train_score: 1.711091   2.23758
     
     #############################
     
@@ -1480,11 +1489,20 @@
     concat_25_diff_net2net_mlp_1001.submission    [259]	loss: 1.735536	train_score: 1.729413   score:2.23728
     concat_25_diff_net2net_mlp_1002.submission    [269]	loss: 1.723722	train_score: 1.717931	score:2.23722
     
+    #############################
+    
+    concat_25_diff_freq_net2net_mlp_1:
+    [269]	loss: 1.723642 	train_score: 1.713395	valid_score: 1.940180
+    final train_score: 2.13958418373 final valid_score: 2.25249934821
+    concat_25_diff_freq_net2net_mlp_1001.submission     [289]	loss: 1.715693	train_score: 1.709493   score:2.23732
+    
     ##############################
     
     concat_25_diff_each_net2net_mlp_1:
     [200]	loss: 1.737199 	train_score: 1.728920	valid_score: 1.939866
     final train_score: 2.14583831266 final valid_score: 2.25238817572
+    concat_25_diff_each_net2net_mlp_1001.submission     [219]	loss: 1.736897	train_score: 1.732821 
+    concat_25_diff_each_net2net_mlp_1002.submission     [232]	loss: 1.723201	train_score: 1.719470   scored 2.23819
     
     ##############################
     
@@ -1505,3 +1523,94 @@
     [269]	loss: 1.722302 	train_score: 1.711961	valid_score: 1.940403
     final train_score: 2.1391011657 final valid_score: 2.25256728358
     concat_25_each_freq_net2net_mlp_1001.submission     [289]	loss: 1.714287	train_score: 1.707994	scored 2.23730
+    
+    ##############################
+    
+
+## 16/9/3
+
+### gym
+ 
+    concat_6_no_app_net2net_mlp_1:
+    params_2 = {
+        'layer_sizes': [task.space, 128, task.num_class],
+        'layer_activates': ['relu', None],
+        'layer_drops': [0.5, 1],
+        'layer_l2': [0.0001, 0.0001],
+        'layer_inits': [('normal', 'zero'), ('normal', 'zero')],
+        'init_path': None,
+        'opt_algo': 'gd',
+        'learning_rate': 0.1,
+        'random_seed': 0x0123
+    }
+    batch_size = -1
+    [2101]	loss: 2.013176 	train_score: 2.009703	valid_score: 2.066061
+    final train_score: 2.24256213847 final valid_score: 2.29094569739
+    
+    
+    batch_size = 1000
+    concat_6_no_app_net2net_mlp_2:
+    [58]	loss: 2.018241 	train_score: 2.015428	valid_score: 2.069150
+    final train_score: 2.23580858461 final valid_score: 2.29372562888
+    
+    ####################################################################
+    
+    concat_6_net2net_mlp_1:
+    'layer_sizes': [task.space, 64, task.num_class]
+    'opt_algo': 'gd'
+    'learning_rate': 0.2
+    [52]	loss: 1.893535 	train_score: 1.885683	valid_score: 1.956571
+    final train_score: 2.18228845812 final valid_score: 2.28341912796
+    
+    concat_6_net2net_mlp_2:    the best arguments
+    'learning_rate': 0.1
+    [115]	loss: 1.823113 	train_score: 1.814375	valid_score: 1.955172
+    final train_score: 2.15690632824 final valid_score: 2.26496323608
+    
+    concat_6_net2net_mlp_3:
+    79	1.886876	1.877605	1.959267
+    
+    concat_6_net2net_mlp_12:
+    'init_path': '../model/concat_6_net2net_mlp_3.bin',
+    'opt_algo': 'adam',
+    'learning_rate': 1e-5,
+    [314]	loss: 1.757576 	train_score: 1.750165	valid_score: 1.947960
+    final train_score: 2.14979117033 final valid_score: 2.25483635817
+    
+    ################################
+    
+    concat_6_freq_net2net_mlp_1:
+    'layer_sizes': [task.space, 64, task.num_class]
+    'opt_algo': 'gd',
+    'learning_rate': 0.2
+    [261]	loss: 1.886829 	train_score: 1.873987	valid_score: 2.050466
+    
+    ####################################################################
+    
+    concat_100_net2net_mlp_1:
+    params_2 = {
+        'layer_sizes': [task.space, 128, task.num_class],
+        'layer_activates': ['relu', None],
+        'layer_drops': [0.5, 1],
+        'layer_l2': [0.0001, 0.0001],
+        'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
+        # 'layer_inits': [('normal', 'zero'), ('normal', 'zero')],
+        'init_path': '../model/concat_6_mlp_100.bin',
+        # 'init_path': None,
+        'opt_algo': 'adam',
+        # 'opt_algo': 'gd',
+        'learning_rate': 1e-5,
+        # 'learning_rate': 0.1,
+        'random_seed': 0x0123
+    }
+    batch_size = 1000
+    [242]	loss: 1.713794 	train_score: 1.703515	valid_score: 1.939061
+    final train_score: 2.13623129534 final valid_score: 2.25215242903
+    
+    
+    
+    
+    
+    
+    
+    

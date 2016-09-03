@@ -87,6 +87,7 @@ fea_device_model = feature.OneHotFeature(name='device_model', dtype='d')
 
 fea_installed_app = feature.MultiFeature(name='installed_app', dtype='d')
 fea_active_app = feature.MultiFeature(name='active_app', dtype='d')
+fea_active_app_num = feature.MultiFeature(name='active_app_num', dtype='d')
 fea_installed_app_label = feature.MultiFeature(name='installed_app_label', dtype='d')
 fea_installed_app_label_num = feature.MultiFeature(name='installed_app_label_num', dtype='d')
 fea_active_app_label = feature.MultiFeature(name='active_app_label', dtype='d')
@@ -94,6 +95,7 @@ fea_active_app_label_num = feature.MultiFeature(name='active_app_label_num', dty
 fea_device_long_lat = feature.MultiFeature(name='device_long_lat', dtype='f')
 fea_device_event_num = feature.NumFeature(name='device_event_num', dtype='d')
 fea_device_day_event_num = feature.MultiFeature(name='device_day_event_num', dtype='d')
+fea_device_day_event_num_new = feature.MultiFeature(name='device_day_event_num_new', dtype='d')
 fea_device_hour_event_num = feature.MultiFeature(name='device_hour_event_num', dtype='d')
 fea_device_day_hour_event_num = feature.MultiFeature(name='device_day_hour_event_num', dtype='d')
 fea_device_weekday_event_num = feature.MultiFeature(name='device_weekday_event_num', dtype='d')
@@ -106,6 +108,7 @@ fea_device_long_lat_norm = feature.MultiFeature(name='device_long_lat_norm', dty
 fea_device_event_num_norm = feature.NumFeature(name='device_event_num_norm', dtype='f')
 fea_device_day_event_num_norm = feature.MultiFeature(name='device_day_event_num_norm', dtype='f')
 fea_device_day_event_num_freq = feature.MultiFeature(name='device_day_event_num_freq', dtype='f')
+fea_device_day_event_num_freq_new = feature.MultiFeature(name='device_day_event_num_freq_new', dtype='f')
 fea_device_hour_event_num_norm = feature.MultiFeature(name='device_hour_event_num_norm', dtype='f')
 fea_device_hour_event_num_freq = feature.MultiFeature(name='device_hour_event_num_freq', dtype='f')
 fea_device_day_hour_event_num_norm = feature.MultiFeature(name='device_day_hour_event_num_norm', dtype='f')
@@ -114,16 +117,17 @@ fea_device_weekday_event_num_freq = feature.MultiFeature(name='device_weekday_ev
 
 fea_installed_app_tfidf = feature.MultiFeature(name='installed_app_tfidf', dtype='f')
 fea_installed_app_label_tfidf = feature.MultiFeature(name='installed_app_label_tfidf', dtype='f')
+fea_active_app_num_tfidf = feature.MultiFeature(name='active_app_num_tfidf', dtype='f')
 
 # new features about app label category
 fea_active_app_label_category = feature.MultiFeature(name='active_app_label_category', dtype='d')
 fea_active_app_label_category_num = feature.MultiFeature(name='active_app_label_category_num', dtype='d')
 fea_active_app_label_diff_hour_category = feature.MultiFeature(name='active_app_label_diff_hour_category', dtype='d')
-fea_active_app_label_diff_hour_category_num = feature.MultiFeature(name='active_app_label_diff_hour_category_num',
-                                                                   dtype='d')
+fea_active_app_label_diff_hour_category_num = feature.MultiFeature(name='active_app_label_diff_hour_category_num',dtype='d')
+fea_active_app_label_diff_hour_category_freq = feature.MultiFeature(name='active_app_label_diff_hour_category_freq',dtype='f')
 fea_active_app_label_each_hour_category = feature.MultiFeature(name='active_app_label_each_hour_category', dtype='d')
-fea_active_app_label_each_hour_category_num = feature.MultiFeature(name='active_app_label_each_hour_category_num',
-                                                                   dtype='d')
+fea_active_app_label_each_hour_category_num = feature.MultiFeature(name='active_app_label_each_hour_category_num',dtype='d')
+fea_active_app_label_each_hour_category_freq = feature.MultiFeature(name='active_app_label_each_hour_category_freq', dtype='f')
 
 # new features about app label cluster
 fea_active_app_label_cluster_40 = feature.MultiFeature(name='active_app_label_cluster_40', dtype='d')
@@ -188,6 +192,7 @@ fea_concat_9 = feature.MultiFeature(name='concat_9', dtype='d')
 fea_concat_9_norm = feature.MultiFeature(name='concat_9_norm', dtype='f')
 fea_ensemble_test = feature.MultiFeature(name='ensmeble_test', dtype='f')
 
+
 """
 model outputs, for ensemble use
 """
@@ -235,19 +240,25 @@ def make_feature():
     start_time = time.time()
 
     # dict_device_brand_model = pkl.load(open('../data/dict_device_brand_model.pkl', 'rb'))
-    # dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
-    # dict_app_event = pkl.load(open('../data/dict_app_event.pkl', 'rb'))
-    # dict_app_label = pkl.load(open('../data/dict_app_label.pkl', 'rb'))
+    dict_device_event = pkl.load(open('../data/dict_device_event.pkl', 'rb'))
+    dict_app_event = pkl.load(open('../data/dict_app_event.pkl', 'rb'))
+    dict_app_label = pkl.load(open('../data/dict_app_label.pkl', 'rb'))
     # dict_event = pkl.load(open('../data/dict_event.pkl', 'rb'))
     # dict_brand = pkl.load(open('../data/dict_id_brand.pkl', 'rb'))
     # dict_model = pkl.load(open('../data/dict_id_model.pkl', 'rb'))
     # dict_app = pkl.load(open('../data/dict_id_app.pkl', 'rb'))
-    # dict_label_category_group = pkl.load(open('../data/dict_label_category_group_number.pkl', 'rb'))
+    dict_label_category_group = pkl.load(open('../data/dict_label_category_group_number.pkl', 'rb'))
     # dict_label_cluster_40 = pkl.load(open('../data/dict_label_cluster_40.pkl', 'rb'))
     # dict_label_cluster_100 = pkl.load(open('../data/dict_label_cluster_100.pkl', 'rb'))
     # dict_label_cluster_270 = pkl.load(open('../data/dict_label_cluster_270.pkl', 'rb'))
 
-    # device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
+    # for i in range(3):
+    #     print dict_device_event[i]
+    #     print "\nA new one!\n"
+    #
+    # exit(0)
+
+    device_id = np.loadtxt('../feature/device_id', dtype=np.int64, skiprows=1, delimiter=',', usecols=[0])
 
     print 'finish in %d sec' % (time.time() - start_time)
 
@@ -257,6 +268,17 @@ def make_feature():
     #                                             dict_app_event=dict_app_event, dict_app_label=dict_app_label,
     #                                             dict_label_cluster_40=dict_label_cluster_40)
     # fea_active_app_label_cluster_40_num.dump()
+    # fea_active_app_num = feature.MultiFeature('active_app_num', dtype='d')
+    # fea_active_app_num.process(device_id=device_id, dict_device_event=dict_device_event, dict_app_event=dict_app_event)
+    # fea_active_app_num.dump()
+    # fea_active_app_label_each_hour_category_freq.process(device_id=device_id, dict_device_event=dict_device_event,
+    #                                                      dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+    #                                                      dict_label_category_group=dict_label_category_group)
+    # fea_active_app_label_each_hour_category_freq.dump()
+    fea_active_app_label_diff_hour_category_freq.process(device_id=device_id, dict_device_event=dict_device_event,
+                                                         dict_app_event=dict_app_event, dict_app_label=dict_app_label,
+                                                         dict_label_category_group=dict_label_category_group)
+    fea_active_app_label_diff_hour_category_freq.dump()
 
 
 def ensemble_concat_feature(name, fea_list):
@@ -485,48 +507,15 @@ if __name__ == '__main__':
     print 'processing features...'
 
     # make_feature()
-    # split_dataset('concat_6_tfidf', 0.2, zero_pad=True)
-
     # feature_tfidf('active_app_label_diff_hour_category_num')
     # feature_tfidf('installed_app')
-    # feature_tfidf('installed_app_label')
-    # feature_tfidf('active_app_label_cluster_40_num')
     #
-    # import word2vec
-    # import matplotlib.pyplot as plt
-    #
-    # fea_installed_app.load()
-    #
-    # fea_tmp = fea_installed_app
-    # for k in [8, 16, 32, 64, 128]:
-    #     # w2v_path = '../data/' + fea_tmp.get_name() + '.vec.%d' % k
-    #     # w2v_model = word2vec.load(w2v_path, kind='bin')
-    #     # w2v_model = word2vec.load(w2v_path, kind='bin')
-    #     # print w2v_model.vectors.shape
-    #     fea_name = fea_tmp.get_name() + '_w2v_%d' % k
-    #     # feature_w2v_embedding(fea_tmp, w2v_model, k, fea_name)
-    #     fea_w2v = feature.multi_feature(fea_name, dtype='f')
-    #     fea_w2v.load()
-    #     indices, values = fea_w2v.get_value()
-    #     sum_values = np.array(map(lambda x: sum(x), values))
-    #     # sum_values = sum_values[np.where(sum_values > 0)[0]]
-    #     print sum_values
-    #     plt.hist(sum_values, bins=1000)
-    #     plt.show()
+    split_dataset('concat_100', zero_pad=True)
+    # make_feature()
 
-    # split_dataset('concat_20')
-    # for i in range(50):
-    #     name = 'concat_6_mlp_%d' % (300 + i)
-    #     extract_test_preds(name)
+    # concat_feature('concat_100', [fea_phone_brand, fea_device_model, fea_installed_app, fea_installed_app_label,
+    #                               fea_device_long_lat_norm, fea_active_app_freq, fea_active_app_label_freq,
+    #                               fea_active_app_label_category, fea_active_app_label_cluster_40,
+    #                               fea_active_app_label_diff_hour_category_freq,
+    #                               fea_device_day_event_num_freq, fea_device_hour_event_num_freq, fea_device_weekday_event_num_freq])
 
-    # average_submissions('concat_6_mlp_362', ['../output/concat_6_mlp_%d.submission' % (300 + i) for i in range(50, 60)])
-
-    # concat_feature('concat_1_ensemble', [fea_concat_1,
-    #                                      fea_concat_1_mlp_100,
-    #                                      fea_concat_1_gblinear_1,
-    #                                      fea_concat_1_gbtree_1])
-    # split_dataset('model_cluster_1')
-    # make_feature_model_cluster('model_cluster_1')
-    # concat_feature('concat_1_cluster_1', [fea_model_cluster_1,
-    #                                       fea_concat_1])
-    split_dataset('concat_1_ensemble_mlp_1', zero_pad=False)
