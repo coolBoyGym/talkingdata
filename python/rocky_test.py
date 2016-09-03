@@ -1,7 +1,7 @@
 from task import Task
 
 dataset = 'installed_app'
-booster = 'embedding'
+booster = 'net2net_mlp'
 version = 1
 
 task = Task(dataset, booster, version)
@@ -86,8 +86,6 @@ elif booster == 'mlp':
 
     # task.train(params=params, num_round=num_round, verbose=True, batch_size=batch_size, save_model=True,
     #            save_submission=True)
-
-
 elif booster == 'predict':
     layer_sizes = [task.space, 64, task.num_class]
     layer_activates = ['relu', None]
@@ -111,30 +109,33 @@ elif booster == 'predict':
     task.predict(params=params, batch_size=batch_size, save_feature=True)
 elif booster == 'net2net_mlp':
     params = {
-        'layer_sizes': [task.space, 128, task.num_class],
+        'layer_sizes': [task.space, 100, task.num_class],
         'layer_activates': ['relu', None],
         'layer_drops': [0.5, 1],
         'layer_l2': [0.0001, 0.0001],
-        'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
-        'init_path': '../model/concat_6_mlp_100.bin',
-        'opt_algo': 'adam',
-        'learning_rate': 1e-5,
-        'random_seed': 0x0123
+        # 'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
+        'layer_inits': [('normal', 'zero'), ('normal', 'zero'), ('normal', 'zero')],
+        'init_path': None,
+        # 'init_path': '../model/concat_6_embedding_net2net_mlp_1.bin',
+        'opt_algo': 'gd',
+        'learning_rate': 0.1,
+        'random_seed': None
     }
 
     batch_size = 1000
-    num_round = 2
+    num_round = 2000
     early_stop_round = 10
 
     dtrain = task.load_data(task.path_train_train)
     dvalid = task.load_data(task.path_train_valid)
     dtest = task.load_data(task.path_test)
 
-    task.net2net_tune('concat_1_mlp_100', 2, dtrain, dvalid, params, batch_size=batch_size, num_round=num_round,
+    task.net2net_tune('concat_1_ensemble_mlp_1024', 0, dtrain, dvalid, params, batch_size=batch_size,
+                      num_round=num_round,
                       early_stop_round=early_stop_round, verbose=True, save_log=True, save_model=True, dtest=dtest,
                       save_feature=True)
-    task.net2net_train('../output/concat_1_mlp_1001.submission', 2, params=params, batch_size=batch_size,
-                       num_round=num_round, verbose=True, save_log=True, save_model=True, save_submission=True)
+    # task.net2net_train('../output/concat_1_mlp_1001.submission', 2, params=params, batch_size=batch_size,
+    #                    num_round=num_round, verbose=True, save_log=True, save_model=True, save_submission=True)
 
 elif booster == 'mnn':
     layer_sizes = [task.sub_spaces, [32] * len(task.sub_spaces), task.num_class]
@@ -161,7 +162,7 @@ elif booster == 'mnn':
     # task.train(params=params, num_round=num_round, verbose=True,
     #            batch_size=batch_size, save_model=False, save_submission=False)
 elif booster == 'embedding':
-    model_path = '../model/installed_app_mlp_2.bin'
+    model_path = '../model/installed_app_label_net2net_mlp_1.bin'
     # feature_to_predict = 'phone_brand'
     # pm.predict_with_mlpmodel(model_path, data_to_predict)
     embedding_size = 32

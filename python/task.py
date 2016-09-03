@@ -64,6 +64,11 @@ class Task:
                         self.sub_input_types.append('dense')
                     else:
                         self.sub_input_types.append('sparse')
+        else:
+            self.sub_features = None
+            self.sub_spaces = None
+            self.sub_ranks = None
+            self.sub_input_types = None
         print 'feature space: %d, rank: %d, size: %d, num class: %d' % (
             self.space, self.rank, self.size, self.num_class)
 
@@ -449,7 +454,10 @@ class Task:
             else:
                 space = self.sub_spaces
         if sub_spaces is None:
-            sub_spaces = self.sub_spaces
+            if self.sub_spaces is not None:
+                sub_spaces = self.sub_spaces
+            else:
+                sub_spaces = [self.space]
         split_index = utils.split_data_by_col(data[0], space, sub_spaces, split_col)
         data_event, data_no_event = utils.split_data(data, split_index)
         return split_index, data_event, data_no_event
