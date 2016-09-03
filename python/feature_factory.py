@@ -511,6 +511,7 @@ if __name__ == '__main__':
     # feature_tfidf('installed_app')
     #
     split_dataset('concat_100', zero_pad=True)
+    split_dataset('concat_1_ensemble_mlp_1024')
     # make_feature()
 
     # concat_feature('concat_100', [fea_phone_brand, fea_device_model, fea_installed_app, fea_installed_app_label,

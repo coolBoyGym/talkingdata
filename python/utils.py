@@ -535,10 +535,19 @@ def split_data_by_col(data, spaces, sub_spaces, split_cols):
 
 
 def split_data(data, ind_list):
-    data_list = []
-    for i in range(len(ind_list)):
-        data_list.append([data[0][ind_list[i]], data[1][ind_list[i]]])
-    return data_list
+    if not isinstance(data[0], list):
+        data_list = []
+        for i in range(len(ind_list)):
+            data_list.append([data[0][ind_list[i]], data[1][ind_list[i]]])
+        return data_list
+    else:
+        data_list = []
+        for i in range(len(ind_list)):
+            data_i = []
+            for j in range(len(data[0])):
+                data_i.append(data[0][j][ind_list[i]])
+            data_list.append([data_i, data[1][ind_list[i]]])
+        return data_list
 
 
 def merge_predict(data_list, model_list, ind_list, shape):

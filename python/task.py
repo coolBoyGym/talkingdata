@@ -452,7 +452,10 @@ class Task:
 
     def split_data_event(self, data, split_col, space=None, sub_spaces=None):
         if space is None:
-            space = self.space
+            if self.booster == 'mlp' or self.booster == 'net2net_mlp':
+                space = self.space
+            else:
+                space = self.sub_spaces
         if sub_spaces is None:
             sub_spaces = self.sub_spaces
         split_index = utils.split_data_by_col(data[0], space, sub_spaces, split_col)

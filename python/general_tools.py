@@ -59,10 +59,10 @@ def plot_xgb_train_valid_score(path_log):
 
 
 if __name__ == '__main__':
-    # path_log = '../model/concat_21_net2net_mlp_1066.log'
-    # plot_train_valid_score(path_log, loss_col=1)
+    path_log = '../model/concat_23_freq_net2net_mnn_0.log'
+    plot_train_valid_score(path_log, loss_col=1)
     # plot_xgb_train_valid_score(path_log)
     # 170 lr: 0.1
-    path_logs = ['concat_23_freq_net2net_mlp_%d' % i for i in [31, 34, 35, 36, 37, 38,]]
-    plot_concat_score(path_logs)
+    # path_logs = ['concat_23_freq_net2net_mlp_%d' % i for i in [31, 34, 35, 36, 37, 38,]]
+    # plot_concat_score(path_logs)
     # plot_multi_score(path_logs)
