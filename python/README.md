@@ -1436,18 +1436,22 @@
     concat_25_100_net2net_mlp_1:
     [269]	loss: 1.723045 	train_score: 1.712836	valid_score: 1.941065
     final train_score: 2.13940197749 final valid_score: 2.2527842268
+    concat_25_100_net2net_mlp_1001.submission   [289]	loss: 1.715253	train_score: 1.709093   scored 2.23762
     
     #############################
     
     concat_25_tfidf_net2net_mlp_1:
     [269]	loss: 1.725690 	train_score: 1.715477	valid_score: 1.941280
     final train_score: 2.1403496188 final valid_score: 2.2528410597
+    concat_25_tfidf_net2net_mlp_1001.submission     [289]	loss: 1.718011	train_score: 1.711793   scored 2.23774
     
     ##############################
     
     concat_25_diff_net2net_mlp_1:
     [242]	loss: 1.733782 	train_score: 1.724386	valid_score: 1.939530
     final train_score: 2.14350960806 final valid_score: 2.25228614139
+    concat_25_diff_net2net_mlp_1001.submission    [259]	loss: 1.735536	train_score: 1.729413   score:2.23728
+    concat_25_diff_net2net_mlp_1002.submission    [269]	loss: 1.723722	train_score: 1.717931	score:2.23722
     
     ##############################
     
@@ -1473,3 +1477,4 @@
     concat_25_each_freq_net2net_mlp_1:
     [269]	loss: 1.722302 	train_score: 1.711961	valid_score: 1.940403
     final train_score: 2.1391011657 final valid_score: 2.25256728358
+    concat_25_each_freq_net2net_mlp_1001.submission     [289]	loss: 1.714287	train_score: 1.707994	scored 2.23730
