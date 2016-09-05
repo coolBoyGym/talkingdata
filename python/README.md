@@ -1666,11 +1666,11 @@
     148 [0.5, 1] 1e-4 0x0123 1000
     [23]	loss: 1.717825 	train_score: 1.707825	valid_score: 1.938072
     concat_100_net2net_mlp_1008.submission      [25]	loss: 1.708907	train_score: 1.702376   
-    
+    concat_100_net2net_mlp_1006.submission      [23]	loss: 1.742119	train_score: 1.737108   score:2.23623
+
     concat_100_net2net_mlp_64
     148 [0.45, 1] 1e-4 0x0123 1000
     [23]	loss: 1.736385 	train_score: 1.726758	valid_score: 1.938060
-    concat_100_net2net_mlp_1006.submission      [23]	loss: 1.742119	train_score: 1.737108   score:2.23623
     concat_100_net2net_mlp_1007.submission      [25]	loss: 1.727690	train_score: 1.721527   socre:2.23635
     
     concat_100_net2net_mlp_11:
@@ -1694,37 +1694,36 @@
     batch_size = -1
     'layer_l2': [0.001, 0.001]
     [1644]	loss: 1.784675 	train_score: 1.715587	valid_score: 1.941106
-    final train score: 2.14492951143 final valid score: 2.25266249903
-    
+   
     concat_100_net2net_mlp_52:
     batch_size = -1
     'layer_l2': [0.01, 0.01]
     [867]	loss: 2.290104 	train_score: 1.878631	valid_score: 1.961248
-    final train score: 2.19836485135 final valid score: 2.25882684976
-    
+        
     concat_100_net2net_mlp_54:
     batch_size = -1
     'layer_l2': [0.00005, 0.00005]
     [1387]	loss: 1.700367 	train_score: 1.692562	valid_score: 1.941580
-    final train score: 2.13743601558 final valid score: 2.25280963137
+        
+    ####################################################################
     
-    concat_100_net2net_mlp_55:
-    batch_size = 10000
-    'layer_l2': [0.001, 0.001]
-    [1092]	loss: 1.774499 	train_score: 1.708117	valid_score: 1.940087
-    final train score: 2.14240260298 final valid score: 2.25236159015
+    ensemble_100_net2net_mlp_5-ensemble_100_net2net_mlp_12:
+    148 [0.5, 1] [0.0001, 0.0001] 0x0123 
+    for sss in [160, 176, 192, 256]
+        for lll in [1e-5, 1e-6]
     
-    concat_100_net2net_mlp_58
-    batch_size = 10000
-    'layer_l2': [0.00005, 0.00005]
-    [896]	loss: 1.698089 	train_score: 1.691563	valid_score: 1.940512
-    final train score: 2.13601234609 final valid score: 2.25249149816
+    ensemble_100_net2net_mlp_11:
+    256 1e-5
+    [49]	loss: 1.657089 	train_score: 1.645255	valid_score: 1.936472
+    ensemble_100_net2net_mlp_1009.submission   [51]	loss: 1.698459	train_score: 1.690439   scored 2.23766    
+    ensemble_100_net2net_mlp_1008.submission   [81]	loss: 1.662884	train_score: 1.654161   scored 2.23721  
     
-    #######################################
-    
-    
-    
-    
-    
+    concat_1_ensemble_mlp_1024.train.train  
+    256 [0.005, 0.005]
+    [101]	loss: 1.932805 	train_score: 1.699903	valid_score: 1.937093
+    final train score: 2.1411293891 final valid score: 2.25146463375
+    ensemble_100_net2net_mlp_1007.submission    [109]	loss: 1.945626	train_score: 1.745879   scored 2.23771
+    ensemble_100_net2net_mlp_1006.submission    [179]	loss: 1.905560	train_score: 1.727127   scored 2.23720
+    ensemble_100_net2net_mlp_1005.submission    [249]	loss: 1.877795	train_score: 1.705119   scored 2.23727
     
     
