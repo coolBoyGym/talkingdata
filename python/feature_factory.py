@@ -123,11 +123,15 @@ fea_active_app_num_tfidf = feature.MultiFeature(name='active_app_num_tfidf', dty
 fea_active_app_label_category = feature.MultiFeature(name='active_app_label_category', dtype='d')
 fea_active_app_label_category_num = feature.MultiFeature(name='active_app_label_category_num', dtype='d')
 fea_active_app_label_diff_hour_category = feature.MultiFeature(name='active_app_label_diff_hour_category', dtype='d')
-fea_active_app_label_diff_hour_category_num = feature.MultiFeature(name='active_app_label_diff_hour_category_num',dtype='d')
-fea_active_app_label_diff_hour_category_freq = feature.MultiFeature(name='active_app_label_diff_hour_category_freq',dtype='f')
+fea_active_app_label_diff_hour_category_num = feature.MultiFeature(name='active_app_label_diff_hour_category_num',
+                                                                   dtype='d')
+fea_active_app_label_diff_hour_category_freq = feature.MultiFeature(name='active_app_label_diff_hour_category_freq',
+                                                                    dtype='f')
 fea_active_app_label_each_hour_category = feature.MultiFeature(name='active_app_label_each_hour_category', dtype='d')
-fea_active_app_label_each_hour_category_num = feature.MultiFeature(name='active_app_label_each_hour_category_num',dtype='d')
-fea_active_app_label_each_hour_category_freq = feature.MultiFeature(name='active_app_label_each_hour_category_freq', dtype='f')
+fea_active_app_label_each_hour_category_num = feature.MultiFeature(name='active_app_label_each_hour_category_num',
+                                                                   dtype='d')
+fea_active_app_label_each_hour_category_freq = feature.MultiFeature(name='active_app_label_each_hour_category_freq',
+                                                                    dtype='f')
 
 # new features about app label cluster
 fea_active_app_label_cluster_40 = feature.MultiFeature(name='active_app_label_cluster_40', dtype='d')
@@ -156,6 +160,15 @@ fea_installed_app_w2v_64 = feature.MultiFeature(name='installed_app_w2v_64', dty
 fea_installed_app_label_w2v_64 = feature.MultiFeature(name='installed_app_label_w2v_64', dtype='f')
 fea_installed_app_w2v_128 = feature.MultiFeature(name='installed_app_w2v_128', dtype='f')
 fea_installed_app_label_w2v_128 = feature.MultiFeature(name='installed_app_label_w2v_128', dtype='f')
+
+fea_installed_app_mf = feature.MultiFeature(name='installed_app_mf', dtype='f')
+fea_installed_app_freq_mf = feature.MultiFeature(name='installed_app_freq_mf', dtype='f')
+fea_active_app_mf = feature.MultiFeature(name='active_app_mf', dtype='f')
+fea_active_app_freq_mf = feature.MultiFeature(name='active_app_freq_mf', dtype='f')
+fea_installed_app_label_mf = feature.MultiFeature(name='installed_app_label_mf', dtype='f')
+fea_installed_app_label_freq_mf = feature.MultiFeature(name='installed_app_label_freq_mf', dtype='f')
+fea_active_app_label_mf = feature.MultiFeature(name='active_app_label_mf', dtype='f')
+fea_active_app_label_freq_mf = feature.MultiFeature(name='active_app_label_freq_mf', dtype='f')
 
 """
 event features
@@ -191,7 +204,6 @@ fea_concat_8_norm = feature.MultiFeature(name='concat_8_norm', dtype='f')
 fea_concat_9 = feature.MultiFeature(name='concat_9', dtype='d')
 fea_concat_9_norm = feature.MultiFeature(name='concat_9_norm', dtype='f')
 fea_ensemble_test = feature.MultiFeature(name='ensmeble_test', dtype='f')
-
 
 """
 model outputs, for ensemble use
@@ -332,6 +344,7 @@ def concat_feature(name, fea_list):
 
     spaces = []
     for fea in fea_list:
+        print fea.get_name()
         fea.load()
         spaces.append(fea.get_space())
 
@@ -503,6 +516,28 @@ def feature_w2v_embedding(fea_raw, model_w2v, order, name):
     fea_out.dump()
 
 
+def fea_mf_embedding(fea_tmp, mf_mat, avg=False):
+    indices, values = fea_tmp.get_value()
+    mf_values = []
+    for i in range(len(indices)):
+        tmp_values = np.zeros_like(mf_mat[0], dtype=np.float32)
+        cnt = 0
+        for j in range(len(indices[i])):
+            item = indices[i][j]
+            tmp_values += mf_mat[item] * values[i][j]
+            cnt += 1
+        tmp_values = np.ravel(tmp_values)
+        if avg and cnt > 0:
+            tmp_values /= cnt
+        mf_values.append(tmp_values)
+    mf_values = np.array(mf_values)
+    mf_indices = np.zeros_like(mf_values, dtype=np.int32) + range(mf_mat.shape[1])
+    mf_indices, mf_values = utils.remove_zero_feature(mf_indices, mf_values)
+    fea_mf = feature.MultiFeature(name=fea_tmp.get_name() + '_mf', dtype='f')
+    fea_mf.set_value(mf_indices, mf_values)
+    fea_mf.dump()
+
+
 if __name__ == '__main__':
     print 'processing features...'
 
@@ -510,5 +545,32 @@ if __name__ == '__main__':
     # feature_tfidf('active_app_label_diff_hour_category_num')
     # feature_tfidf('installed_app')
     #
-    split_dataset('concat_1_ensemble_mlp_1024', zero_pad=True)
+    # split_dataset('concat_1_ensemble_mlp_1024', zero_pad=True)
     # make_feature()
+
+    # fea_installed_app.load()
+    # fea_installed_app_freq.load()
+    # fea_active_app.load()
+    # fea_active_app_freq.load()
+    # fea_installed_app_label.load()
+    # fea_installed_app_label_freq.load()
+    # fea_active_app_label.load()
+    # fea_active_app_label_freq.load()
+    # nmf = pkl.load(open('../data/app_label_nmf_128.pkl', 'rb'))
+    # W = nmf['W']
+    # H = nmf['H'].transpose()
+    # fea_mf_embedding(fea_installed_app, W, avg=False)
+    # fea_mf_embedding(fea_installed_app_freq, W, avg=False)
+    # fea_mf_embedding(fea_active_app, W, avg=False)
+    # fea_mf_embedding(fea_active_app_freq, W, avg=False)
+    # fea_mf_embedding(fea_installed_app_label, H, avg=False)
+    # fea_mf_embedding(fea_installed_app_label_freq, H, avg=False)
+    # fea_mf_embedding(fea_active_app_label, H, avg=False)
+    # fea_mf_embedding(fea_active_app_label_freq, H, avg=False)
+
+    fea_list = [fea_phone_brand, fea_device_model]
+    fea_list.extend([feature.MultiFeature(name='concat_1_gblinear_%d' % i) for i in range(1046, 1052)])
+    fea_list.extend([feature.MultiFeature(name='concat_1_gbtree_%d' % i) for i in range(1000, 1006)])
+    fea_list.extend([feature.MultiFeature(name='concat_1_mlp_%d' % i) for i in range(1000, 1006)])
+    concat_feature('concat_1_ensemble', fea_list)
+    split_dataset('concat_1_ensemble')

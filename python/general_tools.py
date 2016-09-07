@@ -76,10 +76,10 @@ def manage_feature_file():
 
 
 if __name__ == '__main__':
-    # path_log = '../model/concat_7_norm_mlp_34.log'
-    # plot_train_valid_score(path_log, train_col=1, valid_col=2)
+    # path_log = '../model/concat_23_freq_net2net_mnn_0.log'
+    # plot_train_valid_score(path_log, loss_col=1)
     # plot_xgb_train_valid_score(path_log)
-    path_logs = ['../model/concat_100_net2net_mlp_%d.log' % i for i in [5]]
+    # 170 lr: 0.1
+    path_logs = ['concat_23_freq_net2net_mnn_%d' % i for i in [4, 5, 6, 7, 8, 9, 10, 11, 12]]
     plot_concat_score(path_logs)
     # plot_multi_score(path_logs)
-    # manage_feature_file()

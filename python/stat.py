@@ -3,8 +3,9 @@ import re
 import time
 from Queue import PriorityQueue
 
+import nimfa
 import numpy as np
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, coo_matrix
 
 import feature
 from tf_idf import tf_idf
@@ -706,6 +707,40 @@ def aggregate_model_cluster(name):
     pkl.dump(model_centers, open('../data/' + name + '.pkl', 'wb'))
 
 
+def app_label_matrix(max_iter, rank):
+    dict_id_app = pkl.load(open('../data/dict_id_app.pkl'))
+    dict_id_label = pkl.load(open('../data/dict_id_label.pkl'))
+    dict_app_label = pkl.load(open('../data/dict_app_label.pkl'))
+    rows = []
+    cols = []
+    for i in range(len(dict_id_app)):
+        lids = dict_app_label[i]
+        for lid in lids:
+            rows.append(i)
+            cols.append(lid)
+    rows = np.array(rows)
+    cols = np.array(cols)
+    data = np.ones_like(rows, dtype=np.int32)
+    V = coo_matrix((data, (rows, cols)), shape=[len(dict_id_app), len(dict_id_label)])
+    nmf = nimfa.Nmf(V, max_iter=max_iter, rank=rank, update='euclidean', objective='fro')
+    nmf_fit = nmf()
+
+    W = nmf_fit.basis()
+    print('Basis matrix:\n%s' % W.todense())
+
+    H = nmf_fit.coef()
+    print('Mixture matrix:\n%s' % H.todense())
+
+    pkl.dump({'W': W.todense(), 'H': H.todense()}, open('../data/app_label_nmf_%d.pkl' % rank, 'wb'))
+
+    print('Euclidean distance: %5.3f' % nmf_fit.distance(metric='euclidean'))
+
+    sm = nmf_fit.summary()
+    print('Sparseness Basis: %5.3f  Mixture: %5.3f' % (sm['sparseness'][0], sm['sparseness'][1]))
+    print('Iterations: %d' % sm['n_iter'])
+    print('Target estimate:\n%s' % np.dot(W.todense(), H.todense()))
+
+
 if __name__ == '__main__':
     # build_event_dict()
     # aggregate_label_category()
@@ -714,4 +749,6 @@ if __name__ == '__main__':
     # path = '../data/label_coocur_tfidf.pkl'
     # for t in [0.032]:
     #     coocur_cluster(path, t)
-    aggregate_model_cluster('model_cluster_1')
+    # aggregate_model_cluster('model_cluster_1')
+    for rank in [2, 4]:
+        app_label_matrix(200, rank)
