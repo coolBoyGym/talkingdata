@@ -1665,8 +1665,8 @@
     concat_100_net2net_mlp_52
     148 [0.5, 1] 1e-4 0x0123 1000
     [23]	loss: 1.717825 	train_score: 1.707825	valid_score: 1.938072
-    concat_100_net2net_mlp_1008.submission      [25]	loss: 1.708907	train_score: 1.702376   
-    concat_100_net2net_mlp_1006.submission      [23]	loss: 1.742119	train_score: 1.737108   score:2.23623
+    concat_100_net2net_mlp_1008.submission      [25]	loss: 1.708907	train_score: 1.702376   score:2.23623
+    concat_100_net2net_mlp_1006.submission      [23]	loss: 1.742119	train_score: 1.737108   
 
     concat_100_net2net_mlp_64
     148 [0.45, 1] 1e-4 0x0123 1000

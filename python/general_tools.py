@@ -79,7 +79,7 @@ if __name__ == '__main__':
     # path_log = '../model/concat_7_norm_mlp_34.log'
     # plot_train_valid_score(path_log, train_col=1, valid_col=2)
     # plot_xgb_train_valid_score(path_log)
-    path_logs = ['../model/concat_100_net2net_mlp_%d.log' % i for i in [5]]
+    path_logs = ['../model/ensemble_100_net2net_mlp_%d.log' % i for i in range(5, 13)]
     plot_concat_score(path_logs)
     # plot_multi_score(path_logs)
     # manage_feature_file()

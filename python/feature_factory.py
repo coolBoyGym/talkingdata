@@ -234,6 +234,9 @@ fea_concat_1_gbtree_1 = feature.MultiFeature(name='concat_1_gbtree_1', dtype='f'
 fea_concat_1_gblinear_1 = feature.MultiFeature(name='concat_1_gblinear_1', dtype='f')
 fea_concat_1_mlp_100 = feature.MultiFeature(name='concat_1_mlp_1', dtype='f')
 
+fea_concat_23_freq_net2net_mlp_39 = feature.MultiFeature(name='concat_23_freq_net2net_mlp_39', dtype='f')
+fea_concat_24_freq_net2net_mlp_1024 = feature.MultiFeature(name='concat_24_freq_net2net_mlp_1024', dtype='f')
+fea_concat_25_diff_net2net_mlp_1 = feature.MultiFeature(name='concat_25_diff_net2net_mlp_1', dtype='f')
 
 def make_feature():
     print 'loading data...'
@@ -510,5 +513,14 @@ if __name__ == '__main__':
     # feature_tfidf('active_app_label_diff_hour_category_num')
     # feature_tfidf('installed_app')
     #
-    split_dataset('concat_1_ensemble_mlp_1024', zero_pad=True)
+    split_dataset('ensemble_100', zero_pad=True)
     # make_feature()
+    # concat_feature('ensemble_100', [fea_phone_brand, fea_device_model, fea_installed_app, fea_installed_app_label,
+    #                                 fea_device_long_lat_norm, fea_active_app_freq, fea_active_app_label_freq,
+    #                                 fea_active_app_label_category, fea_active_app_label_cluster_40,
+    #                                 fea_active_app_label_diff_hour_category_freq,
+    #                                 fea_device_day_event_num_freq, fea_device_hour_event_num_freq,
+    #                                 fea_device_weekday_event_num_freq,
+    #                                 fea_concat_23_freq_net2net_mlp_39, fea_concat_24_freq_net2net_mlp_1024,
+    #                                 fea_concat_25_diff_net2net_mlp_1])
+
