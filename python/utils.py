@@ -25,6 +25,14 @@ def general_max(x):
         return x
 
 
+def general_len(x):
+    tx = type(x).__name__
+    if 'set' in tx or 'list' in tx or 'array' in tx:
+        return len(x)
+    else:
+        return 1
+
+
 def wrap_array(x):
     tx = type(x).__name__
     if 'set' in tx or 'list' in tx or 'array' in tx:
@@ -42,7 +50,7 @@ def make_submission(path_submission, test_pred):
     print 'output submission file', path_submission
 
 
-def remove_zero_feature(indices, values, threshold=1e-15):
+def remove_zero_feature(indices, values, threshold=1e-5):
     pos_indices = []
     pos_values = []
     for i in range(len(indices)):
@@ -187,10 +195,8 @@ def libsvm_2_feature(indices, values, spaces, types):
     if check_type(spaces, 'int'):
         if types == 'sparse':
             return libsvm_2_csr(indices, values, spaces)
-        elif len(values.shape) == 1:
-            return libsvm_2_csr(indices, values, spaces).toarray()
         else:
-            return values
+            return libsvm_2_csr(indices, values, spaces).toarray()
     else:
         csr_data = []
         for i in range(len(spaces)):

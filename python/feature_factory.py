@@ -123,11 +123,15 @@ fea_active_app_num_tfidf = feature.MultiFeature(name='active_app_num_tfidf', dty
 fea_active_app_label_category = feature.MultiFeature(name='active_app_label_category', dtype='d')
 fea_active_app_label_category_num = feature.MultiFeature(name='active_app_label_category_num', dtype='d')
 fea_active_app_label_diff_hour_category = feature.MultiFeature(name='active_app_label_diff_hour_category', dtype='d')
-fea_active_app_label_diff_hour_category_num = feature.MultiFeature(name='active_app_label_diff_hour_category_num',dtype='d')
-fea_active_app_label_diff_hour_category_freq = feature.MultiFeature(name='active_app_label_diff_hour_category_freq',dtype='f')
+fea_active_app_label_diff_hour_category_num = feature.MultiFeature(name='active_app_label_diff_hour_category_num',
+                                                                   dtype='d')
+fea_active_app_label_diff_hour_category_freq = feature.MultiFeature(name='active_app_label_diff_hour_category_freq',
+                                                                    dtype='f')
 fea_active_app_label_each_hour_category = feature.MultiFeature(name='active_app_label_each_hour_category', dtype='d')
-fea_active_app_label_each_hour_category_num = feature.MultiFeature(name='active_app_label_each_hour_category_num',dtype='d')
-fea_active_app_label_each_hour_category_freq = feature.MultiFeature(name='active_app_label_each_hour_category_freq', dtype='f')
+fea_active_app_label_each_hour_category_num = feature.MultiFeature(name='active_app_label_each_hour_category_num',
+                                                                   dtype='d')
+fea_active_app_label_each_hour_category_freq = feature.MultiFeature(name='active_app_label_each_hour_category_freq',
+                                                                    dtype='f')
 
 # new features about app label cluster
 fea_active_app_label_cluster_40 = feature.MultiFeature(name='active_app_label_cluster_40', dtype='d')
@@ -156,6 +160,15 @@ fea_installed_app_w2v_64 = feature.MultiFeature(name='installed_app_w2v_64', dty
 fea_installed_app_label_w2v_64 = feature.MultiFeature(name='installed_app_label_w2v_64', dtype='f')
 fea_installed_app_w2v_128 = feature.MultiFeature(name='installed_app_w2v_128', dtype='f')
 fea_installed_app_label_w2v_128 = feature.MultiFeature(name='installed_app_label_w2v_128', dtype='f')
+
+fea_installed_app_mf = feature.MultiFeature(name='installed_app_mf', dtype='f')
+fea_installed_app_freq_mf = feature.MultiFeature(name='installed_app_freq_mf', dtype='f')
+fea_active_app_mf = feature.MultiFeature(name='active_app_mf', dtype='f')
+fea_active_app_freq_mf = feature.MultiFeature(name='active_app_freq_mf', dtype='f')
+fea_installed_app_label_mf = feature.MultiFeature(name='installed_app_label_mf', dtype='f')
+fea_installed_app_label_freq_mf = feature.MultiFeature(name='installed_app_label_freq_mf', dtype='f')
+fea_active_app_label_mf = feature.MultiFeature(name='active_app_label_mf', dtype='f')
+fea_active_app_label_freq_mf = feature.MultiFeature(name='active_app_label_freq_mf', dtype='f')
 
 """
 event features
@@ -335,6 +348,7 @@ def concat_feature(name, fea_list):
 
     spaces = []
     for fea in fea_list:
+        print fea.get_name()
         fea.load()
         spaces.append(fea.get_space())
 
@@ -513,7 +527,7 @@ if __name__ == '__main__':
     # feature_tfidf('active_app_label_diff_hour_category_num')
     # feature_tfidf('installed_app')
     #
-    split_dataset('ensemble_100', zero_pad=True)
+    split_dataset('concat_1_ensemble_mlp_1024', zero_pad=True)
     # make_feature()
     # concat_feature('ensemble_100', [fea_phone_brand, fea_device_model, fea_installed_app, fea_installed_app_label,
     #                                 fea_device_long_lat_norm, fea_active_app_freq, fea_active_app_label_freq,

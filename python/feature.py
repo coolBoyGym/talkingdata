@@ -81,6 +81,11 @@ class Feature:
             self.__indices = indices
         if values is not None:
             self.__values = values
+        max_indices = map(utils.general_max, indices)
+        len_indices = map(utils.general_len, indices)
+        self.set_space(max(max_indices) + 1)
+        self.set_rank(max(len_indices))
+        self.set_size(len(indices))
 
     def get_value(self):
         return self.__indices, self.__values

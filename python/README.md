@@ -1727,3 +1727,67 @@
     ensemble_100_net2net_mlp_1005.submission    [249]	loss: 1.877795	train_score: 1.705119   scored 2.23727
     
     
+    
+    
+## 16/9/4
+    
+### xepa
+
+    concat_1_gblinear_1046-1051:
+    params = {
+        'gblinear_alpha': 0,
+        'gblinear_lambda': 8,
+        'random_state': ?
+    }
+    num_round = 200
+    early_stop_round = 10
+    
+    concat_1_gbtree_1000-1005
+    params = {
+        'eta': 0.1,
+        'max_depth': 12,
+        'subsample': 0.7,
+        'colsample_bytree': 0.7,
+        'gbtree_alpha': 0,
+        'gbtree_lambda': 1.5,
+        'random_state': 0
+    }
+    num_round = 2000
+    early_stop_round = 10
+    
+    concat_1_mlp_1000-1005
+    params = {
+        'layer_sizes': [task.space, 80, task.num_class],
+        'layer_activates': ['relu', None],
+        'layer_drops': [0.5, 1],
+        'layer_l2': [0.00026, 0.00026],
+        # 'layer_inits': [('net2:w0', 'net2:b0'), ('net2:w1', 'net2:b1')],
+        'layer_inits': [('normal', 'zero'), ('normal', 'zero')],
+        'init_path': '../model/concat_1_mlp_100.bin',
+        'opt_algo': 'adam',
+        'learning_rate': 1e-4,
+        'random_seed': 0,
+    }
+    batch_size = 1000
+    num_round = 1000
+    best iteration:
+    [279]	train_score: 2.363800	valid_score: 2.387342
+    
+    concat_1_ensemble_gblinear_1000-1005
+    params = {
+        'gblinear_alpha': 0,
+        'gblinear_lambda': 58,
+        'random_state': 0
+    }
+    
+    concat_1_ensemble_gbtree_1000-1005
+    params = {
+        'eta': 0.08,
+        'max_depth': 1,
+        'subsample': 0.1,
+        'colsample_bytree': 0.1,
+        'gbtree_alpha': 0,
+        'gbtree_lambda': 0.1,
+        'random_state': 0
+    }
+    [51]	train-mlogloss:2.34709	eval-mlogloss:2.39084
